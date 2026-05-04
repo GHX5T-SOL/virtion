@@ -4,12 +4,19 @@
 // works transparently.
 
 export const config = {
-  matcher: ['/agent/:path*', '/voice/:path*'],
+  matcher: ['/agent/:path*', '/voice/:path*', '/health'],
 };
 
-const BACKEND_URL = process.env.VIRTION_BACKEND_URL || process.env.BACKEND_URL || 'https://grand-rounds-backend.onrender.com';
+const BACKEND_URL = process.env.VIRTION_BACKEND_URL || process.env.BACKEND_URL || '';
 
 export default async function middleware(request: Request): Promise<Response> {
+  if (!BACKEND_URL) {
+    return Response.json(
+      { detail: 'backend proxy is not configured', degraded: true },
+      { status: 503, headers: { 'cache-control': 'no-store' } }
+    );
+  }
+
   const incoming = new URL(request.url);
   const target = BACKEND_URL + incoming.pathname + incoming.search;
 

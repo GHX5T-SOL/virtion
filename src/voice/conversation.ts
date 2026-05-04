@@ -1,5 +1,5 @@
 /**
- * Real-time voice conversation, backed by LiveKit + Deepgram + Cartesia.
+ * Real-time voice conversation, backed by LiveKit and provider-fallback speech.
  *
  * Public API surface kept from the legacy push-to-talk implementation so
  * existing consumers (PatientPanel, FloatingVoicePanel, Face, ExamRoom,
@@ -8,8 +8,8 @@
  * What changed inside:
  *   - No more browser Whisper / Kokoro / MediaRecorder. The mic streams
  *     over WebRTC into a LiveKit room; the Python voice agent worker
- *     does Deepgram STT → Claude Haiku 4.5 → Cartesia TTS and pipes the
- *     audio back over the same room.
+ *     does provider-fallback STT → LLM → TTS and pipes audio back over
+ *     the same room.
  *   - `init()` now connects the room (and starts the patient's greeting).
  *   - `startListening()` / `stopListeningAndRespond()` are no-ops kept
  *     for backwards compat — real-time means the mic is open the whole
@@ -373,7 +373,7 @@ export class Conversation {
       this.setEmotion(detectEmotion(initialLine));
     } catch (err: any) {
       const msg = err?.message ?? String(err);
-      console.error('Conversation init failed:', err);
+      console.warn('Conversation voice fallback:', err);
       this.setStatus('error', msg);
       this.listeners.onError?.(msg);
       throw err;

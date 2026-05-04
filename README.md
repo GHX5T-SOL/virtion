@@ -20,7 +20,7 @@ The product vision extends beyond the browser simulator: mobile and desktop trai
 |---|---|
 | Frontend | React 18 + TypeScript + Vite, Three.js (`@react-three/fiber`, `@react-three/drei`) |
 | Voice transport | LiveKit Cloud (WebRTC) via `livekit-client` |
-| Voice worker | Python `livekit-agents` — Deepgram Nova-3 STT → Claude Haiku 4.5 → Cartesia Sonic-2 TTS |
+| Voice worker | Python `livekit-agents` — Deepgram/OpenAI STT → Anthropic/OpenAI patient dialogue → Cartesia/ElevenLabs/OpenAI TTS |
 | HTTP backend | FastAPI on `127.0.0.1:8787` — Managed Agents proxy + LiveKit JWT mint |
 | Attending grader | Claude **Opus 4.7** as a Managed Agent (`virtion-attending`) with direct-model and deterministic fallbacks |
 | Model fallback router | Anthropic, OpenAI, Vercel AI Gateway, OpenRouter, Gemini, Cerebras, then local deterministic rubric fallback |
@@ -50,7 +50,7 @@ All keys are server-side only — the browser never sees them. Get one of each:
 | **OpenAI / OpenRouter / Vercel AI Gateway / Gemini / Cerebras** | Optional direct-model fallbacks for triage, patient text, and debrief degradation | Provider consoles | Varies |
 | **LiveKit Cloud** | Real-time WebRTC transport between browser ↔ voice worker | https://cloud.livekit.io → create project → Settings → Keys (gives `URL`, `API Key`, `API Secret`) | Yes — generous free tier |
 | **Deepgram** | Streaming speech-to-text inside the voice worker | https://console.deepgram.com → API Keys | Yes — $200 free credit |
-| **Cartesia** | Streaming text-to-speech inside the voice worker | https://play.cartesia.ai → API Keys | Yes — free credit on signup |
+| **Cartesia / ElevenLabs / OpenAI TTS** | Streaming text-to-speech inside the voice worker, in fallback order | Provider consoles | Varies |
 
 ---
 
@@ -73,7 +73,7 @@ cd backend
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements.txt
 
-# Voice worker — larger (livekit-agents + Deepgram/Cartesia/Silero plugins)
+# Voice worker — larger (livekit-agents + speech/LLM provider plugins)
 python -m venv .venv-voice
 .venv-voice/Scripts/python -m pip install -r voice_agent_requirements.txt
 ```
@@ -95,12 +95,13 @@ LIVEKIT_API_KEY=APIxxxx
 LIVEKIT_API_SECRET=...
 DEEPGRAM_API_KEY=...
 CARTESIA_API_KEY=...
+ELEVEN_API_KEY=...
 
 # Leave these blank on first run — see "Bootstrap the Managed Agent" below
 VIRTION_AGENT_ID=
 VIRTION_ENV_ID=
 
-# Optional direct-model fallback lanes
+# Optional direct-model and speech fallback lanes
 OPENAI_API_KEY=
 VERCEL_AI_GATEWAY_API_KEY=
 OPENROUTER_API_KEY=
@@ -167,7 +168,7 @@ src/
   agents/             # Managed Agent client + custom-tool UI renderer
 backend/
   server.py           # FastAPI: Managed Agents proxy + /voice/token
-  voice_agent.py      # LiveKit Agents worker (Deepgram → Haiku → Cartesia)
+  voice_agent.py      # LiveKit Agents worker with STT/LLM/TTS fallbacks
 .claude/skills/       # Authoring skills (patient generator, rubric author, guideline curator, ...)
 scripts/verify/       # Deterministic data-integrity checks
 ```
@@ -179,8 +180,20 @@ scripts/verify/       # Deterministic data-integrity checks
 | Call | Model | Why |
 |---|---|---|
 | Patient voice persona | Haiku 4.5 | Fast, cheap, good enough for in-character reply |
+| Real-time speech stack | Deepgram → OpenAI STT, Anthropic → OpenAI LLM, Cartesia → ElevenLabs → OpenAI TTS | Premium voice first, then lower-friction fallbacks |
 | Patient text / triage fallback | Anthropic → OpenAI → Vercel AI Gateway → OpenRouter → Gemini → Cerebras → deterministic | Keeps the simulator responsive when one provider fails |
 | `virtion-attending` grading | **Opus 4.7** Managed Agent → direct debrief fallback → deterministic rubric | Clinical reasoning first, graceful degradation last |
+
+## Netlify fallback host
+
+`netlify.toml` publishes the Vite build from `dist`, keeps SPA navigation on `/index.html`, and runs an Edge Function proxy for `/voice/*`, `/agent/*`, and `/health`. Set these Netlify environment variables server-side only:
+
+```env
+VIRTION_BACKEND_URL=https://your-backend-host
+BACKEND_SHARED_SECRET=the-same-secret-as-the-backend
+```
+
+The Edge Function injects the shared secret so the browser can call same-origin `/voice/token` on `https://virtion.netlify.app` without exposing backend credentials.
 
 ---
 

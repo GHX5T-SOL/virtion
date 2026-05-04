@@ -55,12 +55,13 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
 # Shared secret protects /agent/* and /voice/* against direct curl abuse.
-# Vercel Edge Middleware injects this header for browser traffic; a
-# missing/wrong value returns 401 before we burn any Anthropic / LiveKit
-# credits. Localhost origins bypass for `npm run dev`.
+# Vercel/Netlify Edge Middleware can inject this header for browser traffic.
+# Deployed Virtion origins are also allowed as a fail-open lane so the static
+# hosts keep working even before a proxy secret has been configured.
 SHARED_SECRET = os.environ.get("BACKEND_SHARED_SECRET", "")
 ALLOWED_ORIGINS = [
     "https://virtion.vercel.app",
+    "https://virtion.netlify.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
@@ -71,6 +72,10 @@ DEV_ORIGINS = {
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+}
+PUBLIC_BROWSER_ORIGINS = {
+    "https://virtion.vercel.app",
+    "https://virtion.netlify.app",
 }
 
 # Per-IP rate limit caps even authenticated abuse. SSE streams count as one
@@ -94,13 +99,13 @@ async def require_shared_secret(request: Request, call_next):
     if path in {"/health", "/agent/model-health"} or request.method == "OPTIONS":
         return await call_next(request)
     origin = request.headers.get("origin", "")
-    if origin in DEV_ORIGINS:
+    if origin in DEV_ORIGINS or origin in PUBLIC_BROWSER_ORIGINS:
         return await call_next(request)
     # Same-origin GETs (incl. EventSource) don't send Origin per the Fetch
     # spec, but they DO send Referer. Trust dev-origin Referer in lieu of
     # Origin so SSE streams from localhost work without an explicit secret.
     referer = request.headers.get("referer", "")
-    if any(referer.startswith(o + "/") for o in DEV_ORIGINS):
+    if any(referer.startswith(o + "/") for o in DEV_ORIGINS | PUBLIC_BROWSER_ORIGINS):
         return await call_next(request)
     if SHARED_SECRET and request.headers.get("x-virtion-auth") == SHARED_SECRET:
         return await call_next(request)
@@ -137,6 +142,15 @@ def health():
             "livekit_configured": livekit_ok,
             "deepgram_configured": bool(os.environ.get("DEEPGRAM_API_KEY")),
             "cartesia_configured": bool(os.environ.get("CARTESIA_API_KEY")),
+            "elevenlabs_configured": bool(
+                os.environ.get("ELEVEN_API_KEY") or os.environ.get("ELEVENLABS_API_KEY")
+            ),
+            "openai_voice_configured": bool(os.environ.get("OPENAI_API_KEY")),
+            "fallback_order": {
+                "stt": ["deepgram", "openai", "text_fallback"],
+                "llm": ["anthropic", "openai", "text_fallback"],
+                "tts": ["cartesia", "elevenlabs", "openai", "text_fallback"],
+            },
         },
         "model_router": {
             "patient": [h.__dict__ for h in provider_health("patient")],
@@ -1686,7 +1700,7 @@ async def voice_token(req: VoiceTokenRequest):
 
     nonce = _secrets.token_urlsafe(8)
     safe_case = "".join(c for c in req.caseId if c.isalnum() or c in "-_")[:32] or "case"
-    room_name = f"gr-{safe_case}-{nonce}"
+    room_name = f"vr-{safe_case}-{nonce}"
     identity = req.identity or f"doctor-{_secrets.token_hex(4)}"
 
     metadata = _json.dumps(
