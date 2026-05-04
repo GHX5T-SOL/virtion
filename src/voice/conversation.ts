@@ -120,6 +120,8 @@ export class Conversation {
   private analyser: AnalyserNode | null = null;
   private audioCtx: AudioContext;
   private ampBuf: Uint8Array;
+  private thinkingTimeout: number | null = null;
+  private speechSettleTimeout: number | null = null;
 
   private systemPrompt: string;
   private initialMessage: { role: 'assistant'; content: string };
@@ -225,8 +227,20 @@ export class Conversation {
   }
 
   private setStatus(s: ConversationStatus, detail?: string) {
+    if (this.thinkingTimeout !== null) {
+      window.clearTimeout(this.thinkingTimeout);
+      this.thinkingTimeout = null;
+    }
     this.status = s;
     this.listeners.onStatus?.(s, detail);
+    if (s === 'thinking') {
+      this.thinkingTimeout = window.setTimeout(() => {
+        if (this.status !== 'thinking') return;
+        const msg = 'Patient voice timed out. Please try speaking again or use Chat.';
+        this.setStatus('error', msg);
+        this.listeners.onError?.(msg);
+      }, 25000);
+    }
   }
 
   private attachAnalyser(track: RemoteAudioTrack) {
@@ -287,6 +301,27 @@ export class Conversation {
         } else {
           this.handleAgentTranscription(seg);
         }
+      }
+    });
+
+    // The browser UI should not stay stuck in "thinking" if the worker is
+    // speaking but the provider transcript is delayed or unavailable. LiveKit
+    // active-speaker events are driven by the returned audio track itself, so
+    // they are the most reliable signal for the status pill.
+    room.on(RoomEvent.ActiveSpeakersChanged, (speakers: Participant[]) => {
+      const agentSpeaking = speakers.some((p) => p.identity !== room.localParticipant.identity);
+      if (this.speechSettleTimeout !== null) {
+        window.clearTimeout(this.speechSettleTimeout);
+        this.speechSettleTimeout = null;
+      }
+      if (agentSpeaking) {
+        if (this.status !== 'speaking') this.setStatus('speaking');
+        return;
+      }
+      if (this.status === 'speaking') {
+        this.speechSettleTimeout = window.setTimeout(() => {
+          if (this.status === 'speaking') this.setStatus('ready');
+        }, 900);
       }
     });
 
@@ -541,6 +576,14 @@ export class Conversation {
   }
 
   dispose() {
+    if (this.thinkingTimeout !== null) {
+      window.clearTimeout(this.thinkingTimeout);
+      this.thinkingTimeout = null;
+    }
+    if (this.speechSettleTimeout !== null) {
+      window.clearTimeout(this.speechSettleTimeout);
+      this.speechSettleTimeout = null;
+    }
     if (this.room) {
       try { this.room.disconnect(); } catch { /* noop */ }
       this.room = null;

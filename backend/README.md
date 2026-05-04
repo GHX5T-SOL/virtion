@@ -3,7 +3,7 @@
 Two Python processes power the simulator:
 
 1. **FastAPI server** (`server.py`) — Managed Agents proxy (`/agent/*`), provider-fallback text routes, patient-text-chat SSE (`/agent/patient/stream`), and the LiveKit token mint (`/voice/token`). Lives at `127.0.0.1:8787`.
-2. **LiveKit voice worker** (`voice_agent.py`) — joins every room created by `/voice/token`, runs provider-fallback STT/LLM/TTS over WebRTC: Deepgram → OpenAI for STT, Anthropic → OpenAI for patient dialogue, and Cartesia → ElevenLabs → OpenAI for speech output.
+2. **LiveKit voice worker** (`voice_agent.py`) — joins every room created by `/voice/token`, runs provider-fallback STT/LLM/TTS over WebRTC: Deepgram → OpenAI for STT, Anthropic → Vercel AI Gateway → OpenRouter → Gemini → Cerebras → OpenAI for patient dialogue, and Cartesia → ElevenLabs → OpenAI for speech output.
 
 Both must be running for real-time voice to work.
 

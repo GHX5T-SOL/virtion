@@ -148,7 +148,15 @@ def health():
             "openai_voice_configured": bool(os.environ.get("OPENAI_API_KEY")),
             "fallback_order": {
                 "stt": ["deepgram", "openai", "text_fallback"],
-                "llm": ["anthropic", "openai", "text_fallback"],
+                "llm": [
+                    "anthropic",
+                    "vercel-ai-gateway",
+                    "openrouter",
+                    "gemini",
+                    "cerebras",
+                    "openai",
+                    "text_fallback",
+                ],
                 "tts": ["cartesia", "elevenlabs", "openai", "text_fallback"],
             },
         },

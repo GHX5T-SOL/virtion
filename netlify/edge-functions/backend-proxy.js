@@ -114,7 +114,7 @@ function voiceHealthPatch(body = {}) {
       openai_voice_configured: Boolean(readEnv('OPENAI_API_KEY')),
       fallback_order: {
         stt: ['deepgram', 'openai', 'text_fallback'],
-        llm: ['anthropic', 'openai', 'text_fallback'],
+        llm: ['anthropic', 'vercel-ai-gateway', 'openrouter', 'gemini', 'cerebras', 'openai', 'text_fallback'],
         tts: ['cartesia', 'elevenlabs', 'openai', 'text_fallback'],
       },
     },
@@ -155,10 +155,16 @@ async function createLiveKitRoom(roomName, metadata) {
     headers,
     body: JSON.stringify(createPayload),
   });
-  if (create.ok) return;
+  if (create.ok) {
+    await updateLiveKitRoomMetadata(roomName, metadata, headers);
+    return;
+  }
 
   const errorText = await create.text().catch(() => '');
-  if (/already|exist/i.test(errorText)) return;
+  if (/already|exist/i.test(errorText)) {
+    await updateLiveKitRoomMetadata(roomName, metadata, headers);
+    return;
+  }
 
   const fallbackCreate = await fetch(createUrl, {
     method: 'POST',
@@ -172,6 +178,8 @@ async function createLiveKitRoom(roomName, metadata) {
     }
   }
 
+  await updateLiveKitRoomMetadata(roomName, metadata, headers);
+
   const dispatch = await fetch(`${livekitHttpUrl()}/twirp/livekit.AgentDispatchService/CreateDispatch`, {
     method: 'POST',
     headers,
@@ -180,6 +188,18 @@ async function createLiveKitRoom(roomName, metadata) {
   if (!dispatch.ok) {
     const dispatchText = await dispatch.text().catch(() => '');
     throw new Error(`LiveKit agent dispatch failed: ${dispatchText || dispatch.status}`);
+  }
+}
+
+async function updateLiveKitRoomMetadata(roomName, metadata, headers) {
+  const update = await fetch(`${livekitHttpUrl()}/twirp/livekit.RoomService/UpdateRoomMetadata`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ room: roomName, metadata }),
+  });
+  if (!update.ok) {
+    const updateText = await update.text().catch(() => '');
+    throw new Error(`LiveKit room metadata update failed: ${updateText || update.status}`);
   }
 }
 
@@ -257,6 +277,15 @@ function isBodyless(method) {
   return method === 'GET' || method === 'HEAD' || method === 'OPTIONS';
 }
 
+function createTimeout(ms) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ms);
+  return {
+    signal: controller.signal,
+    clear: () => clearTimeout(timeout),
+  };
+}
+
 export default async function handler(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -301,13 +330,16 @@ export default async function handler(request) {
   }
 
   let upstream;
+  const timeout = createTimeout(8000);
   try {
-    upstream = await fetch(target, init);
+    upstream = await fetch(target, { ...init, signal: timeout.signal });
   } catch (error) {
     if (incoming.pathname === '/health') {
       return jsonResponse(voiceHealthPatch({ degraded: true, backend_error: 'unreachable' }), 200, request);
     }
     return jsonResponse({ detail: 'backend proxy unreachable', degraded: true }, 502, request);
+  } finally {
+    timeout.clear();
   }
   if (incoming.pathname === '/health') {
     try {

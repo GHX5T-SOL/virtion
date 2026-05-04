@@ -85,7 +85,7 @@ function voiceHealthPatch(body: Record<string, any> = {}): Record<string, any> {
       openai_voice_configured: Boolean(env('OPENAI_API_KEY')),
       fallback_order: {
         stt: ['deepgram', 'openai', 'text_fallback'],
-        llm: ['anthropic', 'openai', 'text_fallback'],
+        llm: ['anthropic', 'vercel-ai-gateway', 'openrouter', 'gemini', 'cerebras', 'openai', 'text_fallback'],
         tts: ['cartesia', 'elevenlabs', 'openai', 'text_fallback'],
       },
     },
@@ -124,10 +124,16 @@ async function createLiveKitRoom(roomName: string, metadata: string): Promise<vo
     headers,
     body: JSON.stringify(createPayload),
   });
-  if (create.ok) return;
+  if (create.ok) {
+    await updateLiveKitRoomMetadata(roomName, metadata, headers);
+    return;
+  }
 
   const errorText = await create.text().catch(() => '');
-  if (/already|exist/i.test(errorText)) return;
+  if (/already|exist/i.test(errorText)) {
+    await updateLiveKitRoomMetadata(roomName, metadata, headers);
+    return;
+  }
 
   const fallbackCreate = await fetch(createUrl, {
     method: 'POST',
@@ -141,6 +147,8 @@ async function createLiveKitRoom(roomName: string, metadata: string): Promise<vo
     }
   }
 
+  await updateLiveKitRoomMetadata(roomName, metadata, headers);
+
   const dispatch = await fetch(`${livekitHttpUrl()}/twirp/livekit.AgentDispatchService/CreateDispatch`, {
     method: 'POST',
     headers,
@@ -149,6 +157,22 @@ async function createLiveKitRoom(roomName: string, metadata: string): Promise<vo
   if (!dispatch.ok) {
     const dispatchText = await dispatch.text().catch(() => '');
     throw new Error(`LiveKit agent dispatch failed: ${dispatchText || dispatch.status}`);
+  }
+}
+
+async function updateLiveKitRoomMetadata(
+  roomName: string,
+  metadata: string,
+  headers: Record<string, string>
+): Promise<void> {
+  const update = await fetch(`${livekitHttpUrl()}/twirp/livekit.RoomService/UpdateRoomMetadata`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ room: roomName, metadata }),
+  });
+  if (!update.ok) {
+    const updateText = await update.text().catch(() => '');
+    throw new Error(`LiveKit room metadata update failed: ${updateText || update.status}`);
   }
 }
 
@@ -205,6 +229,15 @@ async function handleVoiceToken(request: Request): Promise<Response> {
   return jsonResponse({ token, url: livekitUrl(), roomName });
 }
 
+function createTimeout(ms: number): { signal: AbortSignal; clear: () => void } {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ms);
+  return {
+    signal: controller.signal,
+    clear: () => clearTimeout(timeout),
+  };
+}
+
 export default async function middleware(request: Request): Promise<Response> {
   const incoming = new URL(request.url);
 
@@ -246,13 +279,16 @@ export default async function middleware(request: Request): Promise<Response> {
   }
 
   let upstream: Response;
+  const timeout = createTimeout(8000);
   try {
-    upstream = await fetch(target, init);
+    upstream = await fetch(target, { ...init, signal: timeout.signal });
   } catch {
     if (incoming.pathname === '/health') {
       return jsonResponse(voiceHealthPatch({ degraded: true, backend_error: 'unreachable' }));
     }
     return jsonResponse({ detail: 'backend proxy unreachable', degraded: true }, 502);
+  } finally {
+    timeout.clear();
   }
   if (incoming.pathname === '/health') {
     try {
