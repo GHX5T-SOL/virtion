@@ -1,39 +1,38 @@
-import type { ReactNode } from 'react';
-import { Doodle, DoodleScatter } from './primitives';
 import { store, useStore } from '../game/store';
+import { Wordmark } from './primitives';
 
 interface Card {
-  bg: string;
+  tag: string;
   title: string;
   body: string;
-  icon: ReactNode;
-  tag: string;
+  metric: string;
+  detail: string;
 }
 
 const CARDS: Card[] = [
   {
-    bg: 'var(--peach)',
-    title: 'What this is.',
+    tag: '01 · simulation layer',
+    title: 'Practice the consultation before it matters.',
     body:
-      "A clinic full of simulated patients with histories, symptoms, and stories. You'll talk to them out loud, decide what to do, and get a structured debrief — every claim cited to a real published guideline.",
-    icon: <Doodle kind="stetho" size={140} color="var(--mint)" />,
-    tag: '01 · meet Virtion',
+      'Virtion puts medical students inside synthetic clinical encounters: take the history, examine, order tests, diagnose, prescribe, counsel, and learn from the result.',
+    metric: 'doctor POV',
+    detail: 'A clinic environment built for repeated decisions, not passive revision.',
   },
   {
-    bg: 'var(--mint)',
-    title: 'How it works.',
+    tag: '02 · AI attending',
+    title: 'Feedback is structured, cited, and resilient.',
     body:
-      'Pick a clinic. The next patient is called in. You speak; they answer in conversation. You order labs, prescribe, counsel, refer. At the end, a senior clinician walks you through what you did well and what to work on. Five to eight minutes per case. Patient conversations powered by Claude Opus 4.7.',
-    icon: <Doodle kind="cross" size={140} color="#F47A92" />,
-    tag: '02 · the loop',
+      'The attending debrief grades data gathering, management, and communication. Premium models lead, then fallback providers and deterministic rubrics keep the loop alive.',
+    metric: 'never blank',
+    detail: 'If upstream AI fails, Virtion degrades clearly instead of breaking the case.',
   },
   {
-    bg: 'var(--sky)',
-    title: "Who it's for.",
+    tag: '03 · future network',
+    title: 'A learning platform that can become research infrastructure.',
     body:
-      'For medical students, residents, and doctors preparing for OSCE-style exams. This is a training simulator, not a clinical tool. Never used to give real medical advice.',
-    icon: <Doodle kind="heart" size={140} color="#F47A92" />,
-    tag: '03 · safety line',
+      'The roadmap expands into AR, VR, mobile, desktop, and consent-first device nodes that can contribute idle compute to protein folding, gene sequencing, and drug-discovery simulations.',
+    metric: 'R&D only',
+    detail: 'Synthetic cases today. Consent-first data and compute research tomorrow.',
   },
 ];
 
@@ -42,120 +41,110 @@ export function OnboardingScreen() {
   const card = CARDS[step];
 
   return (
-    <div className="screen bg-cream-2" style={{ position: 'relative' }}>
-      <DoodleScatter
-        items={[
-          { kind: 'sparkle', x: 60, y: 70, size: 28, color: '#FFD86B' },
-          { kind: 'sparkle', x: '85%', y: 130, size: 24, color: '#5AB7F2' },
-          { kind: 'star', x: 80, y: 580, size: 32, color: '#FFD86B', anim: 'wobble' },
-          { kind: 'pill', x: '88%', y: 600, size: 60, anim: 'wobble' },
-        ]}
-      />
-
-      <div
-        style={{
-          position: 'absolute',
-          top: 38,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: 8,
-          zIndex: 5,
-        }}
-      >
-        {CARDS.map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: i === step ? 32 : 12,
-              height: 12,
-              borderRadius: 8,
-              background: i === step ? 'var(--peach-deep)' : 'white',
-              border: '2.5px solid var(--line)',
-              boxShadow: '0 2px 0 var(--line)',
-              transition: 'width 200ms cubic-bezier(.5,1.7,.4,1)',
-            }}
-          />
-        ))}
+    <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
+      <div style={{ padding: '22px clamp(18px, 4vw, 48px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Wordmark size={32} />
+        <div className="chip mint">training simulator · synthetic cases</div>
       </div>
 
-      <div
+      <main
         style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
+          minHeight: 'calc(100vh - 88px)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))',
+          gap: 36,
           alignItems: 'center',
-          justifyContent: 'center',
-          padding: 60,
+          width: 'min(1180px, calc(100vw - 32px))',
+          margin: '0 auto',
+          padding: '28px 0 48px',
         }}
       >
-        <div
-          className="plush-lg popin"
-          key={step}
-          style={{ width: 720, padding: 40, background: card.bg, position: 'relative', transform: 'rotate(-1deg)' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-            <div className="floaty" style={{ flexShrink: 0 }}>
-              <div
-                className="plush"
-                style={{
-                  width: 200,
-                  height: 200,
-                  background: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {card.icon}
-              </div>
+        <section className="glass-panel scanline" style={{ padding: 'clamp(22px, 4vw, 42px)' }}>
+          <div className="chip sky">{card.tag}</div>
+          <h1 style={{ fontSize: 'var(--type-hero-md)', lineHeight: 1.02, marginTop: 18 }}>
+            {card.title}
+          </h1>
+          <p style={{ color: 'var(--ink-2)', fontSize: 18, lineHeight: 1.65, fontWeight: 600, margin: '22px 0 0' }}>
+            {card.body}
+          </p>
+          <div style={{ marginTop: 30, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="btn-plush ghost"
+              style={{ visibility: step === 0 ? 'hidden' : 'visible' }}
+              onClick={() => store.setOnboardingStep(step - 1)}
+            >
+              Back
+            </button>
+            {step < CARDS.length - 1 ? (
+              <button type="button" className="btn-plush primary" onClick={() => store.setOnboardingStep(step + 1)}>
+                Continue
+              </button>
+            ) : (
+              <button type="button" className="btn-plush primary" onClick={() => store.finishOnboarding()}>
+                Enter Virtion
+              </button>
+            )}
+          </div>
+        </section>
+
+        <section style={{ display: 'grid', gap: 16 }}>
+          <div className="glass-panel" style={{ padding: 22 }}>
+            <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              current module
             </div>
-            <div style={{ flex: 1 }}>
-              <div className="chip" style={{ background: 'white', marginBottom: 16 }}>
-                {card.tag}
-              </div>
-              <h1 style={{ fontSize: 44, lineHeight: 1.05, marginBottom: 14, color: 'var(--ink)' }}>{card.title}</h1>
-              <div style={{ fontSize: 17, lineHeight: 1.5, fontWeight: 600, color: 'var(--ink)' }}>{card.body}</div>
+            <div style={{ marginTop: 10, fontFamily: 'Sora', fontSize: 46, fontWeight: 800, color: 'var(--peach-deep)' }}>
+              {card.metric}
+            </div>
+            <div style={{ marginTop: 8, color: 'var(--ink-2)', lineHeight: 1.5, fontWeight: 600 }}>
+              {card.detail}
             </div>
           </div>
-        </div>
-      </div>
 
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 36,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 16,
-        }}
-      >
-        <button
-          type="button"
-          className="btn-plush ghost"
-          style={{ visibility: step === 0 ? 'hidden' : 'visible' }}
-          onClick={() => store.setOnboardingStep(step - 1)}
-        >
-          ← Back
-        </button>
-        {step < CARDS.length - 1 ? (
-          <button type="button" className="btn-plush primary" onClick={() => store.setOnboardingStep(step + 1)}>
-            Next →
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="btn-plush primary breathe"
-            style={{ fontSize: 20 }}
-            onClick={() => store.finishOnboarding()}
-          >
-            Take me in →
-          </button>
-        )}
-      </div>
+          <div className="glass-panel" style={{ padding: 22, display: 'grid', gap: 14 }}>
+            {CARDS.map((item, i) => (
+              <button
+                key={item.tag}
+                type="button"
+                onClick={() => store.setOnboardingStep(i)}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '36px 1fr',
+                  gap: 12,
+                  alignItems: 'center',
+                  textAlign: 'left',
+                  background: i === step ? 'rgba(79,227,255,0.12)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${i === step ? 'rgba(79,227,255,0.45)' : 'rgba(255,255,255,0.12)'}`,
+                  borderRadius: 10,
+                  padding: 12,
+                  color: 'var(--ink)',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+              >
+                <span
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    display: 'grid',
+                    placeItems: 'center',
+                    background: i === step ? 'var(--peach-deep)' : 'rgba(255,255,255,0.08)',
+                    color: i === step ? '#02111b' : 'var(--ink-2)',
+                    fontWeight: 900,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span>
+                  <span style={{ display: 'block', fontWeight: 850 }}>{item.title}</span>
+                  <span style={{ display: 'block', color: 'var(--ink-soft)', fontSize: 12, marginTop: 2 }}>{item.metric}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

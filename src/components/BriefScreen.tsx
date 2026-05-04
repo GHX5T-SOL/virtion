@@ -1,4 +1,4 @@
-import { DoodleScatter, PatientFace, TopBar } from './primitives';
+import { PatientFace, TopBar } from './primitives';
 import { getCase, getPatientCase } from '../data/cases';
 import { store, useStore, useTweaks } from '../game/store';
 
@@ -12,11 +12,11 @@ interface VitalCard {
 
 function buildVitals(p?: { hr: number; bp: string; spo2: number; temp: number; rr: number }): VitalCard[] {
   return [
-    { label: 'HR', value: String(p?.hr ?? 88), unit: 'bpm', color: 'var(--rose)', icon: '❤' },
-    { label: 'BP', value: p?.bp ?? '120/80', unit: 'mmHg', color: 'var(--peach)', icon: '⌥' },
-    { label: 'RR', value: String(p?.rr ?? 16), unit: '/min', color: 'var(--sky)', icon: '~' },
-    { label: 'SpO₂', value: String(p?.spo2 ?? 98), unit: '%', color: 'var(--mint)', icon: '○' },
-    { label: 'Temp', value: (p?.temp ?? 36.7).toFixed(1), unit: '°C', color: 'var(--butter)', icon: '☼' },
+    { label: 'HR', value: String(p?.hr ?? 88), unit: 'bpm', color: 'var(--rose)', icon: 'ECG' },
+    { label: 'BP', value: p?.bp ?? '120/80', unit: 'mmHg', color: 'var(--peach)', icon: 'BP' },
+    { label: 'RR', value: String(p?.rr ?? 16), unit: '/min', color: 'var(--sky)', icon: 'VENT' },
+    { label: 'SpO₂', value: String(p?.spo2 ?? 98), unit: '%', color: 'var(--mint)', icon: 'O2' },
+    { label: 'Temp', value: (p?.temp ?? 36.7).toFixed(1), unit: '°C', color: 'var(--butter)', icon: 'TEMP' },
   ];
 }
 
@@ -36,22 +36,14 @@ export function BriefScreen() {
         : { label: 'first presentation', tone: 'rose' };
 
   return (
-    <div className="screen paper" style={{ position: 'relative' }}>
+    <div className="screen virtion-shell" style={{ position: 'relative', overflowY: 'auto' }}>
       <TopBar here={3} steps={['Polyclinic', 'GP', 'Case', 'Brief']} />
-
-      <DoodleScatter
-        items={[
-          { kind: 'sparkle', x: 60, y: 100, size: 24, color: '#FFD86B' },
-          { kind: 'sparkle', x: '92%', y: 130, size: 22, color: '#5AB7F2' },
-          { kind: 'star', x: 40, y: 380, size: 30, color: '#FFD86B', anim: 'wobble' },
-        ]}
-      />
 
       <div
         style={{
           padding: '28px 36px',
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))',
           gap: 28,
           minHeight: 'calc(100vh - 67px)',
         }}
@@ -59,7 +51,7 @@ export function BriefScreen() {
         {/* LEFT: clipboard */}
         <div
           className="plush-lg"
-          style={{ background: '#FFFCF3', padding: 24, position: 'relative', transform: 'rotate(-1deg)' }}
+          style={{ background: 'var(--glass-strong)', padding: 24, position: 'relative', transform: 'none' }}
         >
           <div style={{ position: 'absolute', top: -22, left: '50%', transform: 'translateX(-50%)' }}>
             <svg width="120" height="46" viewBox="0 0 120 46">
@@ -88,8 +80,8 @@ export function BriefScreen() {
 
           <div
             style={{
-              background: 'white',
-              border: '3px solid var(--line)',
+              background: 'rgba(255,255,255,0.07)',
+              border: '1px solid var(--line)',
               borderRadius: 'var(--r-md)',
               padding: 14,
               marginBottom: 14,
@@ -115,8 +107,8 @@ export function BriefScreen() {
 
           <div
             style={{
-              background: 'white',
-              border: '3px solid var(--line)',
+              background: 'rgba(255,255,255,0.07)',
+              border: '1px solid var(--line)',
               borderRadius: 'var(--r-md)',
               padding: 12,
               marginBottom: 14,
@@ -140,8 +132,8 @@ export function BriefScreen() {
 
           <div
             style={{
-              background: 'var(--butter)',
-              border: '3px solid var(--line)',
+              background: 'linear-gradient(135deg, rgba(79,227,255,0.14), rgba(69,240,176,0.09))',
+              border: '1px solid var(--line)',
               borderRadius: 'var(--r-md)',
               padding: 14,
               boxShadow: 'var(--plush-tiny)',
@@ -171,13 +163,13 @@ export function BriefScreen() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div
             className="plush"
-            style={{ background: 'var(--rose)', padding: 14, position: 'relative', transform: 'rotate(1.2deg)' }}
+            style={{ background: 'linear-gradient(135deg, rgba(255,92,122,0.16), rgba(79,227,255,0.08))', padding: 14, position: 'relative', transform: 'none' }}
           >
             <div
               style={{
-                background: 'white',
+                background: 'rgba(255,255,255,0.07)',
                 borderRadius: 16,
-                border: '3px solid var(--line)',
+                border: '1px solid var(--line)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 14,
@@ -215,15 +207,15 @@ export function BriefScreen() {
                 <div
                   key={v.label}
                   style={{
-                    background: v.color,
-                    border: '3px solid var(--line)',
+                    background: `linear-gradient(135deg, ${v.color}33, rgba(255,255,255,0.04))`,
+                    border: `1px solid ${v.color}`,
                     borderRadius: 12,
                     padding: '8px 4px',
                     textAlign: 'center',
                     boxShadow: 'var(--plush-tiny)',
                   }}
                 >
-                  <div style={{ fontSize: 18 }}>{v.icon}</div>
+                  <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.08em', color: v.color }}>{v.icon}</div>
                   <div style={{ fontWeight: 900, fontSize: 16, lineHeight: 1 }}>{v.value}</div>
                   <div style={{ fontSize: 10, fontWeight: 700 }}>
                     {v.label} <span style={{ opacity: 0.6 }}>{v.unit}</span>
@@ -273,7 +265,7 @@ export function BriefScreen() {
             style={{ fontSize: 22, padding: '18px 0' }}
             onClick={() => store.setScreen('encounter')}
           >
-            ✊ Knock and enter
+            Enter consultation
           </button>
         </div>
       </div>

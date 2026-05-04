@@ -1,4 +1,4 @@
-"""Grand Rounds — LiveKit voice agent (Patient persona, real-time).
+"""Virtion — LiveKit voice agent (patient persona, real-time).
 
 Runs as a separate process from the FastAPI server. Joins every LiveKit
 room created by the frontend and roleplays the patient over WebRTC:
@@ -26,10 +26,12 @@ from livekit import agents, rtc
 from livekit.agents import Agent, AgentSession, RoomInputOptions, WorkerOptions, cli
 from livekit.plugins import anthropic, cartesia, deepgram, silero
 
-# Load .env.local first (project convention), .env as fallback.
+# Load backend env files first, then root .env as a final local fallback.
 _BACKEND = Path(__file__).resolve().parent
+_ROOT = _BACKEND.parent
 load_dotenv(_BACKEND / ".env.local")
 load_dotenv(_BACKEND / ".env")
+load_dotenv(_ROOT / ".env")
 
 logger = logging.getLogger("virtion.voice-agent")
 logger.setLevel(logging.INFO)
@@ -99,7 +101,7 @@ async def entrypoint(ctx: agents.JobContext):
 
     session = AgentSession(
         stt=deepgram.STT(model="nova-3", language="en"),
-        llm=anthropic.LLM(model="claude-haiku-4-5-20251001", temperature=0.8),
+        llm=anthropic.LLM(model=os.environ.get("ANTHROPIC_VOICE_MODEL", "claude-haiku-4-5-20251001"), temperature=0.8),
         tts=cartesia.TTS(model="sonic-2", voice=voice_id),
         vad=silero.VAD.load(),
     )

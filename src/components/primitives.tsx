@@ -343,15 +343,20 @@ export function TopBar({
   steps = ['Polyclinic'],
   showProfile = true,
 }: TopBarProps) {
+  const label = steps[here] ?? steps[steps.length - 1] ?? 'Training';
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '14px 22px',
-        borderBottom: '3px solid var(--line)',
-        background: 'white',
+        gap: 18,
+        padding: '12px 22px',
+        borderBottom: '1px solid var(--line)',
+        background: 'rgba(3, 7, 17, 0.78)',
+        backdropFilter: 'blur(24px) saturate(1.2)',
+        position: 'relative',
+        zIndex: 30,
       }}
     >
       <span
@@ -362,35 +367,53 @@ export function TopBar({
       >
         <Wordmark size={28} />
       </span>
-      <Breadcrumb steps={steps} here={here} />
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>
+        <Breadcrumb steps={steps} here={here} />
+      </div>
       {showProfile ? (
         <div
-          className="tap"
-          onClick={() => store.setScreen('home')}
-          title="Open profile"
-          style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          title="Virtion platform status"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            minWidth: 152,
+            justifyContent: 'flex-end',
+          }}
         >
-          <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--ink-2)' }}>Bedirhan</span>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: 'var(--mint)',
+              boxShadow: '0 0 18px rgba(69, 240, 176, 0.75)',
+            }}
+          />
+          <span style={{ fontWeight: 800, fontSize: 11, color: 'var(--ink-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            {label}
+          </span>
           <div
             style={{
               width: 36,
               height: 36,
-              borderRadius: '50%',
-              background: 'var(--mint)',
-              border: '3px solid var(--line)',
-              boxShadow: '0 2px 0 var(--line)',
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, rgba(79,227,255,0.16), rgba(69,240,176,0.10))',
+              border: '1px solid rgba(255,255,255,0.18)',
+              boxShadow: 'var(--plush-tiny)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 900,
               fontSize: 14,
+              color: 'var(--peach-deep)',
             }}
           >
-            B
+            V
           </div>
         </div>
       ) : (
-        <div style={{ width: 80 }} />
+        <div style={{ width: 152 }} />
       )}
     </div>
   );
@@ -403,43 +426,55 @@ interface WordmarkProps {
 }
 
 export function Wordmark({ size = 36, dark = false }: WordmarkProps) {
+  const color = dark ? '#ffffff' : 'var(--ink)';
   return (
     <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 8,
-        fontFamily: 'Nunito',
+        gap: size * 0.28,
+        fontFamily: 'Sora, Inter, system-ui, sans-serif',
         fontWeight: 900,
         fontSize: size,
-        color: dark ? 'white' : 'var(--ink)',
-        letterSpacing: '-0.02em',
+        color,
+        letterSpacing: 0,
+        lineHeight: 1,
       }}
     >
-      <span style={{ position: 'relative', display: 'inline-block' }}>
-        med
-        <span
-          style={{
-            color: 'var(--peach-deep)',
-            textShadow: dark ? 'none' : '0 2px 0 var(--line)',
-            WebkitTextStroke: dark ? '0' : '2px var(--line)',
-            paintOrder: 'stroke fill',
-          }}
-        >
-          kit
-        </span>
-        <span
-          style={{
-            position: 'absolute',
-            right: -size * 0.42,
-            top: size * 0.05,
-            width: size * 0.34,
-            height: size * 0.34,
-            display: 'inline-block',
-          }}
-        >
-          <Doodle kind="cross" size={size * 0.34} color="#F47A92" />
-        </span>
+      <svg
+        width={size * 1.02}
+        height={size * 1.02}
+        viewBox="0 0 64 64"
+        role="img"
+        aria-label="Virtion mark"
+        style={{ flexShrink: 0, filter: dark ? 'none' : 'drop-shadow(0 0 18px rgba(79,227,255,0.28))' }}
+      >
+        <defs>
+          <linearGradient id="virtion-mark-gradient" x1="10" y1="7" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#4FE3FF" />
+            <stop offset="0.58" stopColor="#45F0B0" />
+            <stop offset="1" stopColor="#7AA7FF" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M13 13 L29.5 51 C30.4 53.2 33.6 53.2 34.5 51 L51 13"
+          fill="none"
+          stroke="url(#virtion-mark-gradient)"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M18 42 C28 51 43 49 51 36 C57 26 52 14 40 11"
+          fill="none"
+          stroke="rgba(255,255,255,0.72)"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+        />
+        <circle cx="45" cy="15" r="4.2" fill="#45F0B0" />
+      </svg>
+      <span>
+        Vir<span style={{ color: 'var(--peach-deep)' }}>tion</span>
       </span>
     </div>
   );

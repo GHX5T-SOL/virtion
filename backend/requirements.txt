@@ -1,4 +1,4 @@
-# Grand Rounds backend — FastAPI server (Managed Agents proxy + LiveKit token mint).
+# Virtion backend — FastAPI server (Managed Agents proxy + LiveKit token mint).
 # The real-time voice worker (voice_agent.py) lives in its own venv with its
 # own requirements file (voice_agent_requirements.txt) so its deps don't
 # tangle with this one.

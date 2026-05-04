@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useScreen } from '../game/store';
 
 const MUTED_KEY = 'virtion:music-muted';
-const VOLUME = 0.18;
 
 function readMuted(): boolean {
   try {
@@ -16,113 +15,145 @@ function writeMuted(v: boolean) {
   try {
     window.localStorage.setItem(MUTED_KEY, v ? '1' : '0');
   } catch {
-    /* private mode — non-fatal */
+    /* storage can be disabled; audio still works */
   }
+}
+
+function createAmbientGraph(ctx: AudioContext) {
+  const master = ctx.createGain();
+  master.gain.value = 0.035;
+  master.connect(ctx.destination);
+
+  const nodes: Array<OscillatorNode | GainNode | BiquadFilterNode> = [master];
+  const tones = [
+    { frequency: 73.42, gain: 0.38, type: 'sine' as OscillatorType },
+    { frequency: 110, gain: 0.18, type: 'sine' as OscillatorType },
+    { frequency: 146.83, gain: 0.10, type: 'triangle' as OscillatorType },
+  ];
+
+  for (const tone of tones) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    osc.type = tone.type;
+    osc.frequency.value = tone.frequency;
+    filter.type = 'lowpass';
+    filter.frequency.value = 620;
+    filter.Q.value = 0.72;
+    gain.gain.value = tone.gain;
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(master);
+    osc.start();
+    nodes.push(osc, gain, filter);
+  }
+
+  const lfo = ctx.createOscillator();
+  const lfoGain = ctx.createGain();
+  lfo.frequency.value = 0.045;
+  lfoGain.gain.value = 0.018;
+  lfo.connect(lfoGain);
+  lfoGain.connect(master.gain);
+  lfo.start();
+  nodes.push(lfo, lfoGain);
+
+  return {
+    resume: () => ctx.resume(),
+    suspend: () => ctx.suspend(),
+    close: () => {
+      for (const node of nodes) {
+        if ('stop' in node) {
+          try { node.stop(); } catch { /* already stopped */ }
+        }
+        try { node.disconnect(); } catch { /* already disconnected */ }
+      }
+      return ctx.close().catch(() => undefined);
+    },
+  };
 }
 
 export function BackgroundMusic() {
   const screen = useScreen();
   const [userMuted, setUserMuted] = useState<boolean>(readMuted);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Lobby = anywhere outside an active encounter. Splash plays too — by
-  // the time the audio context can decode anything the user has clicked
-  // through it, so autoplay is fine there in practice.
-  const inSession = screen === 'encounter';
-  const shouldPlay = !userMuted && !inSession;
-
-  useEffect(() => {
-    const a = new Audio('/virtion.mp3');
-    a.loop = true;
-    a.volume = VOLUME;
-    a.preload = 'auto';
-    audioRef.current = a;
-
-    // First user gesture unblocks autoplay on browsers that gate it.
-    const tryPlay = () => {
-      if (!audioRef.current) return;
-      audioRef.current.play().catch(() => {
-        /* still gated — wait for the next gesture */
-      });
-    };
-
-    const onGesture = () => {
-      if (shouldPlayRef.current) tryPlay();
-    };
-    window.addEventListener('pointerdown', onGesture, { once: false });
-    window.addEventListener('keydown', onGesture, { once: false });
-
-    tryPlay();
-
-    return () => {
-      window.removeEventListener('pointerdown', onGesture);
-      window.removeEventListener('keydown', onGesture);
-      a.pause();
-      a.src = '';
-      audioRef.current = null;
-    };
-  }, []);
-
-  // Mirror `shouldPlay` into a ref so the gesture handler installed once
-  // on mount sees the latest value without being torn down on every change.
+  const graphRef = useRef<ReturnType<typeof createAmbientGraph> | null>(null);
+  const shouldPlay = !userMuted && screen !== 'encounter';
   const shouldPlayRef = useRef(shouldPlay);
+  const mutedRef = useRef(userMuted);
+
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
-    const a = audioRef.current;
-    if (!a) return;
-    if (shouldPlay) {
-      a.play().catch(() => {
-        /* autoplay may be deferred until the first gesture */
-      });
-    } else {
-      a.pause();
-    }
+    const graph = graphRef.current;
+    if (!graph) return;
+    if (shouldPlay) void graph.resume();
+    else void graph.suspend();
   }, [shouldPlay]);
+
+  useEffect(() => {
+    mutedRef.current = userMuted;
+    if (userMuted) void graphRef.current?.suspend();
+    else if (shouldPlayRef.current) void graphRef.current?.resume();
+  }, [userMuted]);
+
+  useEffect(() => {
+    const boot = () => {
+      if (graphRef.current || mutedRef.current) return;
+      const AudioCtx = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return;
+      graphRef.current = createAmbientGraph(new AudioCtx());
+      if (shouldPlayRef.current) void graphRef.current.resume();
+      else void graphRef.current.suspend();
+    };
+    window.addEventListener('pointerdown', boot);
+    window.addEventListener('keydown', boot);
+    return () => {
+      window.removeEventListener('pointerdown', boot);
+      window.removeEventListener('keydown', boot);
+      void graphRef.current?.close();
+      graphRef.current = null;
+    };
+  }, []);
 
   const toggle = () => {
     const next = !userMuted;
     setUserMuted(next);
     writeMuted(next);
+    if (!next && !graphRef.current) {
+      const AudioCtx = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) graphRef.current = createAmbientGraph(new AudioCtx());
+    }
+    if (!next && shouldPlayRef.current) void graphRef.current?.resume();
   };
 
-  // Hide the toggle on splash to keep the title hero clean.
   if (screen === 'splash') return null;
 
-  const off = userMuted || inSession;
+  const off = userMuted || screen === 'encounter';
   return (
     <button
       type="button"
       onClick={toggle}
-      title={
-        userMuted
-          ? 'Music muted — click to unmute'
-          : inSession
-            ? 'Music paused during session'
-            : 'Music on — click to mute'
-      }
-      aria-label={userMuted ? 'Unmute music' : 'Mute music'}
+      title={userMuted ? 'Ambient muted' : screen === 'encounter' ? 'Ambient paused during session' : 'Ambient on'}
+      aria-label={userMuted ? 'Unmute ambient audio' : 'Mute ambient audio'}
       style={{
         position: 'fixed',
         top: 18,
-        right: 156,
+        right: 176,
         zIndex: 1000,
-        width: 36,
-        height: 36,
-        borderRadius: '50%',
-        border: '3px solid var(--line)',
-        background: off ? 'var(--cream)' : 'var(--butter)',
-        boxShadow: '0 2px 0 var(--line)',
+        width: 38,
+        height: 38,
+        borderRadius: 12,
+        border: '1px solid rgba(255,255,255,0.18)',
+        background: off ? 'rgba(255,255,255,0.06)' : 'rgba(79,227,255,0.16)',
+        boxShadow: off ? 'var(--plush-tiny)' : '0 0 24px rgba(79,227,255,0.26), var(--plush-tiny)',
         cursor: 'pointer',
-        fontSize: 16,
-        fontFamily: 'inherit',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        color: off ? 'var(--ink-soft)' : 'var(--peach-deep)',
+        fontFamily: 'Sora, Inter, sans-serif',
+        fontWeight: 900,
+        display: 'grid',
+        placeItems: 'center',
         padding: 0,
-        opacity: inSession && !userMuted ? 0.8 : 1,
       }}
     >
-      <span aria-hidden style={{ lineHeight: 1 }}>{off ? '🔇' : '🎵'}</span>
+      <span aria-hidden>{off ? 'OFF' : 'ON'}</span>
     </button>
   );
 }

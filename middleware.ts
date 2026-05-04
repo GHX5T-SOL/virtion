@@ -1,16 +1,13 @@
-// Vercel Edge Middleware: proxies /agent/* and /voice/* to the Render
-// backend with a shared-secret header. The secret stays server-side
-// (Vercel env var BACKEND_SHARED_SECRET) so direct curl traffic to the
-// Render URL gets 401'd, but browser traffic via virtion.vercel.app
+// Vercel Edge Middleware: proxies /agent/* and /voice/* to the backend
+// with a shared-secret header. The secret stays server-side (Vercel env
+// var BACKEND_SHARED_SECRET), while browser traffic via virtion.vercel.app
 // works transparently.
 
 export const config = {
   matcher: ['/agent/:path*', '/voice/:path*'],
 };
 
-// NOTE: keeping `grand-rounds-backend.onrender.com` until/unless we rename
-// the Render service. Renaming breaks the public hostname.
-const BACKEND_URL = 'https://grand-rounds-backend.onrender.com';
+const BACKEND_URL = process.env.VIRTION_BACKEND_URL || process.env.BACKEND_URL || 'https://grand-rounds-backend.onrender.com';
 
 export default async function middleware(request: Request): Promise<Response> {
   const incoming = new URL(request.url);

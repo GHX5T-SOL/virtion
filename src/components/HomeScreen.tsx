@@ -1,76 +1,9 @@
-import { useEffect, useState } from 'react';
-import { PatientFace, TopBar } from './primitives';
-import { store, useTweaks } from '../game/store';
-import {
-  listEvalHistory,
-  deleteEvalHistory,
-  type EvalHistoryEntry,
-} from '../data/evalHistory';
-
-const VERDICT_COLOR: Record<EvalHistoryEntry['verdict'], string> = {
-  excellent: 'var(--mint)',
-  good: 'var(--mint)',
-  satisfactory: 'var(--butter)',
-  borderline: 'var(--peach)',
-  'clear-fail': 'var(--rose)',
-};
-
-const VERDICT_LABEL: Record<EvalHistoryEntry['verdict'], string> = {
-  excellent: 'Excellent',
-  good: 'Good',
-  satisfactory: 'Satisfactory',
-  borderline: 'Borderline',
-  'clear-fail': 'Clear fail',
-};
-
-function relativeDate(ms: number): string {
-  const diffMs = Date.now() - ms;
-  const minutes = Math.round(diffMs / 60000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
-
-interface StatProps {
-  big: string;
-  sub: string;
-  out?: string;
-}
-
-function Stat({ big, sub, out }: StatProps) {
-  return (
-    <div
-      style={{
-        background: 'white',
-        border: '3px solid var(--line)',
-        borderRadius: 14,
-        padding: 12,
-        boxShadow: 'var(--plush-tiny)',
-      }}
-    >
-      <div style={{ fontWeight: 900, fontSize: 32, lineHeight: 1, color: 'var(--ink)' }}>
-        {big}
-        <span style={{ fontSize: 14, color: 'var(--ink-2)' }}>{out}</span>
-      </div>
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 800,
-          color: 'var(--ink-2)',
-          textTransform: 'uppercase',
-          letterSpacing: '.06em',
-          marginTop: 4,
-        }}
-      >
-        {sub}
-      </div>
-    </div>
-  );
-}
+import { useEffect, useMemo, useState } from 'react';
+import { TopBar } from './primitives';
+import { store } from '../game/store';
+import { listEvalHistory, type EvalHistoryEntry } from '../data/evalHistory';
+import { CASES } from '../data/cases';
+import { CLINIC_IDS } from '../game/clinic';
 
 const VERDICT_SCORE: Record<EvalHistoryEntry['verdict'], number> = {
   'clear-fail': 1,
@@ -80,563 +13,207 @@ const VERDICT_SCORE: Record<EvalHistoryEntry['verdict'], number> = {
   excellent: 5,
 };
 
-const DOMAIN_META = [
-  { key: 'data_gathering' as const, label: 'Data Gathering', color: 'var(--peach)', deep: 'var(--peach-deep)' },
-  { key: 'clinical_management' as const, label: 'Clinical Management', color: 'var(--mint)', deep: 'var(--mint-deep)' },
-  { key: 'interpersonal' as const, label: 'Interpersonal', color: 'var(--sky)', deep: 'var(--sky-deep)' },
+const PRODUCT_PILLARS = [
+  {
+    title: 'Interactive clinical simulation',
+    body: 'A doctor-POV clinic where students speak, investigate, treat, prescribe, and debrief on synthetic patients.',
+    tag: 'now',
+  },
+  {
+    title: 'AI attending and rubric engine',
+    body: 'Premium model reasoning first, multi-provider fallbacks next, deterministic scoring last so a training case never ends blank.',
+    tag: 'resilient AI',
+  },
+  {
+    title: 'AR / VR / mobile / desktop',
+    body: 'Roadmap clients turn every device into a portable clinical-skills lab for young doctors.',
+    tag: 'apps',
+  },
+  {
+    title: 'Decentralized research compute',
+    body: 'Consent-first device nodes can contribute idle compute to future protein folding, gene sequencing, and drug discovery simulations.',
+    tag: 'R&D',
+  },
 ];
 
-interface TrainingStats {
-  count: number;
-  avgRating: number; // 0–5
-  domains: { key: 'data_gathering' | 'clinical_management' | 'interpersonal'; label: string; pct: number; color: string; deep: string }[];
-  weakest: { label: string; pct: number; deep: string } | null;
-  streakDays: number;
+const ROADMAP = [
+  ['01', 'Clinical OS', 'More specialties, procedural stations, voice-first consults, and cited debriefs.'],
+  ['02', 'Immersive apps', 'Native mobile, desktop, AR, and VR releases for repeated training outside the browser.'],
+  ['03', 'Compute mesh', 'Opt-in node clients aggregate idle compute for biotech simulations and model evaluation.'],
+  ['04', 'Future medical AI', 'Synthetic and consented datasets support safer AI doctor and robotics research workflows.'],
+];
+
+function averageScore(history: EvalHistoryEntry[]): string {
+  if (!history.length) return '0.0';
+  const avg = history.reduce((sum, e) => sum + (VERDICT_SCORE[e.verdict] ?? 0), 0) / history.length;
+  return avg.toFixed(1);
 }
 
-function computeStats(history: EvalHistoryEntry[]): TrainingStats {
-  const count = history.length;
-  if (count === 0) {
-    return {
-      count: 0,
-      avgRating: 0,
-      domains: DOMAIN_META.map((d) => ({ ...d, pct: 0 })),
-      weakest: null,
-      streakDays: 0,
-    };
-  }
-
-  const avgRating =
-    history.reduce((sum, e) => sum + (VERDICT_SCORE[e.verdict] ?? 0), 0) / count;
-
-  const domains = DOMAIN_META.map((d) => {
-    const ratios = history
-      .map((e) => {
-        const ds = e.evaluation.domain_scores[d.key];
-        return ds && ds.max > 0 ? ds.raw / ds.max : null;
-      })
-      .filter((r): r is number => r !== null);
-    const pct = ratios.length > 0
-      ? Math.round((ratios.reduce((a, b) => a + b, 0) / ratios.length) * 100)
-      : 0;
-    return { ...d, pct };
-  });
-
-  const weakestDomain = domains.reduce((min, d) => (d.pct < min.pct ? d : min), domains[0]);
-  const weakest = { label: weakestDomain.label, pct: weakestDomain.pct, deep: weakestDomain.deep };
-
-  // Streak: count consecutive days (today, yesterday, …) with at least one
-  // saved review. Stops at the first gap.
-  const days = new Set(
-    history.map((e) => new Date(e.savedAt).toISOString().slice(0, 10)),
-  );
-  let streakDays = 0;
-  const cursor = new Date();
-  for (;;) {
-    const key = cursor.toISOString().slice(0, 10);
-    if (days.has(key)) {
-      streakDays += 1;
-      cursor.setDate(cursor.getDate() - 1);
-    } else {
-      break;
-    }
-  }
-
-  return { count, avgRating, domains, weakest, streakDays };
+function latestCaseLabel(history: EvalHistoryEntry[]): string {
+  const latest = history[0];
+  if (!latest) return 'Start first case';
+  return latest.caseName;
 }
 
 export function HomeScreen() {
-  const tweaks = useTweaks();
   const [history, setHistory] = useState<EvalHistoryEntry[]>([]);
 
-  // Load on mount + whenever the screen is shown so it stays current.
   useEffect(() => {
     setHistory(listEvalHistory());
   }, []);
 
-  const refresh = () => setHistory(listEvalHistory());
-  const onDelete = (id: string) => {
-    deleteEvalHistory(id);
-    refresh();
-  };
+  const stats = useMemo(() => {
+    const specialtyCount = CLINIC_IDS.filter((id) => id !== 'all-specialties').length;
+    return [
+      { big: String(CASES.length), label: 'synthetic cases' },
+      { big: String(specialtyCount), label: 'specialty tracks' },
+      { big: String(history.length), label: 'completed debriefs' },
+      { big: averageScore(history), label: 'avg verdict / 5' },
+    ];
+  }, [history]);
 
-  const stats = computeStats(history);
+  const recent = history.slice(0, 3);
 
   return (
-    <div className="screen" style={{ background: 'var(--cream)' }}>
-      <TopBar here={0} steps={['Profile']} />
+    <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
+      <TopBar here={0} steps={['Virtion']} />
 
-      <div
-        style={{
-          padding: '28px 36px',
-          minHeight: 'calc(100vh - 67px)',
-          display: 'grid',
-          gridTemplateColumns: '1.4fr 1fr',
-          gap: 24,
-        }}
-      >
-        {/* LEFT — desk */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--ink-2)' }}>
-              {stats.count === 0 ? 'Day one' : 'Welcome back'}
-            </div>
-            <h1 style={{ fontSize: 44, lineHeight: 1.05, marginTop: 4 }}>
-              {stats.count === 0 ? 'Ready when you are.' : 'Welcome back, doctor.'}
+      <main style={{ width: 'min(1220px, calc(100vw - 32px))', margin: '0 auto', padding: '38px 0 72px' }}>
+        <section
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))',
+            gap: 24,
+            alignItems: 'stretch',
+            minHeight: 'calc(100vh - 150px)',
+          }}
+        >
+          <div className="glass-panel scanline" style={{ padding: 'clamp(24px, 4.5vw, 54px)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div className="chip mint">training simulator · synthetic cases · not clinical advice</div>
+            <h1 style={{ fontSize: 'var(--type-hero-lg)', lineHeight: 0.98, marginTop: 20 }}>
+              Train the next generation of doctors and medical AI.
             </h1>
-            <div style={{ fontSize: 16, color: 'var(--ink-2)', fontWeight: 600, marginTop: 6 }}>
-              {stats.count === 0
-                ? 'Pick a polyclinic and your first case walks in. Your training log starts filling in after that.'
-                : 'Your training log is updating with every case you finish.'}
+            <p style={{ margin: '24px 0 0', color: 'var(--ink-2)', fontSize: 19, lineHeight: 1.65, fontWeight: 600, maxWidth: 760 }}>
+              Virtion is an interactive medical learning environment: a 3D clinic, voice patients, AI attending feedback, and a roadmap toward immersive apps and consent-first biotech compute infrastructure.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 34 }}>
+              <button type="button" className="btn-plush primary" onClick={() => store.setScreen('mode')}>
+                Start training
+              </button>
+              <button type="button" className="btn-plush ghost" onClick={() => store.setScreen('library')}>
+                Browse cases
+              </button>
+              <button type="button" className="btn-plush ghost" onClick={() => store.setScreen('agentTopology')}>
+                Platform topology
+              </button>
             </div>
           </div>
 
-          {stats.count === 0 ? (
-            <div
-              className="plush-lg"
-              style={{
-                background: 'var(--cream-2)',
-                padding: 18,
-                position: 'relative',
-                transform: 'rotate(-0.6deg)',
-              }}
+          <aside style={{ display: 'grid', gap: 14 }}>
+            <div className="glass-panel" style={{ padding: 22 }}>
+              <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                live product surface
+              </div>
+              <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {stats.map((s) => (
+                  <div key={s.label} style={{ padding: 16, borderRadius: 10, background: 'rgba(255,255,255,0.055)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                    <div style={{ fontFamily: 'Sora', fontSize: 32, fontWeight: 800, color: 'var(--peach-deep)' }}>{s.big}</div>
+                    <div style={{ color: 'var(--ink-soft)', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-panel" style={{ padding: 22 }}>
+              <div className="chip sky">next action</div>
+              <h2 style={{ fontSize: 26, marginTop: 12 }}>{latestCaseLabel(history)}</h2>
+              <p style={{ color: 'var(--ink-2)', fontWeight: 600, lineHeight: 1.5, margin: '10px 0 18px' }}>
+                Pick up the loop: select a case, enter the room, make decisions, and let the debrief show the gaps.
+              </p>
+              <button type="button" className="btn-plush mint" onClick={() => store.setScreen('mode')}>
+                Enter clinic
+              </button>
+            </div>
+
+            <div className="glass-panel" style={{ padding: 22 }}>
+              <div className="chip rose">safety posture</div>
+              <p style={{ color: 'var(--ink-2)', fontWeight: 650, lineHeight: 1.55, margin: '12px 0 0' }}>
+                Virtion does not provide clinical advice. Demo cases are synthetic. Future patient data and robotics work belongs behind explicit consent, governance, and clinical validation.
+              </p>
+            </div>
+          </aside>
+        </section>
+
+        <section style={{ marginTop: 26, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 14 }}>
+          {PRODUCT_PILLARS.map((pillar, i) => (
+            <article
+              key={pillar.title}
+              className="glass-panel popin"
+              style={{ padding: 20, animationDelay: `${i * 0.045}s` }}
             >
-              <div style={{ position: 'absolute', top: -12, left: 22 }} className="chip butter">
-                ★ first case
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 18,
-                  alignItems: 'center',
-                  background: 'white',
-                  borderRadius: 18,
-                  border: '3px dashed rgba(43,30,22,0.25)',
-                  padding: 16,
-                }}
-              >
-                <div className="floaty" style={{ opacity: 0.6 }}>
-                  <PatientFace style={tweaks.avatarStyle} skin="#E8B68F" hair="#3B2A1F" size={120} mood="neutral" />
+              <div className="chip mint">{pillar.tag}</div>
+              <h2 style={{ fontSize: 22, lineHeight: 1.16, marginTop: 14 }}>{pillar.title}</h2>
+              <p style={{ color: 'var(--ink-2)', lineHeight: 1.55, fontWeight: 600, margin: '12px 0 0' }}>{pillar.body}</p>
+            </article>
+          ))}
+        </section>
+
+        <section style={{ marginTop: 26, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: 18 }}>
+          <div className="glass-panel" style={{ padding: 24 }}>
+            <div className="chip sky">roadmap</div>
+            <h2 style={{ fontSize: 34, lineHeight: 1.08, marginTop: 14 }}>From game loop to biotech network.</h2>
+            <p style={{ color: 'var(--ink-2)', lineHeight: 1.6, fontWeight: 600, marginTop: 14 }}>
+              The browser clinic remains the wedge: free, useful training for students. The long-term platform expands into apps, compute nodes, synthetic data generation, and carefully governed future clinical AI research.
+            </p>
+          </div>
+          <div className="glass-panel" style={{ padding: 18, display: 'grid', gap: 10 }}>
+            {ROADMAP.map(([num, title, body]) => (
+              <div key={num} style={{ display: 'grid', gridTemplateColumns: '54px 1fr', gap: 12, padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.11)' }}>
+                <div style={{ fontFamily: 'Sora', color: 'var(--mint)', fontWeight: 800 }}>{num}</div>
+                <div>
+                  <div style={{ fontWeight: 850 }}>{title}</div>
+                  <div style={{ color: 'var(--ink-soft)', marginTop: 4, lineHeight: 1.45, fontWeight: 600 }}>{body}</div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 900, fontSize: 22 }}>No case picked yet</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-2)', marginTop: 2 }}>
-                    Choose a polyclinic — the next patient on the bench will walk straight in.
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="btn-plush primary"
-                  style={{ fontSize: 15, padding: '14px 18px' }}
-                  onClick={() => store.setScreen('mode')}
-                >
-                  Start →
-                </button>
               </div>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ marginTop: 26, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: 18 }}>
+          <div className="glass-panel" style={{ padding: 22 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+              <div>
+                <div className="chip butter">recent debriefs</div>
+                <h2 style={{ fontSize: 28, marginTop: 12 }}>Training record</h2>
+              </div>
+              <button type="button" className="btn-plush ghost" onClick={() => store.setScreen('history')}>
+                History
+              </button>
             </div>
-          ) : (
-            <div className="plush-lg" style={{ background: 'var(--peach)', padding: 18, position: 'relative', transform: 'rotate(-0.6deg)' }}>
-              <div style={{ position: 'absolute', top: -12, left: 22 }} className="chip butter">
-                ★ pick up where you left off
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 18,
-                  alignItems: 'center',
-                  background: 'white',
-                  borderRadius: 18,
-                  border: '3px solid var(--line)',
-                  padding: 16,
-                }}
-              >
-                <div className="floaty">
-                  <PatientFace
-                    style={tweaks.avatarStyle}
-                    skin={history[0].caseGender === 'F' ? '#F0C4A8' : '#E8B68F'}
-                    hair="#3B2A1F"
-                    size={120}
-                    mood="neutral"
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 900, fontSize: 22 }}>
-                    {history[0].caseName}, {history[0].caseAge}
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-2)', marginTop: 2 }}>
-                    {history[0].diagnosisLabel}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
-                    <span className="chip" style={{ background: VERDICT_COLOR[history[0].verdict] }}>
-                      {VERDICT_LABEL[history[0].verdict]}
-                    </span>
-                    <span className="chip">last review · {relativeDate(history[0].savedAt)}</span>
-                    {stats.weakest && (
-                      <span className="chip butter">focus · {stats.weakest.label.toLowerCase()}</span>
-                    )}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="btn-plush primary"
-                  style={{ fontSize: 15, padding: '14px 18px' }}
-                  onClick={() => store.viewEvalHistory(history[0].id)}
-                >
-                  Review →
-                </button>
-              </div>
-            </div>
-          )}
-
-          <button
-            type="button"
-            className="btn-plush mint"
-            style={{ fontSize: 22, padding: '18px 0', alignSelf: 'stretch' }}
-            onClick={() => store.setScreen('mode')}
-          >
-            ▶ Start a session
-          </button>
-
-          <button
-            type="button"
-            className="btn-plush ghost"
-            style={{
-              fontSize: 14,
-              padding: '12px 16px',
-              alignSelf: 'stretch',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.history.pushState({}, '', '/agentic-rounds');
-              }
-              store.setScreen('agenticRounds');
-            }}
-            title="See how the simulator grades you — agents, citations, hard rules"
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="chip butter" style={{ fontSize: 10 }}>NEW</span>
-              <span style={{ fontWeight: 800 }}>Agentic rounds</span>
-              <span style={{ fontWeight: 600, color: 'var(--ink-2)' }}>· how the simulator grades you</span>
-            </span>
-            <span style={{ fontWeight: 800, color: 'var(--ink-2)' }}>→</span>
-          </button>
-
-          <button
-            type="button"
-            className="btn-plush ghost"
-            style={{
-              fontSize: 14,
-              padding: '12px 16px',
-              alignSelf: 'stretch',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.history.pushState({}, '', '/agent-topology');
-              }
-              store.setScreen('agentTopology');
-            }}
-            title="Live map of Opus 4.7 and the sub-rules + sessions it controls"
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="chip peach" style={{ fontSize: 10 }}>LIVE</span>
-              <span style={{ fontWeight: 800 }}>Agent topology</span>
-              <span style={{ fontWeight: 600, color: 'var(--ink-2)' }}>· Opus 4.7 → sub-rules &amp; sessions</span>
-            </span>
-            <span style={{ fontWeight: 800, color: 'var(--ink-2)' }}>→</span>
-          </button>
-
-          <div className="plush" style={{ padding: 16 }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                marginBottom: 10,
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: 800,
-                  fontSize: 12,
-                  color: 'var(--ink-2)',
-                  letterSpacing: '.06em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                RECENT CASES
-              </div>
-              <span
-                style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', cursor: 'pointer' }}
-                onClick={() => store.setScreen('history')}
-              >
-                see all →
-              </span>
-            </div>
-            {history.length === 0 ? (
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: 'var(--ink-2)',
-                  background: 'var(--cream)',
-                  border: '2.5px dashed rgba(43,30,22,0.2)',
-                  borderRadius: 12,
-                  padding: '14px 16px',
-                  textAlign: 'center',
-                }}
-              >
-                No reviews yet — finish an encounter to see your AI feedback here.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {history.slice(0, 6).map((r) => {
-                  const color = VERDICT_COLOR[r.verdict];
-                  return (
-                    <div
-                      key={r.id}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '40px 1fr 110px 80px 28px',
-                        gap: 12,
-                        alignItems: 'center',
-                        padding: '8px 12px',
-                        background: 'var(--cream)',
-                        border: '2.5px solid var(--line)',
-                        borderRadius: 12,
-                        boxShadow: '0 2px 0 var(--line)',
-                      }}
-                    >
-                      <div
-                        className="tap"
-                        onClick={() => store.viewEvalHistory(r.id)}
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          background: color,
-                          border: '2.5px solid var(--line)',
-                          boxShadow: '0 2px 0 var(--line)',
-                          cursor: 'pointer',
-                        }}
-                      />
-                      <div className="tap" onClick={() => store.viewEvalHistory(r.id)} style={{ cursor: 'pointer' }}>
-                        <div style={{ fontWeight: 800, fontSize: 14 }}>
-                          {r.caseName} <span style={{ fontWeight: 600, color: 'var(--ink-2)' }}>· {r.caseAge}{r.caseGender}</span>
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--ink-2)', fontWeight: 700 }}>
-                          {r.diagnosisLabel}
-                        </div>
-                      </div>
-                      <span
-                        className="tap chip"
-                        onClick={() => store.viewEvalHistory(r.id)}
-                        style={{ background: color, fontSize: 11, cursor: 'pointer' }}
-                      >
-                        {VERDICT_LABEL[r.verdict]}
-                      </span>
-                      <span style={{ fontSize: 12, color: 'var(--ink-2)', fontWeight: 700 }}>
-                        {relativeDate(r.savedAt)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm(`Delete review for ${r.caseName}?`)) onDelete(r.id);
-                        }}
-                        title="Delete this review"
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          fontSize: 16,
-                          fontWeight: 800,
-                          color: 'var(--ink-2)',
-                          cursor: 'pointer',
-                          padding: 4,
-                          fontFamily: 'inherit',
-                        }}
-                      >
-                        ✕
-                      </button>
+            <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
+              {(recent.length ? recent : [{ id: 'empty', caseName: 'No completed cases yet', verdict: 'satisfactory' as const, savedAt: Date.now() } as EvalHistoryEntry]).map((entry) => (
+                <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'center', padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <div>
+                    <div style={{ fontWeight: 850 }}>{entry.caseName}</div>
+                    <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 700, marginTop: 2 }}>
+                      {new Date(entry.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT — stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div className="plush" style={{ padding: 16, background: 'var(--butter)' }}>
-            <div
-              style={{
-                fontWeight: 800,
-                fontSize: 11,
-                color: 'var(--ink-2)',
-                letterSpacing: '.06em',
-                textTransform: 'uppercase',
-                marginBottom: 10,
-              }}
-            >
-              YOUR TRAINING
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <Stat big={stats.count > 0 ? String(stats.count) : '—'} sub="cases done" />
-              <Stat
-                big={stats.count > 0 ? stats.avgRating.toFixed(1) : '—'}
-                sub="avg rating"
-                out={stats.count > 0 ? ' / 5' : ''}
-              />
-            </div>
-            <div
-              style={{
-                marginTop: 12,
-                background: 'white',
-                border: '3px solid var(--line)',
-                borderRadius: 14,
-                padding: 12,
-                boxShadow: 'var(--plush-tiny)',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: 'var(--ink-2)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '.06em',
-                }}
-              >
-                WEAKEST DOMAIN
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>
-                {stats.weakest ? stats.weakest.label : '—'}
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  height: 12,
-                  background: 'var(--cream)',
-                  borderRadius: 8,
-                  border: '2px solid var(--line)',
-                  overflow: 'hidden',
-                  position: 'relative',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: `${stats.weakest?.pct ?? 0}%`,
-                    background: stats.weakest?.deep ?? 'var(--peach-deep)',
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginTop: 6,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: 'var(--ink-2)',
-                }}
-              >
-                <span>
-                  {stats.weakest ? `${stats.weakest.label} · ${stats.weakest.pct}%` : 'No reviews yet'}
-                </span>
-                <span>focus area</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="plush" style={{ padding: 16 }}>
-            <div
-              style={{
-                fontWeight: 800,
-                fontSize: 11,
-                color: 'var(--ink-2)',
-                letterSpacing: '.06em',
-                textTransform: 'uppercase',
-                marginBottom: 10,
-              }}
-            >
-              DOMAIN PROGRESS
-            </div>
-            {stats.count === 0 ? (
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>
-                Domain breakdown unlocks after your first AI review.
-              </div>
-            ) : (
-              stats.domains.map((d) => (
-                <div key={d.label} style={{ marginBottom: 10 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      fontSize: 12,
-                      fontWeight: 800,
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span>{d.label}</span>
-                    <span>{d.pct}%</span>
                   </div>
-                  <div
-                    style={{
-                      height: 14,
-                      background: 'var(--cream)',
-                      borderRadius: 8,
-                      border: '2.5px solid var(--line)',
-                      overflow: 'hidden',
-                      position: 'relative',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        width: `${d.pct}%`,
-                        background: d.color,
-                        borderRight: '2.5px solid var(--line)',
-                      }}
-                    />
-                  </div>
+                  <span className="chip mint">{entry.verdict}</span>
                 </div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
 
-          <div
-            className="plush"
-            style={{ padding: 14, background: 'var(--mint)', display: 'flex', alignItems: 'center', gap: 12 }}
-          >
-            <div style={{ fontSize: 36 }} className="floaty">
-              📚
-            </div>
-            <div>
-              <div style={{ fontWeight: 900, fontSize: 14 }}>
-                {stats.streakDays === 0
-                  ? 'Streak: —'
-                  : `Streak: ${stats.streakDays} ${stats.streakDays === 1 ? 'day' : 'days'}`}
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>
-                {stats.streakDays === 0
-                  ? 'Finish your first case to start a streak.'
-                  : 'One more case today keeps it alive.'}
-              </div>
-            </div>
+          <div className="glass-panel" style={{ padding: 22 }}>
+            <div className="chip mint">funding narrative</div>
+            <h2 style={{ fontSize: 28, lineHeight: 1.12, marginTop: 12 }}>Education wedge. Research-scale upside.</h2>
+            <p style={{ color: 'var(--ink-2)', lineHeight: 1.6, fontWeight: 600, marginTop: 12 }}>
+              Virtion can start as a free learning game for young clinicians while building the platform rails for consent-first datasets, simulation infrastructure, and distributed biomedical compute.
+            </p>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

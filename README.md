@@ -1,16 +1,16 @@
 # Virtion
 
-Browser-based ER + polyclinic clinical training simulator. You play the doctor: new patients arrive at triage, you talk to them in real time, order tests, treat, disposition. An attending physician (Claude Opus 4.7) watches and grades your decisions.
+Browser-based ER + polyclinic clinical training simulator. You play the doctor: patients arrive at triage, you talk to them in real time, order tests, treat, disposition, then receive an attending-style debrief.
 
-> Hackathon submission. Cases are plausible but synthetic — no clinical claims.
+> Training simulator only. Cases are plausible but synthetic — no clinical claims or medical advice.
 
 ---
 
 ## About
 
-Virtion is a voice-first AI patient simulator for medical students and newly graduated doctors. You take the history, order labs, read imaging, diagnose, and prescribe — talking to AI patients in real time. After each session, an attending grader powered by Claude Opus 4.7 marks your communication, history-taking, and clinical reasoning, citing published guidelines (NICE, ESC, AHA, GINA, GOLD) from a curated registry so the grading can't fabricate sources.
+Virtion is a voice-first AI patient simulator for medical students and newly graduated doctors. You take the history, order labs, read imaging, diagnose, and prescribe while talking to AI patients in real time. After each session, an attending grader marks communication, history-taking, and clinical reasoning, citing published guidelines (NICE, ESC, AHA, GINA, GOLD) from a curated registry so the grading cannot fabricate sources.
 
-The format is modelled on OSCE training with standardised patients, which works well but is expensive, scheduled rarely, requires physical attendance, and isn't available in many countries — leaving most trainees globally with little or no access. Virtion makes the same kind of practice available on demand in the browser.
+The product vision extends beyond the browser simulator: mobile and desktop training apps, AR/VR clinical spaces, consent-first research data tooling, and an opt-in compute network for future biomedical simulation workloads. See [docs/platform-roadmap.md](docs/platform-roadmap.md).
 
 
 
@@ -22,7 +22,8 @@ The format is modelled on OSCE training with standardised patients, which works 
 | Voice transport | LiveKit Cloud (WebRTC) via `livekit-client` |
 | Voice worker | Python `livekit-agents` — Deepgram Nova-3 STT → Claude Haiku 4.5 → Cartesia Sonic-2 TTS |
 | HTTP backend | FastAPI on `127.0.0.1:8787` — Managed Agents proxy + LiveKit JWT mint |
-| Attending grader | Claude **Opus 4.7** as a Managed Agent (`virtion-attending`) |
+| Attending grader | Claude **Opus 4.7** as a Managed Agent (`virtion-attending`) with direct-model and deterministic fallbacks |
+| Model fallback router | Anthropic, OpenAI, Vercel AI Gateway, OpenRouter, Gemini, Cerebras, then local deterministic rubric fallback |
 | State | Single `Store` class with `useSyncExternalStore` (no Redux/Zustand) |
 
 Two flows:
@@ -45,7 +46,8 @@ All keys are server-side only — the browser never sees them. Get one of each:
 
 | Service | What it does | Where to get it | Free tier? |
 |---|---|---|---|
-| **Anthropic** | Powers the attending grader (Opus 4.7) and patient voice persona (Haiku 4.5) | https://console.anthropic.com → API Keys | Pay-as-you-go, no free tier |
+| **Anthropic** | Primary attending grader (Opus 4.7) and patient voice persona (Haiku 4.5) | https://console.anthropic.com → API Keys | Pay-as-you-go, no free tier |
+| **OpenAI / OpenRouter / Vercel AI Gateway / Gemini / Cerebras** | Optional direct-model fallbacks for triage, patient text, and debrief degradation | Provider consoles | Varies |
 | **LiveKit Cloud** | Real-time WebRTC transport between browser ↔ voice worker | https://cloud.livekit.io → create project → Settings → Keys (gives `URL`, `API Key`, `API Secret`) | Yes — generous free tier |
 | **Deepgram** | Streaming speech-to-text inside the voice worker | https://console.deepgram.com → API Keys | Yes — $200 free credit |
 | **Cartesia** | Streaming text-to-speech inside the voice worker | https://play.cartesia.ai → API Keys | Yes — free credit on signup |
@@ -57,7 +59,7 @@ All keys are server-side only — the browser never sees them. Get one of each:
 ### 1. Frontend
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 2. Backend (two separate venvs)
@@ -97,6 +99,13 @@ CARTESIA_API_KEY=...
 # Leave these blank on first run — see "Bootstrap the Managed Agent" below
 VIRTION_AGENT_ID=
 VIRTION_ENV_ID=
+
+# Optional direct-model fallback lanes
+OPENAI_API_KEY=
+VERCEL_AI_GATEWAY_API_KEY=
+OPENROUTER_API_KEY=
+GEMINI_API_KEY=
+CEREBRAS_API_KEY=
 ```
 
 ### 4. Bootstrap the Managed Agent (one-time)
@@ -129,7 +138,7 @@ backend/.venv-voice/Scripts/python backend/voice_agent.py dev
 # Logs "registered worker" once connected to LiveKit Cloud
 ```
 
-All three must be up for voice. The frontend works without the worker — you'll just lose real-time voice (text chat still works).
+All three must be up for premium voice. If voice setup fails, the encounter degrades to text patient roleplay. If premium model providers fail, the app returns structured degraded outputs instead of blanking.
 
 Open http://localhost:5173 and grant microphone permission when prompted.
 
@@ -170,7 +179,8 @@ scripts/verify/       # Deterministic data-integrity checks
 | Call | Model | Why |
 |---|---|---|
 | Patient voice persona | Haiku 4.5 | Fast, cheap, good enough for in-character reply |
-| `virtion-attending` grading | **Opus 4.7** | Clinical reasoning, precision matters |
+| Patient text / triage fallback | Anthropic → OpenAI → Vercel AI Gateway → OpenRouter → Gemini → Cerebras → deterministic | Keeps the simulator responsive when one provider fails |
+| `virtion-attending` grading | **Opus 4.7** Managed Agent → direct debrief fallback → deterministic rubric | Clinical reasoning first, graceful degradation last |
 
 ---
 
@@ -184,4 +194,4 @@ scripts/verify/       # Deterministic data-integrity checks
 
 ## License
 
-Private 
+Private

@@ -17,15 +17,21 @@ export async function* streamClaude(
   messages: ChatMessage[],
   signal?: AbortSignal
 ): AsyncGenerator<string, void, unknown> {
-  const res = await fetch(PATIENT_STREAM_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ system: systemPrompt, messages }),
-    signal,
-  });
+  let res: Response;
+  try {
+    res = await fetch(PATIENT_STREAM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: systemPrompt, messages }),
+      signal,
+    });
+  } catch {
+    yield localPatientReply(systemPrompt, messages);
+    return;
+  }
   if (!res.ok || !res.body) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`patient stream failed: ${res.status} ${detail}`.trim());
+    yield localPatientReply(systemPrompt, messages);
+    return;
   }
 
   const reader = res.body.getReader();
@@ -50,9 +56,28 @@ export async function* streamClaude(
       } catch {
         continue;
       }
-      if (parsed.error) throw new Error(parsed.error);
+      if (parsed.error) {
+        yield localPatientReply(systemPrompt, messages);
+        return;
+      }
       if (parsed.done) return;
       if (typeof parsed.text === 'string') yield parsed.text;
     }
   }
+}
+
+function localPatientReply(systemPrompt: string, messages: ChatMessage[]): string {
+  const last = messages[messages.length - 1]?.content.toLowerCase() ?? '';
+  if (last.includes('pain') || last.includes('hurt')) {
+    return 'It has been uncomfortable and I would like to know what is causing it.';
+  }
+  if (last.includes('worry') || last.includes('concern')) {
+    return 'I am mainly worried this could become serious or affect my daily life.';
+  }
+  if (last.includes('medicine') || last.includes('tablet') || last.includes('prescription')) {
+    return 'I can take medicine if you explain what it is for and what side effects to watch for.';
+  }
+  const chief = /chief complaint[:\s]+(.+)/i.exec(systemPrompt)?.[1]?.trim();
+  if (chief) return `The main thing is ${chief.slice(0, 120)}`;
+  return 'I understand. Could you explain the next step in simple terms?';
 }

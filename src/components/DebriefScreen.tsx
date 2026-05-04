@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Doodle, TopBar } from './primitives';
+import { TopBar } from './primitives';
 import { store, useGameState } from '../game/store';
 import { getPatientCase } from '../data/cases';
 import { TESTS } from '../data/tests';
@@ -70,8 +70,8 @@ function DomainRing({ label, score }: DomainRingProps) {
   return (
     <div
       style={{
-        background: 'white',
-        border: '3px solid var(--line)',
+        background: 'rgba(255,255,255,0.07)',
+        border: '1px solid var(--line)',
         borderRadius: 16,
         padding: 14,
         boxShadow: 'var(--plush-tiny)',
@@ -97,7 +97,7 @@ function DomainRing({ label, score }: DomainRingProps) {
           x="42"
           y="48"
           textAnchor="middle"
-          fontFamily="Nunito"
+          fontFamily="Inter"
           fontWeight="900"
           fontSize="16"
           fill="var(--ink)"
@@ -153,8 +153,8 @@ function Criterion({ status, text, evidence, cite }: CriterionProps) {
         gap: 12,
         alignItems: 'flex-start',
         padding: 12,
-        background: '#FFFCF3',
-        border: '2.5px solid var(--line)',
+        background: 'rgba(255,255,255,0.07)',
+        border: '1px solid var(--line)',
         borderRadius: 14,
         boxShadow: '0 2px 0 var(--line)',
       }}
@@ -303,11 +303,11 @@ function StatusBanner({
     <div
       className="plush-lg popin"
       style={{
-        background: bg,
+        background: `linear-gradient(135deg, ${bg}, rgba(79,227,255,0.08))`,
         padding: 24,
         position: 'relative',
         marginBottom: 22,
-        transform: 'rotate(-0.4deg)',
+        transform: 'none',
       }}
     >
       <div style={{ position: 'absolute', top: -14, left: 24 }} className="chip butter">
@@ -320,13 +320,13 @@ function StatusBanner({
             style={{
               width: 110,
               height: 110,
-              background: 'white',
+              background: 'rgba(255,255,255,0.07)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Doodle kind="star" size={86} color="#FFD86B" />
+            <AttendingGlyph />
           </div>
         </div>
         <div style={{ flex: 1 }}>
@@ -336,6 +336,26 @@ function StatusBanner({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AttendingGlyph() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        width: 86,
+        height: 86,
+        borderRadius: '50%',
+        border: '1px solid rgba(79,227,255,0.42)',
+        display: 'grid',
+        placeItems: 'center',
+        boxShadow: '0 0 34px rgba(79,227,255,0.24), inset 0 0 24px rgba(79,227,255,0.12)',
+        background: 'radial-gradient(circle at 50% 45%, rgba(69,240,176,0.22), rgba(7,17,30,0.96))',
+      }}
+    >
+      <span style={{ fontFamily: 'Sora', fontSize: 34, fontWeight: 900, color: 'var(--peach-deep)' }}>V</span>
     </div>
   );
 }
@@ -379,11 +399,11 @@ function GradingProgress({ partialNarration }: { partialNarration: string }) {
     <div
       className="plush-lg popin"
       style={{
-        background: 'var(--sky)',
+        background: 'linear-gradient(135deg, rgba(122,167,255,0.18), rgba(79,227,255,0.08))',
         padding: 24,
         position: 'relative',
         marginBottom: 22,
-        transform: 'rotate(-0.4deg)',
+        transform: 'none',
       }}
     >
       <div style={{ position: 'absolute', top: -14, left: 24 }} className="chip butter">
@@ -396,13 +416,13 @@ function GradingProgress({ partialNarration }: { partialNarration: string }) {
             style={{
               width: 110,
               height: 110,
-              background: 'white',
+              background: 'rgba(255,255,255,0.07)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Doodle kind="star" size={86} color="#FFD86B" />
+            <AttendingGlyph />
           </div>
         </div>
         <div style={{ flex: 1 }}>
@@ -423,7 +443,7 @@ function GradingProgress({ partialNarration }: { partialNarration: string }) {
                       width: 12,
                       height: 12,
                       borderRadius: '50%',
-                      border: '2px solid rgba(43,30,22,0.25)',
+                      border: '2px solid rgba(255,255,255,0.24)',
                       borderTopColor: 'var(--ink)',
                       animation: 'gr-spin 0.7s linear infinite',
                     }}
@@ -433,7 +453,7 @@ function GradingProgress({ partialNarration }: { partialNarration: string }) {
                 );
               const opacity = state === 'pending' ? 0.4 : 1;
               const fontWeight = state === 'active' ? 800 : 700;
-              const bg = state === 'done' ? 'rgba(255,255,255,0.55)' : state === 'active' ? 'white' : 'transparent';
+              const bg = state === 'done' ? 'rgba(69,240,176,0.16)' : state === 'active' ? 'rgba(255,255,255,0.09)' : 'transparent';
               return (
                 <li
                   key={i}
@@ -446,7 +466,7 @@ function GradingProgress({ partialNarration }: { partialNarration: string }) {
                     color: 'var(--ink)',
                     opacity,
                     background: bg,
-                    border: state === 'pending' ? '2px dashed rgba(43,30,22,0.18)' : '2.5px solid var(--line)',
+                    border: state === 'pending' ? '1px dashed rgba(255,255,255,0.16)' : '1px solid var(--line)',
                     borderRadius: 10,
                     padding: '6px 10px',
                     transition: 'opacity 0.3s, background 0.3s',
@@ -542,7 +562,7 @@ export function DebriefScreen() {
   }, []);
 
   return (
-    <div className="screen paper" style={{ overflowY: 'auto' }}>
+    <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
       <TopBar here={5} steps={['Polyclinic', 'GP', 'Case', 'Brief', 'Encounter', 'Debrief']} />
 
       <div style={{ padding: '28px 36px 60px', maxWidth: 1080, margin: '0 auto' }}>
@@ -636,16 +656,16 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
   return (
     <>
       {evaluation.safety_breach && (
-        <div
-          className="plush-lg popin"
-          style={{
-            background: 'var(--rose)',
+      <div
+        className="plush-lg popin"
+        style={{
+            background: 'linear-gradient(135deg, rgba(255,92,122,0.18), rgba(255,255,255,0.05))',
             padding: 18,
             marginBottom: 18,
-            border: '3px solid var(--line)',
+            border: '1px solid var(--line)',
           }}
         >
-          <div className="chip" style={{ background: 'white', marginBottom: 8 }}>
+          <div className="chip rose" style={{ marginBottom: 8 }}>
             {'\u26A0 SAFETY BREACH'}
           </div>
           <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.4 }}>
@@ -657,8 +677,8 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
               <div
                 style={{
                   marginTop: 10,
-                  background: 'white',
-                  border: '2.5px dashed var(--line)',
+                  background: 'rgba(255,255,255,0.07)',
+                  border: '1px dashed var(--line)',
                   borderRadius: 10,
                   padding: '8px 10px',
                 }}
@@ -677,11 +697,11 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
       <div
         className="plush-lg popin"
         style={{
-          background: GLOBAL_BG[verdict],
+          background: `linear-gradient(135deg, ${GLOBAL_BG[verdict]}33, rgba(79,227,255,0.08))`,
           padding: 24,
           position: 'relative',
           marginBottom: 22,
-          transform: 'rotate(-0.4deg)',
+          transform: 'none',
         }}
       >
         <div style={{ position: 'absolute', top: -14, left: 24 }} className="chip butter">
@@ -694,13 +714,13 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
               style={{
                 width: 110,
                 height: 110,
-                background: 'white',
+                background: 'rgba(255,255,255,0.07)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Doodle kind="star" size={86} color="#FFD86B" />
+              <AttendingGlyph />
             </div>
           </div>
           <div style={{ flex: 1 }}>
@@ -730,7 +750,7 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
 
       <div className="plush" style={{ padding: 18, marginBottom: 22 }}>
         <SectionLabel>DOMAIN SCORES</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 14 }}>
           <DomainRing label="Data Gathering" score={evaluation.domain_scores.data_gathering} />
           <DomainRing label="Clinical Management" score={evaluation.domain_scores.clinical_management} />
           <DomainRing label="Interpersonal" score={evaluation.domain_scores.interpersonal} />
@@ -756,8 +776,8 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 22 }}>
         {evaluation.highlights.length > 0 && (
-          <div className="plush" style={{ background: 'var(--mint)', padding: 16 }}>
-            <div className="chip" style={{ background: 'white', marginBottom: 10 }}>
+          <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(69,240,176,0.16), rgba(255,255,255,0.04))', padding: 16 }}>
+            <div className="chip mint" style={{ marginBottom: 10 }}>
               {'\u2713 HIGHLIGHTS'}
             </div>
             <ul style={{ margin: 0, paddingLeft: 18, fontWeight: 700, fontSize: 14, lineHeight: 1.6 }}>
@@ -766,8 +786,8 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
           </div>
         )}
         {evaluation.improvements.length > 0 && (
-          <div className="plush" style={{ background: 'var(--peach)', padding: 16 }}>
-            <div className="chip" style={{ background: 'white', marginBottom: 10 }}>
+          <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(25,200,255,0.16), rgba(255,209,102,0.08))', padding: 16 }}>
+            <div className="chip butter" style={{ marginBottom: 10 }}>
               {'\u2191 NEXT TIME'}
             </div>
             <ul style={{ margin: 0, paddingLeft: 18, fontWeight: 700, fontSize: 14, lineHeight: 1.6 }}>

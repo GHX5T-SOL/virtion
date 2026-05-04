@@ -47,9 +47,9 @@ const DEFAULT_TWEAKS: Tweaks = {
 };
 
 /** Resolve the full Virtion `PatientCase` (anamnesis, vitals, diagnosis
- *  options, etc.) for a cozy-cartoon `Case`. If we can't find one in the
- *  catalogue (shouldn't happen — the cartoon library is derived FROM the
- *  catalogue), fall back to a minimal stub built from the cartoon shape so
+ *  options, etc.) for a Virtion display `Case`. If we can't find one in the
+ *  catalogue (shouldn't happen — the display library is derived FROM the
+ *  catalogue), fall back to a minimal stub built from the display shape so
  *  the voice agent + 3D scene still get something to render. */
 function toPatientCase(c: VirtionCase): PatientCase {
   const real = getPatientCase(c.id);

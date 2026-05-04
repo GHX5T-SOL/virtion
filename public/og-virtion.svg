@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630">
+      <stop stop-color="#030711"/>
+      <stop offset=".55" stop-color="#07111E"/>
+      <stop offset="1" stop-color="#0B1726"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="86" y1="105" x2="396" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4FE3FF"/>
+      <stop offset=".58" stop-color="#45F0B0"/>
+      <stop offset="1" stop-color="#7AA7FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g opacity=".28">
+    <path d="M0 110h1200M0 220h1200M0 330h1200M0 440h1200M0 550h1200M120 0v630M240 0v630M360 0v630M480 0v630M600 0v630M720 0v630M840 0v630M960 0v630M1080 0v630" stroke="#4FE3FF" stroke-width="1"/>
+  </g>
+  <circle cx="260" cy="300" r="204" fill="none" stroke="#4FE3FF" stroke-opacity=".16"/>
+  <path d="M112 130 224 414c8 21 38 21 46 0L382 130" fill="none" stroke="url(#mark)" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M145 349c78 72 194 57 244-39 42-80 4-174-95-198" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="15" stroke-linecap="round"/>
+  <circle cx="330" cy="145" r="30" fill="#45F0B0"/>
+  <text x="500" y="250" fill="#F5FBFF" font-family="Sora, Inter, Arial, sans-serif" font-size="76" font-weight="800">Virtion</text>
+  <text x="505" y="318" fill="#4FE3FF" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="4">CLINICAL LEARNING OS</text>
+  <text x="505" y="386" fill="#C5D6E6" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="650">Synthetic patients, AI attending feedback,</text>
+  <text x="505" y="432" fill="#C5D6E6" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="650">and a roadmap toward biotech compute.</text>
+</svg>

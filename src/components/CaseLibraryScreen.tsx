@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { DoodleScatter, PatientFace, TopBar } from './primitives';
+import { PatientFace, TopBar } from './primitives';
 import { CASES, CONDITION_COLORS, type Case } from '../data/cases';
 import { CLINIC_IDS, CLINIC_LABELS, type ClinicId } from '../game/clinic';
 import { store, useTweaks } from '../game/store';
@@ -25,19 +25,19 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
           left: 18,
           zIndex: 2,
           background: bg,
-          border: '3px solid var(--line)',
-          borderRadius: '10px 10px 0 0',
+          border: '1px solid var(--line)',
+          borderRadius: '8px 8px 0 0',
           padding: '4px 14px',
           fontWeight: 800,
           fontSize: 12,
-          boxShadow: '0 -2px 0 var(--line)',
+          boxShadow: 'var(--glow-cyan)',
         }}
       >
         {c.cond}
       </div>
 
       <div
-        className="plush"
+        className="glass-panel"
         style={{
           padding: 14,
           opacity: c.attempted ? 0.92 : 1,
@@ -54,7 +54,7 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
               transform: 'rotate(38deg)',
               background: 'var(--mint-deep)',
               color: 'white',
-              border: '2.5px solid var(--line)',
+              border: '1px solid var(--line)',
               padding: '2px 36px',
               fontWeight: 900,
               fontSize: 11,
@@ -68,8 +68,8 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
         <div
           style={{
             background: bg,
-            borderRadius: 14,
-            border: '3px solid var(--line)',
+            borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.16)',
             height: 140,
             display: 'flex',
             alignItems: 'flex-end',
@@ -79,11 +79,15 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
             position: 'relative',
           }}
         >
-          <DoodleScatter
-            items={[
-              { kind: 'sparkle', x: 12, y: 10, size: 18, color: '#fff' },
-              { kind: 'sparkle', x: '80%', y: 14, size: 14, color: '#fff' },
-            ]}
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)',
+              backgroundSize: '22px 22px',
+              opacity: 0.35,
+            }}
           />
           <div style={{ marginBottom: -8 }} className="floaty">
             <PatientFace
@@ -113,7 +117,7 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
             </span>
           ))}
         </div>
-        <div style={{ marginTop: 8, fontSize: 11, fontWeight: 800, color: 'var(--ink-2)' }}>📖 {c.guideline}</div>
+        <div style={{ marginTop: 8, fontSize: 11, fontWeight: 800, color: 'var(--ink-2)' }}>GUIDELINE · {c.guideline}</div>
       </div>
     </div>
   );
@@ -122,31 +126,31 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
 type ClinicFilter = ClinicId | 'all' | 'red-flag';
 
 const CLINIC_ICON: Record<ClinicId, string> = {
-  'all-specialties': '🌈',
-  'internal-medicine': '🩺',
-  cardiology: '❤️',
-  neurology: '🧠',
-  neurosurgery: '🧠',
-  dermatology: '🌿',
-  endocrinology: '🍯',
-  gastroenterology: '🍽️',
-  pulmonology: '🫁',
-  nephrology: '💧',
-  rheumatology: '🦴',
-  hematology: '🩸',
-  oncology: '🎗️',
-  'infectious-disease': '🦠',
-  'allergy-immunology': '🌼',
-  psychiatry: '💭',
-  obgyn: '🌷',
-  urology: '💧',
-  ophthalmology: '👁️',
-  ent: '👂',
-  orthopedics: '🦴',
-  pmr: '🏃',
-  pediatrics: '🧸',
-  'general-surgery': '🔪',
-  'cardiothoracic-vascular-surgery': '🫀',
+  'all-specialties': 'ALL',
+  'internal-medicine': 'IM',
+  cardiology: 'CV',
+  neurology: 'NEU',
+  neurosurgery: 'NS',
+  dermatology: 'DERM',
+  endocrinology: 'ENDO',
+  gastroenterology: 'GI',
+  pulmonology: 'PULM',
+  nephrology: 'REN',
+  rheumatology: 'RHE',
+  hematology: 'HEME',
+  oncology: 'ONC',
+  'infectious-disease': 'ID',
+  'allergy-immunology': 'AI',
+  psychiatry: 'PSY',
+  obgyn: 'OB',
+  urology: 'URO',
+  ophthalmology: 'OPH',
+  ent: 'ENT',
+  orthopedics: 'ORTH',
+  pmr: 'PMR',
+  pediatrics: 'PEDS',
+  'general-surgery': 'GS',
+  'cardiothoracic-vascular-surgery': 'CTS',
 };
 
 export function CaseLibraryScreen() {
@@ -196,15 +200,15 @@ export function CaseLibraryScreen() {
   };
 
   const clinicChips: Array<{ id: ClinicFilter; label: string; icon?: string }> = [
-    { id: 'all', label: 'All clinics', icon: '🌈' },
-    { id: 'red-flag', label: 'Red-flag only', icon: '🚩' },
+    { id: 'all', label: 'All clinics', icon: 'ALL' },
+    { id: 'red-flag', label: 'Red-flag only', icon: 'RF' },
     ...CLINIC_IDS.filter((id) => id !== 'all-specialties' && (grouped.get(id)?.length ?? 0) > 0).map(
       (id) => ({ id: id as ClinicFilter, label: CLINIC_LABELS[id], icon: CLINIC_ICON[id] }),
     ),
   ];
 
   return (
-    <div className="screen" style={{ background: 'var(--cream)' }}>
+    <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
       <TopBar here={2} steps={['Polyclinic', 'GP', 'Case']} />
 
       {/* Header row: back button + title + shuffle */}
@@ -225,7 +229,7 @@ export function CaseLibraryScreen() {
             onClick={() => store.setScreen('gpRoom')}
             title="Back to the GP room"
           >
-            ← Back
+            Back
           </button>
           <div>
             <h1 style={{ fontSize: 36, marginBottom: 4 }}>Pick a patient</h1>
@@ -240,7 +244,7 @@ export function CaseLibraryScreen() {
           style={{ fontSize: 16, padding: '12px 22px', whiteSpace: 'nowrap' }}
           onClick={shuffle}
         >
-          🔀 Shuffle ({totalVisible})
+          Shuffle ({totalVisible})
         </button>
       </div>
 
@@ -278,11 +282,11 @@ export function CaseLibraryScreen() {
                 gap: 10,
                 marginBottom: 14,
                 paddingBottom: 8,
-                borderBottom: '3px dashed rgba(43,30,22,0.18)',
+                borderBottom: '1px solid rgba(255,255,255,0.12)',
               }}
             >
-              <span style={{ fontSize: 22 }}>{CLINIC_ICON[clinic] ?? '🏥'}</span>
-              <h2 style={{ fontSize: 22, margin: 0, letterSpacing: '-0.01em' }}>
+              <span className="chip mint" style={{ fontSize: 11 }}>{CLINIC_ICON[clinic] ?? 'CLINIC'}</span>
+              <h2 style={{ fontSize: 22, margin: 0, letterSpacing: 0 }}>
                 {CLINIC_LABELS[clinic]}
               </h2>
               <span className="chip" style={{ fontSize: 11, marginLeft: 6 }}>
@@ -292,7 +296,7 @@ export function CaseLibraryScreen() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
                 gap: 18,
               }}
             >

@@ -1,17 +1,22 @@
 {
-  "experimentalServices": {
-    "frontend": {
-      "routePrefix": "/",
-      "framework": "vite"
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     },
-    "backend": {
-      "entrypoint": "backend",
-      "routePrefix": "/_/backend"
+    {
+      "source": "/(.*).svg",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
     }
-  },
+  ],
   "rewrites": [
-    { "source": "/agent/:path*", "destination": "https://grand-rounds-backend.onrender.com/agent/:path*" },
-    { "source": "/voice/:path*", "destination": "https://grand-rounds-backend.onrender.com/voice/:path*" },
-    { "source": "/:path*", "destination": "/" }
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }

@@ -72,6 +72,7 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
 
   const firstName = patientName.split(' ')[0];
   const statusLabel =
+    status === 'error' ? 'TEXT FALLBACK' :
     status === 'listening' ? 'LISTENING…' :
     status === 'thinking' ? 'THINKING…' :
     status === 'speaking' ? `${firstName.toUpperCase()} SPEAKING` :
@@ -81,6 +82,7 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
 
   const live = status === 'listening' || status === 'speaking' || status === 'thinking' || status === 'ready';
   const statusColor =
+    status === 'error' ? 'var(--butter-deep)' :
     status === 'speaking' ? 'var(--peach-deep)' :
     status === 'listening' ? 'var(--mint-deep)' :
     status === 'thinking' ? 'var(--butter-deep)' :
@@ -104,12 +106,12 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
         right: 18,
         zIndex: 60,
         width: 260,
-        background: 'white',
-        border: '3px solid var(--line)',
+        background: 'rgba(10,23,39,0.9)',
+        border: '1px solid var(--line)',
         borderRadius: 'var(--r-md)',
-        boxShadow: '0 6px 0 var(--line), 0 14px 28px rgba(43,30,22,0.18)',
+        boxShadow: 'var(--plush-sm)',
         padding: '12px 14px',
-        fontFamily: 'Nunito, system-ui, sans-serif',
+        fontFamily: 'Inter, system-ui, sans-serif',
         color: 'var(--ink)',
       }}
     >
@@ -141,8 +143,8 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
             whiteSpace: 'nowrap',
             padding: '3px 7px',
             borderRadius: 'var(--r-pill)',
-            background: 'var(--cream)',
-            border: '2px solid var(--line)',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid var(--line)',
           }}
         >
           <span
@@ -170,7 +172,7 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
           maxHeight: 110,
           overflowY: 'auto',
           background: 'var(--cream-2)',
-          border: '2px solid var(--line)',
+          border: '1px solid var(--line)',
           borderRadius: 10,
           padding: '8px 10px',
         }}
@@ -193,7 +195,7 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
             "{subtitle.text}"
           </>
         ) : (
-          'Voice live · just talk'
+          status === 'error' ? 'Voice unavailable · use Chat' : 'Voice live · just talk'
         )}
       </div>
     </div>

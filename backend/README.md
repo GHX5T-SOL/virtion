@@ -2,7 +2,7 @@
 
 Two Python processes power the simulator:
 
-1. **FastAPI server** (`server.py`) — Managed Agents proxy (`/agent/*`), patient-text-chat SSE (`/agent/patient/stream`), and the LiveKit token mint (`/voice/token`). Lives at `127.0.0.1:8787`.
+1. **FastAPI server** (`server.py`) — Managed Agents proxy (`/agent/*`), provider-fallback text routes, patient-text-chat SSE (`/agent/patient/stream`), and the LiveKit token mint (`/voice/token`). Lives at `127.0.0.1:8787`.
 2. **LiveKit voice worker** (`voice_agent.py`) — joins every room created by `/voice/token`, runs Deepgram Nova-3 STT → Claude Haiku 4.5 → Cartesia Sonic-2 TTS over WebRTC.
 
 Both must be running for real-time voice to work.
@@ -27,7 +27,8 @@ python -m venv .venv-voice
 
 Copy `.env.example` to `.env.local` and fill in:
 
-- `ANTHROPIC_API_KEY` — Managed Agent + patient persona LLM.
+- `ANTHROPIC_API_KEY` — Managed Agent + primary direct LLM.
+- Optional fallback keys: `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `VERCEL_AI_GATEWAY_API_KEY`, `GEMINI_API_KEY`, `CEREBRAS_API_KEY`.
 - `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` — from LiveKit Cloud.
 - `DEEPGRAM_API_KEY` — streaming STT.
 - `CARTESIA_API_KEY` — streaming TTS.
@@ -47,7 +48,9 @@ The worker logs `registered worker` once it's connected to LiveKit Cloud. From t
 
 ## Endpoints
 
-- `GET  /health` — backend + agent + voice config status.
+- `GET  /health` — backend + agent + voice + provider-fallback config status.
+- `GET  /agent/model-health` — configured provider booleans, no secrets.
 - `POST /voice/token` — body `{caseId, systemPrompt, initialLine, gender}`. Pre-creates a LiveKit room with the persona payload as metadata, returns `{token, url, roomName}`.
 - `POST /agent/*` — Managed Agents proxy for the virtion-attending. See inline docs in `server.py`.
 - `POST /agent/patient/stream` — text-only patient persona SSE; used by the right-sidebar text chat.
+- `POST /agent/debrief/fallback` — structured fallback debrief when Managed Agents are unavailable.

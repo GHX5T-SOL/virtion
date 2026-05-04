@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import type { PerspectiveCamera } from 'three';
@@ -103,12 +103,12 @@ function Loader() {
     <Html center>
       <div
         style={{
-          fontFamily: 'Nunito, sans-serif',
+          fontFamily: 'Inter, sans-serif',
           fontWeight: 800,
           color: 'var(--peach-deep)',
-          background: 'white',
+          background: 'var(--glass-strong)',
           padding: '8px 14px',
-          border: '3px solid var(--line)',
+          border: '1px solid var(--line)',
           borderRadius: 'var(--r-pill)',
           boxShadow: 'var(--plush-tiny)',
           fontSize: 13,
@@ -139,8 +139,8 @@ function Crosshair() {
         background: hot ? 'transparent' : 'rgba(255,248,236,0.85)',
         border: hot ? '2.5px solid var(--peach-deep)' : 'none',
         boxShadow: hot
-          ? '0 0 12px rgba(255,142,92,0.55), 0 0 0 1px rgba(43,30,22,0.3)'
-          : '0 0 0 1px rgba(43,30,22,0.4)',
+          ? '0 0 12px rgba(79,227,255,0.55), 0 0 0 1px rgba(255,255,255,0.18)'
+          : '0 0 0 1px rgba(255,255,255,0.24)',
         pointerEvents: 'none',
         transition: 'width 0.12s, height 0.12s, margin 0.12s, border 0.12s, box-shadow 0.12s',
       }}
@@ -152,19 +152,86 @@ function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <span
       style={{
-        background: 'var(--cream)',
+        background: 'rgba(255,255,255,0.08)',
         padding: '2px 8px',
         borderRadius: 6,
         fontFamily: 'ui-monospace, monospace',
         fontSize: 11,
-        border: '2px solid var(--line)',
-        boxShadow: '0 2px 0 var(--line)',
+        border: '1px solid var(--line)',
+        boxShadow: 'none',
         margin: '0 2px',
         color: 'var(--ink)',
       }}
     >
       {children}
     </span>
+  );
+}
+
+function canCreateWebGLContext(): boolean {
+  if (typeof document === 'undefined') return true;
+  try {
+    const canvas = document.createElement('canvas');
+    return Boolean(
+      canvas.getContext('webgl2') ||
+      canvas.getContext('webgl') ||
+      canvas.getContext('experimental-webgl'),
+    );
+  } catch {
+    return false;
+  }
+}
+
+class SceneErrorBoundary extends Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch() {
+    // The fallback keeps the encounter usable on browsers/headless contexts
+    // where WebGL cannot be created.
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+function SceneFallback({
+  patientName,
+  onExamine,
+}: {
+  patientName: string;
+  onExamine: () => void;
+}) {
+  return (
+    <div
+      className="glass-panel scanline"
+      style={{
+        height: '100%',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 28,
+        background:
+          'radial-gradient(circle at 50% 42%, rgba(79,227,255,0.18), transparent 34%), linear-gradient(135deg, rgba(7,17,30,0.95), rgba(11,23,38,0.94))',
+      }}
+    >
+      <div style={{ maxWidth: 620, textAlign: 'center' }}>
+        <div className="chip mint">2D continuity mode</div>
+        <h2 style={{ fontSize: 42, lineHeight: 1.05, margin: '18px 0 10px' }}>Consultation room degraded gracefully.</h2>
+        <p style={{ margin: 0, color: 'var(--ink-2)', fontWeight: 650, lineHeight: 1.6 }}>
+          This browser context could not create a WebGL scene. Virtion preserved the patient encounter with the chart, voice/text tools, and dispatch workflow still available for {patientName}.
+        </p>
+        <button type="button" className="btn-plush primary" style={{ marginTop: 24 }} onClick={onExamine}>
+          Open clinical workspace
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -178,6 +245,7 @@ export function EncounterScreen() {
   const [voiceActive, setVoiceActive] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [examineOpen, setExamineOpen] = useState(false);
+  const [webglAvailable] = useState(canCreateWebGLContext);
 
   // If the user navigated straight here without a patient set, drop the
   // current selectedCaseId in. Without this the scene shows an empty room.
@@ -340,7 +408,7 @@ export function EncounterScreen() {
   );
 
   return (
-    <div className="screen" style={{ background: 'var(--cream)', position: 'relative' }}>
+    <div className="screen virtion-shell" style={{ position: 'relative' }}>
       <TopBar here={4} steps={['Polyclinic', 'GP', 'Case', 'Brief', 'Encounter']} />
 
       <div
@@ -354,29 +422,35 @@ export function EncounterScreen() {
           pointerEvents: examineOpen ? 'none' : undefined,
         }}
       >
-        <Canvas
-          shadows
-          camera={{ position: playerSpawn, fov: 55 }}
-          style={{ background: 'linear-gradient(#f0ebe1, #e3dac7)' }}
-        >
-          <AdaptiveCameraFov />
-          <Suspense fallback={<Loader />}>
-            <Polyclinic
-              voiceActive={voiceActive && !examineOpen}
-              onCloseVoice={() => setVoiceActive(false)}
-            />
-            <Player
-              spawn={playerSpawn}
-              colliders={POLYCLINIC_COLLIDERS}
-              onInteract={handleInteract}
-              onTalk={handleTalk}
-              height={SEATED_HEIGHT}
-              locked
-              lookAt={doctorLookAt}
-              enableLook={!examineOpen}
-            />
-          </Suspense>
-        </Canvas>
+        {webglAvailable ? (
+          <SceneErrorBoundary fallback={<SceneFallback patientName={patient?.case.name ?? 'the patient'} onExamine={openExamine} />}>
+            <Canvas
+              shadows
+              camera={{ position: playerSpawn, fov: 55 }}
+              style={{ background: 'linear-gradient(#06101b, #0b1726)' }}
+            >
+              <AdaptiveCameraFov />
+              <Suspense fallback={<Loader />}>
+                <Polyclinic
+                  voiceActive={voiceActive && !examineOpen}
+                  onCloseVoice={() => setVoiceActive(false)}
+                />
+                <Player
+                  spawn={playerSpawn}
+                  colliders={POLYCLINIC_COLLIDERS}
+                  onInteract={handleInteract}
+                  onTalk={handleTalk}
+                  height={SEATED_HEIGHT}
+                  locked
+                  lookAt={doctorLookAt}
+                  enableLook={!examineOpen}
+                />
+              </Suspense>
+            </Canvas>
+          </SceneErrorBoundary>
+        ) : (
+          <SceneFallback patientName={patient?.case.name ?? 'the patient'} onExamine={openExamine} />
+        )}
 
         {pointerLocked && <Crosshair />}
 
@@ -414,8 +488,8 @@ export function EncounterScreen() {
             display: 'flex',
             gap: 8,
             alignItems: 'center',
-            background: 'white',
-            border: '2.5px solid var(--line)',
+            background: 'rgba(10,23,39,0.78)',
+            border: '1px solid var(--line)',
             borderRadius: 'var(--r-pill)',
             padding: '6px 14px',
             boxShadow: 'var(--plush-tiny)',

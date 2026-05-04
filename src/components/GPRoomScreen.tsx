@@ -1,35 +1,35 @@
 import { useState, useMemo } from 'react';
-import { Doodle, DoodleScatter, PatientFace, TopBar } from './primitives';
+import { PatientFace, TopBar } from './primitives';
 import { CASES, getCase } from '../data/cases';
 import { CLINIC_IDS, CLINIC_LABELS, type ClinicId } from '../game/clinic';
 import { store, useGameState, useTweaks } from '../game/store';
 
 const CLINIC_ICON: Record<ClinicId, string> = {
-  'all-specialties': '🌈',
-  'internal-medicine': '🩺',
-  cardiology: '❤️',
-  neurology: '🧠',
-  neurosurgery: '🧠',
-  dermatology: '🌿',
-  endocrinology: '🍯',
-  gastroenterology: '🍽️',
-  pulmonology: '🫁',
-  nephrology: '💧',
-  rheumatology: '🦴',
-  hematology: '🩸',
-  oncology: '🎗️',
-  'infectious-disease': '🦠',
-  'allergy-immunology': '🌼',
-  psychiatry: '💭',
-  obgyn: '🌷',
-  urology: '💧',
-  ophthalmology: '👁️',
-  ent: '👂',
-  orthopedics: '🦴',
-  pmr: '🏃',
-  pediatrics: '🧸',
-  'general-surgery': '🔪',
-  'cardiothoracic-vascular-surgery': '🫀',
+  'all-specialties': 'ALL',
+  'internal-medicine': 'IM',
+  cardiology: 'CV',
+  neurology: 'NEU',
+  neurosurgery: 'NS',
+  dermatology: 'DERM',
+  endocrinology: 'ENDO',
+  gastroenterology: 'GI',
+  pulmonology: 'PULM',
+  nephrology: 'REN',
+  rheumatology: 'RHE',
+  hematology: 'HEME',
+  oncology: 'ONC',
+  'infectious-disease': 'ID',
+  'allergy-immunology': 'AI',
+  psychiatry: 'PSY',
+  obgyn: 'OB',
+  urology: 'URO',
+  ophthalmology: 'OPH',
+  ent: 'ENT',
+  orthopedics: 'ORTH',
+  pmr: 'PMR',
+  pediatrics: 'PEDS',
+  'general-surgery': 'GS',
+  'cardiothoracic-vascular-surgery': 'CTS',
 };
 
 export function GPRoomScreen() {
@@ -59,21 +59,12 @@ export function GPRoomScreen() {
   }, []);
 
   return (
-    <div className="screen" style={{ background: 'var(--cream)', position: 'relative' }}>
+    <div className="screen virtion-shell" style={{ position: 'relative', overflowY: 'auto' }}>
       <TopBar here={1} steps={['Polyclinic', 'GP']} />
 
-      <DoodleScatter
-        items={[
-          { kind: 'sparkle', x: 60, y: 100, size: 22, color: '#FFD86B' },
-          { kind: 'sparkle', x: '88%', y: 130, size: 20, color: '#5AB7F2' },
-          { kind: 'star', x: 80, y: 560, size: 28, color: '#FFD86B', anim: 'wobble' },
-          { kind: 'pill', x: '86%', y: 580, size: 60, anim: 'wobble' },
-        ]}
-      />
-
       <div style={{ padding: '36px 36px 12px', textAlign: 'center' }}>
-        <span className="chip butter" style={{ marginBottom: 12 }}>
-          🏥 GENERAL PRACTICE
+        <span className="chip mint" style={{ marginBottom: 12 }}>
+          POLYCLINIC CONTROL ROOM
         </span>
         <h1 style={{ fontSize: 42, lineHeight: 1.05, marginTop: 12 }}>How would you like to start?</h1>
         <div
@@ -104,7 +95,7 @@ export function GPRoomScreen() {
             justifyContent: 'space-between',
             fontSize: 15,
             fontWeight: 800,
-            background: 'white',
+            background: 'rgba(255,255,255,0.08)',
           }}
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -132,7 +123,7 @@ export function GPRoomScreen() {
             style={{
               marginTop: 8,
               padding: 12,
-              background: 'white',
+              background: 'var(--glass-strong)',
               display: 'flex',
               gap: 8,
               flexWrap: 'wrap',
@@ -161,7 +152,7 @@ export function GPRoomScreen() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
           gap: 28,
           padding: '20px 36px 40px',
           maxWidth: 1080,
@@ -173,10 +164,10 @@ export function GPRoomScreen() {
           className={`tap plush-lg popin ${next ? 'breathe' : ''}`}
           onClick={() => next && store.acceptNextPatient()}
           style={{
-            background: 'var(--mint)',
+            background: 'linear-gradient(145deg, rgba(69,240,176,0.2), rgba(79,227,255,0.08))',
             padding: 32,
             position: 'relative',
-            transform: 'rotate(-0.8deg)',
+            transform: 'none',
             animationDelay: '.05s',
             opacity: next ? 1 : 0.55,
             cursor: next ? 'pointer' : 'not-allowed',
@@ -191,7 +182,7 @@ export function GPRoomScreen() {
               style={{
                 width: 160,
                 height: 160,
-                background: 'white',
+                background: 'radial-gradient(circle at 50% 36%, rgba(79,227,255,0.22), rgba(7,17,30,0.94))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -211,15 +202,6 @@ export function GPRoomScreen() {
               ) : (
                 <span style={{ fontSize: 42 }}>{CLINIC_ICON[activeClinic]}</span>
               )}
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                }}
-              >
-                <Doodle kind="sparkle" size={22} color="#FFD86B" />
-              </span>
             </div>
           </div>
           <h2 style={{ fontSize: 28, lineHeight: 1.1, textAlign: 'center', marginBottom: 8 }}>
@@ -242,7 +224,7 @@ export function GPRoomScreen() {
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
             {next && (
               <>
-                <span className="chip" style={{ background: 'white' }}>
+                <span className="chip">
                   {next.name.split(' ')[0]} · {next.age}
                 </span>
                 <span className="chip rose">{next.cond}</span>
@@ -259,10 +241,10 @@ export function GPRoomScreen() {
           className="tap plush-lg popin"
           onClick={() => store.setScreen('library')}
           style={{
-            background: 'var(--sky)',
+            background: 'linear-gradient(145deg, rgba(122,167,255,0.2), rgba(79,227,255,0.08))',
             padding: 32,
             position: 'relative',
-            transform: 'rotate(0.8deg)',
+            transform: 'none',
             animationDelay: '.15s',
           }}
         >
@@ -275,7 +257,7 @@ export function GPRoomScreen() {
               style={{
                 width: 160,
                 height: 160,
-                background: 'white',
+                background: 'radial-gradient(circle at 50% 40%, rgba(122,167,255,0.18), rgba(7,17,30,0.96))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -300,8 +282,8 @@ export function GPRoomScreen() {
             Open the case folder, filter by specialty or red-flag, attempted ribbons on completed.
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span className="chip" style={{ background: 'white' }}>
-              📁 {totalAll} cases
+            <span className="chip">
+              {totalAll} case files
             </span>
             <span className="chip butter">filterable</span>
           </div>
@@ -315,7 +297,7 @@ export function GPRoomScreen() {
           style={{ fontSize: 14, padding: '10px 18px' }}
           onClick={() => store.setScreen('mode')}
         >
-          ← Back to corridor
+          Back to corridor
         </button>
       </div>
     </div>
@@ -326,16 +308,10 @@ function ChartFolder() {
   const stroke = 'var(--line)';
   return (
     <svg width="120" height="120" viewBox="0 0 120 120">
-      <rect x="14" y="22" width="92" height="14" rx="4" fill="#FFD86B" stroke={stroke} strokeWidth="3.5" />
-      <rect x="10" y="30" width="100" height="78" rx="10" fill="#FFB68A" stroke={stroke} strokeWidth="4" />
-      <rect x="20" y="42" width="80" height="60" rx="6" fill="white" stroke={stroke} strokeWidth="3" />
-      <line x1="30" y1="56" x2="86" y2="56" stroke={stroke} strokeWidth="3" strokeLinecap="round" />
-      <line x1="30" y1="68" x2="78" y2="68" stroke={stroke} strokeWidth="3" strokeLinecap="round" />
-      <line x1="30" y1="80" x2="70" y2="80" stroke={stroke} strokeWidth="3" strokeLinecap="round" />
-      <circle cx="92" cy="84" r="9" fill="#F47A92" stroke={stroke} strokeWidth="3" />
-      <text x="92" y="88" textAnchor="middle" fontFamily="Nunito" fontWeight="900" fontSize="11" fill="white">
-        +
-      </text>
+      <rect x="18" y="18" width="84" height="84" rx="18" fill="rgba(255,255,255,0.06)" stroke={stroke} strokeWidth="2" />
+      <path d="M34 42h52M34 58h38M34 74h48" stroke="var(--peach-deep)" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="86" cy="78" r="12" fill="rgba(69,240,176,0.18)" stroke="var(--mint)" strokeWidth="3" />
+      <path d="M80 78h12M86 72v12" stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }

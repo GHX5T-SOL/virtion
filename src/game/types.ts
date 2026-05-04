@@ -1,7 +1,7 @@
 import type { PaletteName } from '../styles/palettes';
 import type { ClinicId } from './clinic';
 
-// ── Virtion cozy-cartoon UI state ──────────────────────────
+// ── Virtion UI state ──────────────────────────
 
 export type Screen =
   | 'splash'

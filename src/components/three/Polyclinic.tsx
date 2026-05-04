@@ -11,7 +11,7 @@ import { FloatingVoicePanel } from './FloatingVoicePanel';
 import { StylizedCharacter } from './StylizedCharacter';
 import { parentGenderForId } from '../../voice/patientPersona';
 
-// ───────── World layout — a doctor's private office (muayenehane) ─────────
+// ───────── World layout — a doctor's private consultation lab ─────────
 //
 // No exam bed. The patient walks in, sits on a patient chair across from
 // the desk, talks to the (seated) doctor, then walks out.
@@ -61,29 +61,29 @@ const OUTER_CENTER_X = (WORLD_LEFT_X + WORLD_RIGHT_X) / 2;
 
 const PALETTE = {
   skin: '#e4b896',
-  sheet: '#f5f1e8',
-  hair: '#3a2a1f',
-  scrubsDoc: '#5e8ba3',
-  patientTop: '#b8a890',
-  patientPants: '#4a4035',
-  floor: '#d0a878',
-  floorPlank: '#c19565',
-  floorSeam: '#6a4a32',
-  wall: '#f4ecd8',
-  wallLow: '#d4b28a',
-  wallTrim: '#f7ecd4',
-  ceiling: '#fbf3dd',
-  ceilingTrim: '#e8d4ac',
-  trim: '#c89060',
-  accent: '#d65d2f',
-  wood: '#9a7648',
-  woodDark: '#563a20',
-  leather: '#3a2820',
-  plant: '#486b3a',
-  pot: '#8a5a32',
-  paper: '#fbf7ec',
-  brass: '#c89a54',
-  rugRed: '#8a3628',
+  sheet: '#dfe8f2',
+  hair: '#1d2430',
+  scrubsDoc: '#154f68',
+  patientTop: '#445061',
+  patientPants: '#1c2430',
+  floor: '#1a2634',
+  floorPlank: '#223142',
+  floorSeam: '#07111e',
+  wall: '#b8c6d6',
+  wallLow: '#26374a',
+  wallTrim: '#d9e7f4',
+  ceiling: '#0c1624',
+  ceilingTrim: '#2b3c51',
+  trim: '#4fe3ff',
+  accent: '#4fe3ff',
+  wood: '#243247',
+  woodDark: '#0b121f',
+  leather: '#101823',
+  plant: '#45f0b0',
+  pot: '#1e2a38',
+  paper: '#eaf4ff',
+  brass: '#7aa7ff',
+  rugRed: '#153a4a',
 };
 
 const FRONT_WALL_SEGMENTS = [
@@ -99,7 +99,7 @@ const FRONT_WALL_SEGMENTS = [
 
 // ───────── Left-wall window opening ─────────
 //
-// The muayenehane window sits on the left wall roughly level with the
+// The consultation-room window sits on the left wall roughly level with the
 // patient's upper torso. To make it actually LOOK like you can see out
 // of it, we render the wall as four boxes around the opening instead of
 // one solid box, and place a painted sky/skyline backdrop behind the
@@ -205,7 +205,7 @@ function Wall({ position, args, color = PALETTE.wall }: { position: [number, num
 
 /** Wainscot (lower wall panel) + chair-rail trim + crown molding at the ceiling,
  *  rendered as a thin veneer in front of the existing wall. Provides the
- *  classic "muayenehane" two-tone wall without changing collider geometry. */
+ *  two-tone wall without changing collider geometry. */
 function WallTrim({
   span,
   axis,
@@ -273,6 +273,60 @@ function FloorStripe({ zStart, zEnd, x, color }: { zStart: number; zEnd: number;
   return <>{stripes}</>;
 }
 
+function HolographicClinicalLayer() {
+  return (
+    <group>
+      <group position={[2.8, 1.72, ROOM_BACK_Z + 0.2]}>
+        <mesh>
+          <boxGeometry args={[1.65, 0.9, 0.035]} />
+          <meshStandardMaterial
+            color="#4fe3ff"
+            emissive="#4fe3ff"
+            emissiveIntensity={0.55}
+            transparent
+            opacity={0.24}
+            metalness={0.2}
+            roughness={0.08}
+          />
+        </mesh>
+        <Text position={[0, 0.24, 0.035]} fontSize={0.095} color="#f5fbff" anchorX="center" anchorY="middle" fontWeight={800}>
+          VIRTION CLINICAL OS
+        </Text>
+        <Text position={[0, 0.03, 0.035]} fontSize={0.062} color="#45f0b0" anchorX="center" anchorY="middle" fontWeight={700}>
+          SYNTHETIC CASE · AI ATTENDING
+        </Text>
+        <Text position={[0, -0.20, 0.035]} fontSize={0.048} color="#9fdcff" anchorX="center" anchorY="middle" fontWeight={500}>
+          vitals · transcript · rubric · citations
+        </Text>
+      </group>
+
+      <group position={[WORLD_RIGHT_X - 0.22, 1.62, ROOM_BACK_Z + 6.35]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh>
+          <boxGeometry args={[1.5, 0.78, 0.035]} />
+          <meshStandardMaterial
+            color="#45f0b0"
+            emissive="#45f0b0"
+            emissiveIntensity={0.42}
+            transparent
+            opacity={0.18}
+            metalness={0.35}
+            roughness={0.1}
+          />
+        </mesh>
+        {[0, 1, 2, 3].map((i) => (
+          <mesh key={i} position={[0, -0.24 + i * 0.16, 0.036]}>
+            <boxGeometry args={[1.1 - i * 0.12, 0.018, 0.01]} />
+            <meshStandardMaterial color={i % 2 ? '#4fe3ff' : '#45f0b0'} emissive={i % 2 ? '#4fe3ff' : '#45f0b0'} emissiveIntensity={0.9} toneMapped={false} />
+          </mesh>
+        ))}
+        <Text position={[0, 0.25, 0.04]} fontSize={0.07} color="#f5fbff" anchorX="center" anchorY="middle" fontWeight={800}>
+          MOLECULAR SIM QUEUE
+        </Text>
+      </group>
+    </group>
+  );
+}
+
 /** Padded armchair for the patient. Rotated so the sitter faces the desk.
  *  Rounded edges everywhere — visually coherent with the stylized
  *  character. No more visible knees-through-apron since the character
@@ -328,19 +382,12 @@ function PatientChair({ position, rotationY = 0 }: { position: [number, number, 
 function Lighting() {
   return (
     <>
-      {/* Ambient — neutral so surfaces read their true color instead of
-          everything drifting toward amber. Previously tinted warm which,
-          on top of the hemisphere + directional, made the whole room look
-          like a sepia filter. */}
-      <ambientLight intensity={0.55} color="#ffffff" />
-      {/* Soft sky / floor bounce — brighter + less saturated than before */}
-      <hemisphereLight args={['#f6f0e4', '#a89a84', 0.7]} />
-      {/* Key: "window" daylight through the left wall — still warm, just
-          a touch less orange so walls don't look stained. */}
+      <ambientLight intensity={0.38} color="#dbeeff" />
+      <hemisphereLight args={['#bfeeff', '#06101b', 0.72]} />
       <directionalLight
         position={[-10, 8, 4]}
-        intensity={1.3}
-        color="#fff0d4"
+        intensity={1.1}
+        color="#c7f5ff"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -351,14 +398,10 @@ function Lighting() {
         shadow-camera-near={0.1}
         shadow-camera-far={30}
       />
-      {/* Fill from the opposite side — cooler, much softer, no shadows */}
-      <directionalLight position={[6, 6, 6]} intensity={0.35} color="#c9d8e8" />
-      {/* Rim behind the doctor to separate the back wall from the figure */}
-      <directionalLight position={[0, 3, -8]} intensity={0.4} color="#ffb37a" />
-      {/* Patient-chair fill — warm, practical */}
-      <pointLight position={[0, 2.4, ROOM_BACK_Z + 4.2]} intensity={0.45} distance={6} color="#ffd89a" />
-      {/* Desk fill — subtle emphasis on the doctor side */}
-      <pointLight position={[0, 2.4, ROOM_BACK_Z + 1.6]} intensity={0.35} distance={5} color="#ffe4b8" />
+      <directionalLight position={[6, 6, 6]} intensity={0.28} color="#7aa7ff" />
+      <directionalLight position={[0, 3, -8]} intensity={0.55} color="#45f0b0" />
+      <pointLight position={[0, 2.4, ROOM_BACK_Z + 4.2]} intensity={0.65} distance={6} color="#4fe3ff" />
+      <pointLight position={[0, 2.4, ROOM_BACK_Z + 1.6]} intensity={0.45} distance={5} color="#7aa7ff" />
     </>
   );
 }
@@ -374,9 +417,9 @@ function CeilingLight({ position }: { position: [number, number, number] }) {
       {/* diffuser panel */}
       <mesh>
         <boxGeometry args={[1.5, 0.04, 0.4]} />
-        <meshStandardMaterial color="#fff6dc" emissive="#ffe6b0" emissiveIntensity={1.6} toneMapped={false} />
+        <meshStandardMaterial color="#dff8ff" emissive="#4fe3ff" emissiveIntensity={1.35} toneMapped={false} />
       </mesh>
-      <pointLight intensity={0.35} distance={7} color="#ffe4b8" />
+      <pointLight intensity={0.45} distance={7} color="#4fe3ff" />
     </group>
   );
 }
@@ -393,31 +436,42 @@ interface MonitorPatient {
 /** Canvas texture for the consultation desk monitor. Renders a calm patient
  *  record card (no vitals trace — this isn't an ICU monitor, just the
  *  doctor's desktop EMR application). The card is populated from the
- *  current polyclinic patient and uses the cozy Virtion palette. */
+ *  current polyclinic patient and uses the Virtion clinical OS palette. */
 function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
   const w = 512, h = 320;
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   const ctx = c.getContext('2d')!;
 
-  // Sunshine cream background, matching --paper / --cream-2.
-  ctx.fillStyle = '#FFF6E6';
+  ctx.fillStyle = '#07111e';
   ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(79, 227, 255, 0.14)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 32) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 32) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
 
-  // Title bar — peach accent like the cozy app's primary CTA.
-  ctx.fillStyle = '#FFB68A';
+  ctx.fillStyle = '#0d2033';
   ctx.fillRect(0, 0, w, 40);
-  ctx.fillStyle = '#3B2A1F';
-  ctx.font = 'bold 17px "Nunito", sans-serif';
+  ctx.fillStyle = '#f5fbff';
+  ctx.font = 'bold 17px "Inter", sans-serif';
   ctx.fillText('Virtion · Patient Record', 14, 26);
-  ctx.fillStyle = '#5FCFA0';
-  ctx.font = 'bold 12px "Nunito", sans-serif';
+  ctx.fillStyle = '#45f0b0';
+  ctx.font = 'bold 12px "Inter", sans-serif';
   ctx.fillText('● ACTIVE SESSION', w - 150, 26);
 
-  // Card frame with the signature plush outline.
-  ctx.strokeStyle = '#2B1E16';
-  ctx.lineWidth = 3;
-  ctx.fillStyle = '#FFFFFF';
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 2;
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
   const cardX = 18, cardY = 56, cardW = w - 36, cardH = h - 74;
   ctx.beginPath();
   ctx.roundRect(cardX, cardY, cardW, cardH, 14);
@@ -425,8 +479,8 @@ function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
   ctx.stroke();
 
   if (!patient) {
-    ctx.fillStyle = '#8E7261';
-    ctx.font = '600 14px "Nunito", sans-serif';
+    ctx.fillStyle = '#9fb4c7';
+    ctx.font = '600 14px "Inter", sans-serif';
     ctx.fillText('No active patient. Accept the next patient to begin.', cardX + 18, cardY + cardH / 2);
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -437,26 +491,26 @@ function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
   const initials = patient.name.split(' ').map((s) => s[0]).slice(0, 2).join('');
   ctx.beginPath();
   ctx.arc(cardX + 44, cardY + 44, 26, 0, Math.PI * 2);
-  ctx.fillStyle = '#FFD86B';
+  ctx.fillStyle = '#4fe3ff';
   ctx.fill();
   ctx.lineWidth = 2.5;
   ctx.stroke();
-  ctx.fillStyle = '#3B2A1F';
-  ctx.font = 'bold 20px "Nunito", sans-serif';
+  ctx.fillStyle = '#02111b';
+  ctx.font = 'bold 20px "Inter", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(initials, cardX + 44, cardY + 51);
   ctx.textAlign = 'left';
 
   // Name + demographic header, right of the avatar.
-  ctx.fillStyle = '#3B2A1F';
-  ctx.font = 'bold 22px "Nunito", sans-serif';
+  ctx.fillStyle = '#f5fbff';
+  ctx.font = 'bold 22px "Inter", sans-serif';
   ctx.fillText(patient.name, cardX + 84, cardY + 38);
-  ctx.fillStyle = '#6B4F3F';
-  ctx.font = '600 14px "Nunito", sans-serif';
+  ctx.fillStyle = '#9fb4c7';
+  ctx.font = '600 14px "Inter", sans-serif';
   ctx.fillText(`${patient.age} years · ${patient.gender === 'F' ? 'Female' : 'Male'}`, cardX + 84, cardY + 60);
 
   // Divider.
-  ctx.strokeStyle = 'rgba(43,30,22,0.18)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
   ctx.lineWidth = 1.5;
   ctx.setLineDash([4, 6]);
   ctx.beginPath();
@@ -466,18 +520,18 @@ function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
   ctx.setLineDash([]);
 
   // Field rows.
-  ctx.font = 'bold 11px "Nunito", sans-serif';
-  ctx.fillStyle = '#8E7261';
+  ctx.font = 'bold 11px "Inter", sans-serif';
+  ctx.fillStyle = '#9fb4c7';
   ctx.fillText('PATIENT ID', cardX + 18, cardY + 110);
-  ctx.fillStyle = '#3B2A1F';
-  ctx.font = '700 14px "Nunito", sans-serif';
+  ctx.fillStyle = '#f5fbff';
+  ctx.font = '700 14px "Inter", sans-serif';
   ctx.fillText(`#${patient.id.toUpperCase()}`, cardX + 18, cardY + 128);
 
-  ctx.font = 'bold 11px "Nunito", sans-serif';
-  ctx.fillStyle = '#8E7261';
+  ctx.font = 'bold 11px "Inter", sans-serif';
+  ctx.fillStyle = '#9fb4c7';
   ctx.fillText('REASON FOR VISIT', cardX + 18, cardY + 156);
-  ctx.fillStyle = '#3B2A1F';
-  ctx.font = '700 13px "Nunito", sans-serif';
+  ctx.fillStyle = '#f5fbff';
+  ctx.font = '700 13px "Inter", sans-serif';
   // wrap chief complaint at ~52 chars
   const maxLineW = cardW - 36;
   const words = `"${patient.chiefComplaint}"`.split(' ');
@@ -495,11 +549,11 @@ function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
   }
   if (line) ctx.fillText(line.trim(), cardX + 18, yPos);
 
-  // Badges along the bottom — mood markers using the cozy chip language.
+  // Badges along the bottom.
   const chipY = cardY + cardH - 30;
-  drawChip(ctx, cardX + 18, chipY, '★ accepted', '#A8E5C8');
-  drawChip(ctx, cardX + 124, chipY, '🎙 voice live', '#A6D8FF');
-  drawChip(ctx, cardX + 246, chipY, 'OSCE training', '#FFD86B');
+  drawChip(ctx, cardX + 18, chipY, 'accepted', '#45f0b0');
+  drawChip(ctx, cardX + 116, chipY, 'voice live', '#4fe3ff');
+  drawChip(ctx, cardX + 226, chipY, 'OSCE training', '#ffd166');
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -507,7 +561,7 @@ function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
 }
 
 function drawChip(ctx: CanvasRenderingContext2D, x: number, y: number, label: string, fill: string) {
-  ctx.font = 'bold 11px "Nunito", sans-serif';
+  ctx.font = 'bold 11px "Inter", sans-serif';
   const padX = 10;
   const w = ctx.measureText(label).width + padX * 2;
   const h = 22;
@@ -516,9 +570,9 @@ function drawChip(ctx: CanvasRenderingContext2D, x: number, y: number, label: st
   ctx.fillStyle = fill;
   ctx.fill();
   ctx.lineWidth = 2;
-  ctx.strokeStyle = '#2B1E16';
+  ctx.strokeStyle = 'rgba(255,255,255,0.24)';
   ctx.stroke();
-  ctx.fillStyle = '#3B2A1F';
+  ctx.fillStyle = '#06101b';
   ctx.fillText(label, x + padX, y + 15);
 }
 
@@ -763,7 +817,7 @@ function DoctorChair({ position, rotationY = 0 }: { position: [number, number, n
   );
 }
 
-/** Bookshelf against a wall — decorative, conveys "muayenehane" vibe. */
+/** Bookshelf against a wall — decorative study/storage cue. */
 function Bookshelf({ position, rotationY = 0 }: { position: [number, number, number]; rotationY?: number }) {
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
@@ -2855,8 +2909,9 @@ export function Polyclinic({
         subtitle="DR. CONSULTATION ROOM"
       />
       <WallDiplomas />
+      <HolographicClinicalLayer />
 
-      {/* Side-wall decor (muayenehane atmosphere) */}
+      {/* Side-wall decor */}
       <AnatomyPoster
         position={[WORLD_LEFT_X + 0.18, 1.6, ROOM_BACK_Z + 5.0]}
         rotationY={Math.PI / 2}

@@ -39,11 +39,11 @@ function TrendChart() {
             y1={y(g)}
             x2={W - P}
             y2={y(g)}
-            stroke="rgba(43,30,22,0.08)"
+            stroke="rgba(255,255,255,0.1)"
             strokeWidth="1.5"
             strokeDasharray="3 5"
           />
-          <text x={4} y={y(g) + 4} fontSize="9" fontFamily="Nunito" fontWeight="800" fill="var(--ink-2)">
+          <text x={4} y={y(g) + 4} fontSize="9" fontFamily="Inter" fontWeight="800" fill="var(--ink-2)">
             {g}
           </text>
         </g>
@@ -78,8 +78,8 @@ function Legend({ color, label }: { color: string; label: string }) {
 
 export function HistoryScreen() {
   return (
-    <div className="screen" style={{ background: 'var(--cream)', overflowY: 'auto' }}>
-      <TopBar here={1} steps={['Profile', 'History']} />
+    <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
+      <TopBar here={1} steps={['Virtion', 'History']} />
       <div style={{ padding: '28px 36px' }}>
         <div
           style={{
@@ -104,12 +104,12 @@ export function HistoryScreen() {
               style={{ fontSize: 13, padding: '8px 14px' }}
               onClick={() => store.setScreen('home')}
             >
-              ← Profile
+              Home
             </button>
           </div>
         </div>
 
-        <div className="plush" style={{ padding: 16, marginBottom: 18, background: 'white' }}>
+        <div className="glass-panel" style={{ padding: 16, marginBottom: 18 }}>
           <div
             style={{
               fontWeight: 800,
@@ -163,7 +163,7 @@ export function HistoryScreen() {
                     gap: 10,
                     alignItems: 'center',
                     padding: '8px 8px',
-                    borderBottom: i < CASES.length - 1 ? '2px dashed rgba(43,30,22,0.15)' : 'none',
+                    borderBottom: i < CASES.length - 1 ? '1px solid rgba(255,255,255,0.12)' : 'none',
                   }}
                 >
                   <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-2)' }}>{c.day}</span>
@@ -191,9 +191,9 @@ export function HistoryScreen() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div className="plush" style={{ padding: 16, background: 'var(--peach)' }}>
-              <div className="chip" style={{ background: 'white', marginBottom: 10 }}>
-                🎯 FOCUS AREA
+            <div className="glass-panel" style={{ padding: 16, background: 'linear-gradient(135deg, rgba(25,200,255,0.16), rgba(255,209,102,0.1))' }}>
+              <div className="chip mint" style={{ marginBottom: 10 }}>
+                FOCUS AREA
               </div>
               <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1.1 }}>Data Gathering</div>
               <div style={{ fontSize: 13, fontWeight: 600, marginTop: 6 }}>
@@ -201,7 +201,7 @@ export function HistoryScreen() {
               </div>
             </div>
 
-            <div className="plush" style={{ padding: 16 }}>
+            <div className="glass-panel" style={{ padding: 16 }}>
               <div
                 style={{
                   fontWeight: 800,
@@ -218,16 +218,16 @@ export function HistoryScreen() {
                 {['NICE NG136', 'NICE NG28', 'GINA 2025', 'ESC 2023', 'BSG 2024', 'NICE NG209', 'NICE CG69', 'NICE NG217'].map(
                   (g) => (
                     <span key={g} className="chip" style={{ fontSize: 11 }}>
-                      📖 {g}
+                      {g}
                     </span>
                   ),
                 )}
               </div>
             </div>
 
-            <div className="plush" style={{ padding: 16, background: 'var(--rose)' }}>
-              <div className="chip" style={{ background: 'white', marginBottom: 10 }}>
-                🚩 RED-FLAG CASES
+            <div className="glass-panel" style={{ padding: 16, background: 'linear-gradient(135deg, rgba(255,92,122,0.16), rgba(255,255,255,0.04))' }}>
+              <div className="chip rose" style={{ marginBottom: 10 }}>
+                RED-FLAG CASES
               </div>
               <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1 }}>3 / 7</div>
               <div style={{ fontSize: 12, fontWeight: 700, marginTop: 4 }}>red-flag cases attempted</div>

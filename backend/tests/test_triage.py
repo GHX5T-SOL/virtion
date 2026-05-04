@@ -158,7 +158,12 @@ class TriageEndpointIntegrationTests(unittest.TestCase):
     """HTTP-level smoke of the endpoint, patching the Anthropic client."""
 
     def setUp(self) -> None:
-        self.client = TestClient(server.app)
+        self._previous_shared_secret = server.SHARED_SECRET
+        server.SHARED_SECRET = "test-shared-secret"
+        self.client = TestClient(server.app, headers={"x-virtion-auth": "test-shared-secret"})
+
+    def tearDown(self) -> None:
+        server.SHARED_SECRET = self._previous_shared_secret
 
     def test_endpoint_returns_response_from_mocked_client(self) -> None:
         # Patch the lazy-built client so the route sees our mock.

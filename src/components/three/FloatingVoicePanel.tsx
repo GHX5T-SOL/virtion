@@ -72,7 +72,7 @@ export function FloatingVoicePanel({
     const conv = getOrCreatePatientConversation(patient.bedIndex, patient.case, listeners);
     const current = conv.getStatus();
     if (current !== 'uninitialized') {
-      setVoiceReady(true);
+      setVoiceReady(current !== 'error');
       setStatus(current);
     } else {
       setVoiceStarting(true);
@@ -88,6 +88,7 @@ export function FloatingVoicePanel({
 
   const firstName = patient.case.name.split(' ')[0];
   const statusLabel =
+    error || status === 'error' ? 'TEXT FALLBACK' :
     status === 'listening' ? 'LISTENING…' :
     status === 'thinking' ? 'THINKING…' :
     status === 'speaking' ? `${firstName.toUpperCase()} SPEAKING` :
@@ -96,6 +97,7 @@ export function FloatingVoicePanel({
     voiceStarting ? 'CONNECTING…' : 'OFFLINE';
 
   const idleHint =
+    error || status === 'error' ? 'Voice unavailable. Open the clinical workspace and use Chat.' :
     status === 'speaking' ? `${firstName} is speaking…` :
     status === 'thinking' ? `${firstName} is thinking…` :
     status === 'listening' ? 'Listening — go ahead.' :
@@ -105,6 +107,7 @@ export function FloatingVoicePanel({
 
   const live = voiceReady && (status === 'listening' || status === 'speaking' || status === 'thinking' || status === 'ready');
   const statusColor =
+    error || status === 'error' ? 'var(--butter-deep)' :
     status === 'speaking' ? 'var(--peach-deep)' :
     status === 'listening' ? 'var(--mint-deep)' :
     status === 'thinking' ? 'var(--butter-deep)' :
@@ -128,12 +131,12 @@ export function FloatingVoicePanel({
           position: 'relative',
           minWidth: 240,
           maxWidth: 320,
-          background: 'white',
-          border: '3px solid var(--line)',
+          background: 'rgba(10,23,39,0.88)',
+          border: '1px solid var(--line)',
           borderRadius: 'var(--r-md)',
-          boxShadow: '0 4px 0 var(--line), 0 8px 16px rgba(43,30,22,0.18)',
+          boxShadow: 'var(--plush-sm)',
           padding: '10px 14px 12px',
-          fontFamily: 'Nunito, system-ui, sans-serif',
+          fontFamily: 'Inter, system-ui, sans-serif',
           color: 'var(--ink)',
         }}
       >
@@ -146,7 +149,7 @@ export function FloatingVoicePanel({
             marginBottom: 6,
           }}
         >
-          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: '-0.01em' }}>
+          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: 0 }}>
             {patient.case.name}
             <span style={{ fontSize: 11, color: 'var(--ink-soft)', marginLeft: 6, fontWeight: 700 }}>
               {patient.case.age}{patient.case.gender}
@@ -165,8 +168,8 @@ export function FloatingVoicePanel({
               whiteSpace: 'nowrap',
               padding: '3px 8px',
               borderRadius: 'var(--r-pill)',
-              background: 'var(--cream)',
-              border: '2px solid var(--line)',
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid var(--line)',
             }}
           >
             <span
@@ -198,16 +201,16 @@ export function FloatingVoicePanel({
             style={{
               marginTop: 8,
               padding: '6px 10px',
-              background: 'var(--rose)',
-              border: '2.5px solid var(--line)',
+              background: 'rgba(255,209,102,0.14)',
+              border: '1px solid rgba(255,209,102,0.32)',
               borderRadius: 10,
-              boxShadow: '0 2px 0 var(--line)',
+              boxShadow: 'none',
               fontSize: 11,
               fontWeight: 800,
               color: 'var(--ink)',
             }}
           >
-            ⚠ {error}
+            {error} · text chat remains available
           </div>
         )}
 
@@ -235,7 +238,7 @@ export function FloatingVoicePanel({
             height: 0,
             borderLeft: '9px solid transparent',
             borderRight: '9px solid transparent',
-            borderTop: '9px solid white',
+            borderTop: '9px solid rgba(10,23,39,0.88)',
           }}
         />
       </div>

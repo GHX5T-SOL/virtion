@@ -1,9 +1,16 @@
 import { useEffect } from 'react';
-import { Doodle, DoodleScatter } from './primitives';
+import { Wordmark } from './primitives';
 import { store } from '../game/store';
 
+const SIGNALS = [
+  'clinical simulation',
+  'AI attending',
+  'synthetic cases',
+  'AR / VR roadmap',
+  'decentralized compute',
+];
+
 export function SplashScreen() {
-  // Click anywhere or hit space → onboarding (first run) or home (returning).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === 'Space' || e.code === 'Enter') {
@@ -17,159 +24,164 @@ export function SplashScreen() {
 
   return (
     <div
-      className="screen bg-peach-soft"
+      className="screen virtion-shell"
       onClick={() => store.beginFromSplash()}
-      style={{ position: 'relative', cursor: 'pointer' }}
+      style={{
+        cursor: 'pointer',
+        display: 'grid',
+        gridTemplateRows: '1fr auto',
+        overflow: 'hidden',
+      }}
     >
-      <DoodleScatter
-        items={[
-          { kind: 'cloud', x: 60, y: 70, size: 100, color: '#fff' },
-          { kind: 'cloud', x: 720, y: 110, size: 130, color: '#fff' },
-          { kind: 'cloud', x: 920, y: 60, size: 90, color: '#fff' },
-          { kind: 'sparkle', x: 180, y: 200, size: 32, color: '#FFD86B' },
-          { kind: 'sparkle', x: 880, y: 240, size: 28, color: '#fff' },
-          { kind: 'star', x: 90, y: 480, size: 38, color: '#FFD86B', anim: 'wobble' },
-          { kind: 'pill', x: 800, y: 500, size: 70, anim: 'wobble' },
-          { kind: 'heart', x: 130, y: 600, size: 40, color: '#F47A92' },
-        ]}
-      />
-
-      {/* Sun */}
       <div
-        style={{ position: 'absolute', top: 38, left: '50%', transform: 'translateX(-50%)' }}
-        className="floaty"
-      >
-        <svg width="120" height="120" viewBox="0 0 120 120">
-          <g>
-            {Array.from({ length: 12 }).map((_, i) => (
-              <rect
-                key={i}
-                x="58"
-                y="6"
-                width="4"
-                height="14"
-                rx="2"
-                fill="#F5B73D"
-                stroke="var(--line)"
-                strokeWidth="2.5"
-                transform={`rotate(${i * 30} 60 60)`}
-              />
-            ))}
-          </g>
-          <circle cx="60" cy="60" r="32" fill="#FFD86B" stroke="var(--line)" strokeWidth="4" />
-          <circle cx="50" cy="58" r="2.5" fill="var(--line)" />
-          <circle cx="70" cy="58" r="2.5" fill="var(--line)" />
-          <path d="M 50 68 Q 60 76 70 68" stroke="var(--line)" strokeWidth="3" fill="none" strokeLinecap="round" />
-        </svg>
-      </div>
-
-      {/* Center stage */}
-      <div
+        aria-hidden
         style={{
           position: 'absolute',
           inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 32,
+          background:
+            'radial-gradient(circle at 50% 34%, rgba(79,227,255,0.24), transparent 28%), radial-gradient(circle at 50% 42%, rgba(69,240,176,0.12), transparent 34%)',
+        }}
+      />
+
+      <div
+        aria-hidden
+        className="drift"
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '38%',
+          width: 'min(72vw, 760px)',
+          aspectRatio: '1 / 1',
+          transform: 'translate(-50%, -50%)',
+          border: '1px solid rgba(79,227,255,0.22)',
+          borderRadius: '50%',
+          boxShadow: 'inset 0 0 120px rgba(79,227,255,0.08), 0 0 90px rgba(79,227,255,0.16)',
         }}
       >
-        <div className="popin" style={{ animationDelay: '.05s' }}>
+        {[0, 1, 2].map((i) => (
           <div
+            key={i}
             style={{
-              fontFamily: 'Nunito',
-              fontWeight: 900,
-              fontSize: 168,
-              lineHeight: 1,
-              letterSpacing: '-0.04em',
-              color: 'var(--cream)',
-              WebkitTextStroke: '5px var(--line)',
-              paintOrder: 'stroke fill',
-              textShadow: '0 8px 0 var(--line)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
+              position: 'absolute',
+              inset: `${10 + i * 13}%`,
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '50%',
+              transform: `rotate(${i * 28}deg)`,
             }}
-          >
-            med
-            <span style={{ color: 'var(--peach)' }}>kit</span>
-            <span className="wobble" style={{ display: 'inline-block', marginLeft: 8, marginBottom: 30 }}>
-              <Doodle kind="cross" size={86} color="#F47A92" />
-            </span>
-          </div>
+          />
+        ))}
+      </div>
+
+      <main
+        className="popin"
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          alignSelf: 'center',
+          justifySelf: 'center',
+          width: 'min(1120px, calc(100vw - 32px))',
+          padding: '72px 28px 44px',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+          <Wordmark size={64} />
         </div>
 
-        <div
-          className="popin"
+        <div className="chip mint" style={{ marginBottom: 18 }}>
+          Training simulator · synthetic cases · not clinical advice
+        </div>
+
+        <h1
           style={{
-            animationDelay: '.15s',
-            fontSize: 24,
-            fontWeight: 700,
-            color: 'var(--ink)',
-            background: 'white',
-            padding: '10px 22px',
-            border: '3px solid var(--line)',
-            borderRadius: 'var(--r-pill)',
-            boxShadow: 'var(--plush-tiny)',
+            fontSize: 'var(--type-hero-xl)',
+            lineHeight: 0.92,
+            maxWidth: 980,
+            margin: '0 auto',
           }}
         >
-          The clinic that lets you make every mistake before they count.
+          The medical learning OS for the AI-native doctor.
+        </h1>
+
+        <p
+          style={{
+            maxWidth: 780,
+            margin: '24px auto 0',
+            color: 'var(--ink-2)',
+            fontSize: 'var(--type-copy-lg)',
+            lineHeight: 1.6,
+            fontWeight: 600,
+          }}
+        >
+          Enter a realistic clinic, speak to synthetic patients, make decisions under pressure, and receive structured feedback from an AI attending.
+        </p>
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 10,
+            flexWrap: 'wrap',
+            marginTop: 28,
+          }}
+        >
+          {SIGNALS.map((signal) => (
+            <span key={signal} className="chip sky">
+              {signal}
+            </span>
+          ))}
         </div>
 
-        <div className="popin breathe" style={{ animationDelay: '.3s', marginTop: 24 }}>
+        <div style={{ marginTop: 38, display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn-plush primary"
-            style={{ fontSize: 22, padding: '18px 38px' }}
+            style={{ fontSize: 18, padding: '16px 30px' }}
             onClick={(e) => {
               e.stopPropagation();
               store.beginFromSplash();
             }}
           >
-            ▸ Tap to begin
+            Start simulation
           </button>
-        </div>
-
-        <div
-          className="popin"
-          style={{
-            animationDelay: '.45s',
-            fontSize: 13,
-            color: 'var(--ink-2)',
-            fontWeight: 700,
-            marginTop: 8,
-          }}
-        >
-          press{' '}
-          <span
-            style={{
-              background: 'white',
-              padding: '2px 10px',
-              border: '2.5px solid var(--line)',
-              borderRadius: 8,
-              boxShadow: '0 2px 0 var(--line)',
+          <button
+            type="button"
+            className="btn-plush ghost"
+            style={{ fontSize: 18, padding: '16px 30px' }}
+            onClick={(e) => {
+              e.stopPropagation();
+              store.setScreen('agentTopology');
             }}
           >
-            space
-          </span>{' '}
-          to continue
+            View platform
+          </button>
         </div>
-      </div>
+      </main>
 
-      {/* Foreground hill */}
-      <svg
-        style={{ position: 'absolute', bottom: -2, left: 0, width: '100%' }}
-        viewBox="0 0 1200 120"
-        preserveAspectRatio="none"
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+          gap: 1,
+          background: 'rgba(255,255,255,0.08)',
+        }}
       >
-        <path
-          d="M 0 60 Q 300 0 600 50 T 1200 50 V 120 H 0 Z"
-          fill="#A8E5C8"
-          stroke="var(--line)"
-          strokeWidth="4"
-        />
-      </svg>
+        {[
+          ['300+', 'synthetic consults'],
+          ['24', 'specialty tracks'],
+          ['<8 min', 'case loop'],
+          ['0 PHI', 'demo data'],
+        ].map(([big, label]) => (
+          <div key={label} style={{ padding: '18px 20px', background: 'rgba(3,7,17,0.78)', textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Sora', fontSize: 24, fontWeight: 800 }}>{big}</div>
+            <div style={{ marginTop: 4, color: 'var(--ink-soft)', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -20,35 +20,35 @@ from pathlib import Path
 from typing import Optional
 
 
-def _load_env_local() -> None:
-    """Minimal .env.local loader — no python-dotenv dependency.
+def _load_env_files() -> None:
+    """Minimal env loader.
 
-    Reads `backend/.env.local` (next to this file) and sets any KEY=VALUE
-    pair into ``os.environ`` without overwriting values already set.
-    Silently no-ops if the file is missing."""
-    env_path = Path(__file__).resolve().parent / ".env.local"
-    if not env_path.exists():
-        return
-    for raw in env_path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#") or "=" not in line:
+    Reads backend-local files first, then the repository root ``.env`` as a
+    final fallback. Existing non-empty environment values win so deployment
+    secrets are never overwritten by checked-out local files.
+    """
+    backend_dir = Path(__file__).resolve().parent
+    root_dir = backend_dir.parent
+    for env_path in [backend_dir / ".env.local", backend_dir / ".env", root_dir / ".env"]:
+        if not env_path.exists():
             continue
-        key, _, value = line.partition("=")
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        # Overwrite if the existing value is empty (subprocesses can inherit
-        # declared-but-empty env vars from the parent). Only preserve a
-        # non-empty existing value.
-        if key and not os.environ.get(key):
-            os.environ[key] = value
+        for raw in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and not os.environ.get(key):
+                os.environ[key] = value
 
 
-_load_env_local()
+_load_env_files()
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -91,7 +91,7 @@ async def require_shared_secret(request: Request, call_next):
     path = request.url.path
     # /health is public for monitoring; CORS preflight runs above this anyway
     # but bypass OPTIONS defensively.
-    if path == "/health" or request.method == "OPTIONS":
+    if path in {"/health", "/agent/model-health"} or request.method == "OPTIONS":
         return await call_next(request)
     origin = request.headers.get("origin", "")
     if origin in DEV_ORIGINS:
@@ -138,6 +138,12 @@ def health():
             "deepgram_configured": bool(os.environ.get("DEEPGRAM_API_KEY")),
             "cartesia_configured": bool(os.environ.get("CARTESIA_API_KEY")),
         },
+        "model_router": {
+            "patient": [h.__dict__ for h in provider_health("patient")],
+            "triage": [h.__dict__ for h in provider_health("triage")],
+            "debrief": [h.__dict__ for h in provider_health("debrief")],
+            "local_deterministic_fallback": True,
+        },
         "agent": {
             "anthropic_sdk_installed": _HAS_ANTHROPIC,
             "api_key_configured": has_key,
@@ -146,6 +152,19 @@ def health():
             "environment_id": env_id,
             "model": AGENT_MODEL if _HAS_ANTHROPIC else None,
         },
+    }
+
+
+@app.get("/agent/model-health")
+def model_health():
+    return {
+        "ok": True,
+        "tasks": {
+            "patient": [h.__dict__ for h in provider_health("patient")],
+            "triage": [h.__dict__ for h in provider_health("triage")],
+            "debrief": [h.__dict__ for h in provider_health("debrief")],
+        },
+        "local_deterministic_fallback": True,
     }
 
 
@@ -212,6 +231,8 @@ try:
     _HAS_ANTHROPIC = True
 except ImportError:  # pragma: no cover
     _HAS_ANTHROPIC = False
+
+from model_router import provider_health, route_text, trace_as_dict
 
 # Structured logger for the Managed Agents proxy. Uvicorn captures stdlib
 # logging so these land in the same stream as its own access log.
@@ -1194,6 +1215,9 @@ class TriageClassifyResponse(BaseModel):
     rationale: str
     red_flags: list[str]
     model: str
+    provider: str = "anthropic"
+    degraded: bool = False
+    fallback_trace: list[dict] = Field(default_factory=list)
 
 
 ALLOWED_ESI_LEVELS = {"critical", "urgent", "stable"}
@@ -1304,8 +1328,221 @@ def triage_classify(req: TriageClassifyRequest):
     """Opus 4.7 one-shot ESI classification for ER arrivals. Separate
     from the Managed Agent event stream — this is a stateless direct
     inference endpoint."""
-    client = get_anthropic_client()
-    return run_triage_reasoning(client, req)
+    try:
+        client = get_anthropic_client()
+        return run_triage_reasoning(client, req)
+    except Exception as primary_error:
+        _agent_log.warning("triage primary failed, falling back: %s", primary_error)
+
+    result = asyncio.run(
+        route_text(
+            "triage",
+            ESI_TRIAGE_SYSTEM_PROMPT,
+            [{"role": "user", "content": _format_triage_user_message(req)}],
+            max_tokens=TRIAGE_MAX_TOKENS,
+            temperature=0.1,
+        )
+    )
+    raw = result.text.strip()
+    if raw.startswith("```"):
+        raw = raw.strip("`")
+        if raw.lower().startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
+    try:
+        parsed = json.loads(raw)
+    except ValueError:
+        parsed = json.loads(
+            '{"esi_level":"stable","rationale":"Fallback output was not valid JSON, so Virtion returned the safest structured low-acuity placeholder for training continuity.","red_flags":[]}'
+        )
+    esi = str(parsed.get("esi_level", "stable")).strip()
+    if esi not in ALLOWED_ESI_LEVELS:
+        esi = "stable"
+    red_flags_raw = parsed.get("red_flags", [])
+    return TriageClassifyResponse(
+        patient_id=req.patient_id,
+        esi_level=esi,
+        rationale=str(parsed.get("rationale", "Fallback triage completed.")),
+        red_flags=[str(x) for x in red_flags_raw] if isinstance(red_flags_raw, list) else [],
+        model=result.model,
+        provider=result.provider,
+        degraded=result.degraded,
+        fallback_trace=trace_as_dict(result.fallback_trace),
+    )
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Debrief fallback — structured rubric evaluator
+# ───────────────────────────────────────────────────────────────────────────
+
+class DebriefFallbackResponse(BaseModel):
+    evaluation: dict
+    provider: str
+    model: str
+    degraded: bool
+    fallback_trace: list[dict] = Field(default_factory=list)
+
+
+def _band(ratio: float) -> str:
+    if ratio >= 0.85:
+        return "excellent"
+    if ratio >= 0.70:
+        return "good"
+    if ratio >= 0.55:
+        return "satisfactory"
+    if ratio >= 0.40:
+        return "borderline"
+    return "clear-fail"
+
+
+def _score_domain(criteria: list[dict]) -> dict:
+    raw = 0.0
+    max_score = 0.0
+    for item in criteria:
+        weight = float(item.get("weight", 1) or 1)
+        verdict = item.get("verdict")
+        max_score += weight
+        if verdict == "met":
+            raw += weight
+        elif verdict == "partially-met":
+            raw += weight * 0.5
+    ratio = raw / max_score if max_score else 0.0
+    return {"raw": raw, "max": max_score, "verdict": _band(ratio)}
+
+
+def _criterion_result(
+    criterion: dict,
+    domain: str,
+    verdict: str,
+    evidence: str,
+) -> dict:
+    return {
+        "criterion_id": criterion.get("criterion_id") or criterion.get("label") or domain,
+        "domain": domain,
+        "verdict": verdict,
+        "evidence": evidence,
+        "guideline_ref": criterion.get("guideline_ref"),
+        "weight": criterion.get("weight", 1),
+        "label": criterion.get("label", criterion.get("criterion_id", domain)),
+    }
+
+
+def build_deterministic_debrief(req: dict, degraded_note: str) -> dict:
+    rubric = req.get("rubric") or {}
+    log = req.get("encounter_log") or {}
+    case_id = str(req.get("case_id") or "unknown")
+    diagnosis_correct = log.get("diagnosis_was_correct") is True
+    asked = log.get("history_questions_asked") or []
+    relevant_asked = [q for q in asked if q.get("relevant_per_case")]
+    tests = log.get("tests_ordered") or []
+    treatments = log.get("treatments_given") or []
+    prescriptions = log.get("prescriptions") or []
+    did_management = bool(tests or treatments or prescriptions or log.get("submitted_diagnosis_id"))
+
+    criteria: list[dict] = []
+    dg_items = rubric.get("data_gathering") or []
+    for i, criterion in enumerate(dg_items):
+        if i < len(relevant_asked):
+            verdict = "met"
+            evidence = f"Asked: {relevant_asked[i].get('question', 'relevant history question')}"
+        elif asked:
+            verdict = "partially-met"
+            evidence = "Some history was gathered, but this rubric item was not clearly evidenced."
+        else:
+            verdict = "missed"
+            evidence = "No relevant history question was recorded for this rubric item."
+        criteria.append(_criterion_result(criterion, "data_gathering", verdict, evidence))
+
+    cm_items = rubric.get("clinical_management") or []
+    critical_actions = [t for t in treatments if t.get("was_critical")]
+    for i, criterion in enumerate(cm_items):
+        label = str(criterion.get("label", "")).lower()
+        if "diagnos" in label and diagnosis_correct:
+            verdict = "met"
+            evidence = "Submitted diagnosis matched the case gold standard."
+        elif critical_actions:
+            verdict = "met" if i < len(critical_actions) else "partially-met"
+            evidence = f"Recorded critical action: {critical_actions[min(i, len(critical_actions) - 1)].get('treatment_name', 'critical treatment')}"
+        elif did_management:
+            verdict = "partially-met"
+            evidence = "Some management action was recorded, but this criterion was not clearly satisfied."
+        else:
+            verdict = "missed"
+            evidence = "No management action was recorded for this criterion."
+        criteria.append(_criterion_result(criterion, "clinical_management", verdict, evidence))
+
+    ip_items = rubric.get("interpersonal") or []
+    for criterion in ip_items:
+        if asked:
+            verdict = "partially-met"
+            evidence = "The fallback evaluator saw encounter activity but no full transcript, so communication is conservatively partial."
+        else:
+            verdict = "missed"
+            evidence = "No communication transcript or history activity was available to score this criterion."
+        criteria.append(_criterion_result(criterion, "interpersonal", verdict, evidence))
+
+    scored = [
+        {k: v for k, v in item.items() if k in {"criterion_id", "domain", "verdict", "evidence", "guideline_ref"}}
+        for item in criteria
+    ]
+    by_domain = {
+        "data_gathering": _score_domain([c for c in criteria if c["domain"] == "data_gathering"]),
+        "clinical_management": _score_domain([c for c in criteria if c["domain"] == "clinical_management"]),
+        "interpersonal": _score_domain([c for c in criteria if c["domain"] == "interpersonal"]),
+    }
+    raw_total = sum(d["raw"] for d in by_domain.values())
+    max_total = sum(d["max"] for d in by_domain.values()) or 1
+    global_rating = _band(raw_total / max_total)
+    improvements = []
+    if not diagnosis_correct:
+        improvements.append("Confirm the diagnosis against the case evidence before closing.")
+    if not critical_actions and cm_items:
+        improvements.append("Record the critical management action expected by the rubric.")
+    if len(relevant_asked) < max(1, len(dg_items) // 2):
+        improvements.append("Gather more focused history before moving to management.")
+    if not improvements:
+        improvements.append("Rerun the case with premium AI feedback enabled for richer narrative coaching.")
+
+    return {
+        "case_id": case_id,
+        "global_rating": global_rating,
+        "domain_scores": by_domain,
+        "criteria": scored,
+        "safety_breach": None,
+        "highlights": [
+            "Virtion preserved the debrief flow through a deterministic rubric fallback.",
+            "Encounter actions were converted into structured domain scores.",
+        ],
+        "improvements": improvements[:3],
+        "narrative": (
+            f"{degraded_note} This fallback is intentionally conservative and should be treated as training continuity, not a complete clinical judgement. "
+            "It scored the rubric from recorded actions only: history questions, tests, treatments, prescriptions and submitted diagnosis."
+        ),
+    }
+
+
+@app.post("/agent/debrief/fallback", response_model=DebriefFallbackResponse)
+async def debrief_fallback(request: Request):
+    body = await request.json()
+    req = body.get("request") if isinstance(body, dict) and isinstance(body.get("request"), dict) else body
+    result = await route_text(
+        "debrief",
+        "Summarise that a deterministic Virtion debrief fallback is being used. Keep it one sentence.",
+        [{"role": "user", "content": json.dumps(req)[:12000]}],
+        max_tokens=180,
+        temperature=0.2,
+    )
+    evaluation = build_deterministic_debrief(
+        req if isinstance(req, dict) else {},
+        result.text.strip() or "Premium debrief providers were unavailable.",
+    )
+    return DebriefFallbackResponse(
+        evaluation=evaluation,
+        provider=result.provider,
+        model=result.model,
+        degraded=True,
+        fallback_trace=trace_as_dict(result.fallback_trace),
+    )
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -1335,10 +1572,9 @@ class PatientStreamRequest(BaseModel):
 
 @app.post("/agent/patient/stream")
 async def patient_stream(req: PatientStreamRequest):
-    client = get_async_anthropic_client()
-
     async def generator():
         try:
+            client = get_async_anthropic_client()
             async with client.messages.stream(  # type: ignore[attr-defined]
                 model=PATIENT_MODEL,
                 max_tokens=PATIENT_MAX_TOKENS,
@@ -1368,8 +1604,30 @@ async def patient_stream(req: PatientStreamRequest):
         except asyncio.CancelledError:
             raise
         except Exception as e:
-            _agent_log.exception("patient stream failed")
-            yield "data: " + json.dumps({"error": str(e)}) + "\n\n"
+            _agent_log.warning("patient stream primary failed, falling back: %s", e)
+            result = await route_text(
+                "patient",
+                req.system,
+                [{"role": m.role, "content": m.content} for m in req.messages],
+                max_tokens=PATIENT_MAX_TOKENS,
+                temperature=0.7,
+            )
+            words = result.text.split()
+            chunk: list[str] = []
+            for word in words:
+                chunk.append(word)
+                if len(chunk) >= 8:
+                    yield "data: " + json.dumps({"text": " ".join(chunk) + " "}) + "\n\n"
+                    chunk = []
+            if chunk:
+                yield "data: " + json.dumps({"text": " ".join(chunk)}) + "\n\n"
+            yield "data: " + json.dumps({
+                "done": True,
+                "provider": result.provider,
+                "model": result.model,
+                "degraded": result.degraded,
+                "fallback_trace": trace_as_dict(result.fallback_trace),
+            }) + "\n\n"
 
     return StreamingResponse(
         generator(),

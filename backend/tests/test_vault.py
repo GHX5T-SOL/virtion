@@ -45,7 +45,12 @@ _VAULT_TOKEN = os.environ["EHR_API_TOKEN"]
 
 class VaultEndpointTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.client = TestClient(server.app)
+        self._previous_shared_secret = server.SHARED_SECRET
+        server.SHARED_SECRET = "test-shared-secret"
+        self.client = TestClient(server.app, headers={"x-virtion-auth": "test-shared-secret"})
+
+    def tearDown(self) -> None:
+        server.SHARED_SECRET = self._previous_shared_secret
 
     # ─── happy path ──────────────────────────────────────────────
     def test_known_patient_returns_record(self) -> None:

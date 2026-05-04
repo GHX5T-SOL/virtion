@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Virtion mark</title>
+  <defs>
+    <linearGradient id="g" x1="88" y1="64" x2="430" y2="456" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4FE3FF"/>
+      <stop offset=".58" stop-color="#45F0B0"/>
+      <stop offset="1" stop-color="#7AA7FF"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.31 0 0 0 0 0.89 0 0 0 0 1 0 0 0 .55 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#030711"/>
+  <path d="M104 101 231 413c9 23 41 23 50 0L408 101" fill="none" stroke="url(#g)" stroke-width="58" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M142 341c79 82 207 66 260-41 44-89 1-190-105-215" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="352" cy="118" r="34" fill="#45F0B0"/>
+</svg>

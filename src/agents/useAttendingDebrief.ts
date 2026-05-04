@@ -29,6 +29,7 @@ import {
   type DebriefRequest,
   debriefRequestToUserMessage,
 } from './debriefRequest';
+import { buildLocalFallbackDebrief, requestFallbackDebrief } from './fallbackDebrief';
 
 export type DebriefStatus =
   | 'idle'
@@ -101,13 +102,33 @@ export function useAttendingDebrief(
         if (result.kind === 'eval') setStatus('got-evaluation');
         else if (result.kind === 'aborted') setStatus('aborted');
         else if (result.kind === 'closed-without-eval') {
-          setStatus('error');
-          setError('Agent stream closed without emitting a case evaluation.');
+          const fallback = await runFallbackDebrief(request, ctrl.signal, 'Agent stream closed without emitting a case evaluation.');
+          if (cancelled) return;
+          setEvaluation(fallback);
+          setPartial((p) => p + '\nDeterministic fallback debrief rendered.');
+          setStatus('got-evaluation');
         }
       } catch (e) {
         if (cancelled) return;
-        setStatus('error');
-        setError(e instanceof Error ? e.message : String(e));
+        if (ctrl.signal.aborted) {
+          setStatus('aborted');
+          return;
+        }
+        const message = e instanceof Error ? e.message : String(e);
+        try {
+          const fallback = await runFallbackDebrief(request, ctrl.signal, message);
+          if (cancelled) return;
+          setEvaluation(fallback);
+          setPartial(`Premium attending unavailable. ${message}\nDeterministic fallback debrief rendered.`);
+          setStatus('got-evaluation');
+          setError(null);
+        } catch (fallbackError) {
+          if (cancelled) return;
+          setEvaluation(buildLocalFallbackDebrief(request, `Premium and backend fallback debriefs were unavailable: ${message}`));
+          setPartial('Local deterministic fallback debrief rendered.');
+          setStatus('got-evaluation');
+          setError(fallbackError instanceof Error ? fallbackError.message : String(fallbackError));
+        }
       }
     })();
 
@@ -129,6 +150,18 @@ export function useAttendingDebrief(
       setPartial('');
     },
   };
+}
+
+async function runFallbackDebrief(
+  request: DebriefRequest,
+  signal: AbortSignal,
+  reason: string,
+): Promise<CaseEvaluationInput> {
+  try {
+    return await requestFallbackDebrief(request, signal);
+  } catch {
+    return buildLocalFallbackDebrief(request, `Premium debrief route unavailable: ${reason}`);
+  }
 }
 
 type StreamResult =
