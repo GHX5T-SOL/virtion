@@ -47,6 +47,42 @@ Copy `.env.example` to `.env.local` and fill in:
 
 The worker logs `registered worker` once it's connected to LiveKit Cloud. From then on, any room created via `POST /voice/token` will dispatch a worker into it; the worker reads the persona payload from room metadata and starts the patient.
 
+## Deploy on Railway (recommended setup)
+
+If Railway auto-detects Node and runs `npm ci`, your deploy will fail with `pip: not found`.
+Use Dockerfile-based services so Railway always builds with Python:
+
+1) Create two Railway services from this repo:
+- `virtion-backend` (web)
+- `virtion-voice-worker` (worker)
+
+2) Configure service roots:
+- Root directory for both services: `backend`
+
+3) Configure Dockerfile per service:
+- Web service Dockerfile path: `backend/Dockerfile.backend`
+- Worker service Dockerfile path: `backend/Dockerfile.worker`
+
+4) Set environment variables on both services:
+- `BACKEND_SHARED_SECRET`
+- `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`
+- `ANTHROPIC_API_KEY`
+- Optional fallback providers: `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `VERCEL_AI_GATEWAY_API_KEY`, `GEMINI_API_KEY`, `CEREBRAS_API_KEY`
+- Voice providers: `DEEPGRAM_API_KEY`, `CARTESIA_API_KEY`, `ELEVEN_API_KEY` or `ELEVENLABS_API_KEY`
+- `VIRTION_AGENT_ID`, `VIRTION_ENV_ID` (can be empty first deploy)
+
+5) After web is healthy, bootstrap once:
+- `POST https://<railway-backend-domain>/agent/bootstrap` with header `x-virtion-auth: <BACKEND_SHARED_SECRET>`
+- Save returned values to `VIRTION_AGENT_ID` and `VIRTION_ENV_ID`, redeploy web service.
+
+6) Wire Netlify:
+- `VIRTION_BACKEND_URL=https://<railway-backend-domain>`
+- `BACKEND_SHARED_SECRET=<same secret as Railway backend>`
+
+7) Verify:
+- `https://<railway-backend-domain>/health`
+- `https://virtion.netlify.app/agent/model-health`
+
 ## Endpoints
 
 - `GET  /health` — backend + agent + voice + provider-fallback config status.
