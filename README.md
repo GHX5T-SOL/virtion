@@ -195,6 +195,15 @@ BACKEND_SHARED_SECRET=the-same-secret-as-the-backend
 
 The Edge Function injects the shared secret so the browser can call same-origin `/voice/token` on `https://virtion.netlify.app` without exposing backend credentials.
 
+## Render production backend
+
+`render.yaml` creates the two always-on production processes Virtion needs:
+
+- `virtion-backend` — FastAPI web service for `/agent/*`, `/health`, and backend `/voice/token`.
+- `virtion-voice-worker` — persistent LiveKit Agents worker that listens for `virtion-voice` dispatches and speaks to patients.
+
+Use Render's Blueprint flow from the repo root. Fill every `sync: false` secret directly in Render, then copy the backend service URL into Netlify/Vercel as `VIRTION_BACKEND_URL`. The frontend can stay on Netlify and Vercel; the realtime patient worker must run as this long-lived Render worker.
+
 ---
 
 ## Notes

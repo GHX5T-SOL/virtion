@@ -1,0 +1,121 @@
+envVarGroups:
+  - name: virtion-prod-secrets
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.3
+      - key: BACKEND_SHARED_SECRET
+        sync: false
+      - key: LIVEKIT_URL
+        sync: false
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPGRAM_API_KEY
+        sync: false
+      - key: CARTESIA_API_KEY
+        sync: false
+      - key: ELEVEN_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: VERCEL_AI_GATEWAY_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CEREBRAS_API_KEY
+        sync: false
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+      - key: VIRTION_AGENT_ID
+        sync: false
+      - key: VIRTION_ENV_ID
+        sync: false
+      - key: ANTHROPIC_TRIAGE_MODEL
+        value: claude-opus-4-7
+      - key: ANTHROPIC_DEBRIEF_MODEL
+        value: claude-opus-4-7
+      - key: ANTHROPIC_PATIENT_MODEL
+        value: claude-haiku-4-5
+      - key: OPENAI_TRIAGE_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_DEBRIEF_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_PATIENT_MODEL
+        value: gpt-4o-mini
+      - key: OPENROUTER_TRIAGE_MODEL
+        value: openai/gpt-4o-mini
+      - key: OPENROUTER_DEBRIEF_MODEL
+        value: anthropic/claude-3.5-sonnet
+      - key: OPENROUTER_PATIENT_MODEL
+        value: openai/gpt-4o-mini
+      - key: VERCEL_AI_GATEWAY_BASE_URL
+        value: https://ai-gateway.vercel.sh/v1/chat/completions
+      - key: VERCEL_AI_GATEWAY_TRIAGE_MODEL
+        value: openai/gpt-4o-mini
+      - key: VERCEL_AI_GATEWAY_DEBRIEF_MODEL
+        value: openai/gpt-4o-mini
+      - key: VERCEL_AI_GATEWAY_PATIENT_MODEL
+        value: openai/gpt-4o-mini
+      - key: GEMINI_TRIAGE_MODEL
+        value: gemini-2.0-flash-lite
+      - key: GEMINI_DEBRIEF_MODEL
+        value: gemini-2.0-flash
+      - key: GEMINI_PATIENT_MODEL
+        value: gemini-2.0-flash-lite
+      - key: CEREBRAS_TRIAGE_MODEL
+        value: llama-3.3-70b
+      - key: CEREBRAS_DEBRIEF_MODEL
+        value: llama-3.3-70b
+      - key: CEREBRAS_PATIENT_MODEL
+        value: llama-3.1-8b
+      - key: CARTESIA_TTS_MODEL
+        value: sonic-2
+      - key: ELEVENLABS_TTS_MODEL
+        value: eleven_flash_v2_5
+      - key: ELEVENLABS_VOICE_ID_M
+        value: pNInz6obpgDQGcFmaJgB
+      - key: ELEVENLABS_VOICE_ID_F
+        value: EXAVITQu4vr4xnSDxMaL
+      - key: OPENAI_STT_MODEL
+        value: gpt-4o-transcribe
+      - key: OPENAI_VOICE_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_TTS_MODEL
+        value: gpt-4o-mini-tts
+      - key: OPENAI_TTS_VOICE
+        value: ash
+
+services:
+  - type: web
+    name: virtion-backend
+    runtime: python
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: backend
+    autoDeploy: true
+    healthCheckPath: /health
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - fromGroup: virtion-prod-secrets
+
+  - type: worker
+    name: virtion-voice-worker
+    runtime: python
+    plan: starter
+    region: frankfurt
+    branch: main
+    rootDir: backend
+    autoDeploy: true
+    buildCommand: pip install -r voice_agent_requirements.txt
+    startCommand: python voice_agent.py start
+    envVars:
+      - fromGroup: virtion-prod-secrets
