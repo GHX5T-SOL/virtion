@@ -38,6 +38,205 @@ function backendBaseUrl() {
   return configured.replace(/\/+$/, '');
 }
 
+function livekitUrl() {
+  return readEnv('LIVEKIT_URL').replace(/\/+$/, '');
+}
+
+function livekitHttpUrl() {
+  return livekitUrl().replace(/^wss:/, 'https:').replace(/^ws:/, 'http:');
+}
+
+function hasLiveKitConfig() {
+  return Boolean(livekitUrl() && readEnv('LIVEKIT_API_KEY') && readEnv('LIVEKIT_API_SECRET'));
+}
+
+function bytesToBase64Url(bytes) {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.slice(i, i + 0x8000));
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function textToBase64Url(text) {
+  return bytesToBase64Url(new TextEncoder().encode(text));
+}
+
+async function signJwt(payload, secret) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const signingInput = `${textToBase64Url(JSON.stringify(header))}.${textToBase64Url(JSON.stringify(payload))}`;
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signingInput));
+  return `${signingInput}.${bytesToBase64Url(new Uint8Array(signature))}`;
+}
+
+function randomToken(bytes = 8) {
+  const data = new Uint8Array(bytes);
+  crypto.getRandomValues(data);
+  return bytesToBase64Url(data);
+}
+
+function safeCaseId(value) {
+  return String(value || 'case').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 32) || 'case';
+}
+
+function jsonResponse(body, status = 200, request) {
+  const headers = new Headers({
+    'content-type': 'application/json',
+    'cache-control': 'no-store',
+  });
+  if (request) appendCors(headers, request);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function voiceHealthPatch(body = {}) {
+  return {
+    ...body,
+    ok: body.ok ?? true,
+    edge_proxy: {
+      ...(body.edge_proxy || {}),
+      voice_token: 'livekit-edge',
+      backend_proxy_configured: Boolean(backendBaseUrl()),
+    },
+    voice: {
+      ...(body.voice || {}),
+      transport: 'livekit',
+      livekit_configured: hasLiveKitConfig(),
+      deepgram_configured: Boolean(readEnv('DEEPGRAM_API_KEY')),
+      cartesia_configured: Boolean(readEnv('CARTESIA_API_KEY')),
+      elevenlabs_configured: Boolean(readEnv('ELEVEN_API_KEY') || readEnv('ELEVENLABS_API_KEY')),
+      openai_voice_configured: Boolean(readEnv('OPENAI_API_KEY')),
+      fallback_order: {
+        stt: ['deepgram', 'openai', 'text_fallback'],
+        llm: ['anthropic', 'openai', 'text_fallback'],
+        tts: ['cartesia', 'elevenlabs', 'openai', 'text_fallback'],
+      },
+    },
+  };
+}
+
+async function createLiveKitRoom(roomName, metadata) {
+  const apiKey = readEnv('LIVEKIT_API_KEY');
+  const apiSecret = readEnv('LIVEKIT_API_SECRET');
+  const now = Math.floor(Date.now() / 1000);
+  const adminToken = await signJwt(
+    {
+      iss: apiKey,
+      sub: 'virtion-edge-room-admin',
+      nbf: now - 10,
+      exp: now + 600,
+      video: {
+        roomCreate: true,
+        roomAdmin: true,
+        room: roomName,
+      },
+    },
+    apiSecret
+  );
+  const headers = {
+    authorization: `Bearer ${adminToken}`,
+    'content-type': 'application/json',
+  };
+  const createUrl = `${livekitHttpUrl()}/twirp/livekit.RoomService/CreateRoom`;
+  const createPayload = {
+    name: roomName,
+    metadata,
+    empty_timeout: 120,
+    agents: [{ agent_name: 'virtion-voice' }],
+  };
+  const create = await fetch(createUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(createPayload),
+  });
+  if (create.ok) return;
+
+  const errorText = await create.text().catch(() => '');
+  if (/already|exist/i.test(errorText)) return;
+
+  const fallbackCreate = await fetch(createUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ name: roomName, metadata, empty_timeout: 120 }),
+  });
+  if (!fallbackCreate.ok) {
+    const fallbackText = await fallbackCreate.text().catch(() => '');
+    if (!/already|exist/i.test(fallbackText)) {
+      throw new Error(`LiveKit room create failed: ${fallbackText || errorText || fallbackCreate.status}`);
+    }
+  }
+
+  const dispatch = await fetch(`${livekitHttpUrl()}/twirp/livekit.AgentDispatchService/CreateDispatch`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ room: roomName, agent_name: 'virtion-voice' }),
+  });
+  if (!dispatch.ok) {
+    const dispatchText = await dispatch.text().catch(() => '');
+    throw new Error(`LiveKit agent dispatch failed: ${dispatchText || dispatch.status}`);
+  }
+}
+
+async function handleVoiceToken(request) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ detail: 'method not allowed' }, 405, request);
+  }
+  if (!hasLiveKitConfig()) {
+    return jsonResponse({ detail: 'LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured' }, 503, request);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ detail: 'invalid JSON body' }, 400, request);
+  }
+
+  const nonce = randomToken(8);
+  const roomName = `vr-${safeCaseId(body.caseId)}-${nonce}`;
+  const identity = body.identity || `doctor-${randomToken(4)}`;
+  const metadata = JSON.stringify({
+    caseId: body.caseId,
+    systemPrompt: body.systemPrompt,
+    initialLine: body.initialLine,
+    voiceGender: body.gender,
+    voiceId: body.voiceId,
+  });
+
+  try {
+    await createLiveKitRoom(roomName, metadata);
+  } catch (error) {
+    return jsonResponse({ detail: error?.message || 'LiveKit room create failed' }, 502, request);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const token = await signJwt(
+    {
+      iss: readEnv('LIVEKIT_API_KEY'),
+      sub: identity,
+      name: identity,
+      nbf: now - 10,
+      exp: now + 60 * 60,
+      video: {
+        roomJoin: true,
+        room: roomName,
+        canPublish: true,
+        canSubscribe: true,
+        canPublishData: true,
+      },
+    },
+    readEnv('LIVEKIT_API_SECRET')
+  );
+
+  return jsonResponse({ token, url: livekitUrl(), roomName }, 200, request);
+}
+
 function appendCors(headers, request) {
   const origin = request.headers.get('origin');
   if (!origin) return headers;
@@ -66,14 +265,21 @@ export default async function handler(request) {
     });
   }
 
+  const incoming = new URL(request.url);
+  if (incoming.pathname === '/voice/token') {
+    return handleVoiceToken(request);
+  }
+
   if (!backendBaseUrl()) {
+    if (incoming.pathname === '/health') {
+      return jsonResponse(voiceHealthPatch(), 200, request);
+    }
     return new Response(JSON.stringify({ detail: 'backend proxy is not configured', degraded: true }), {
       status: 503,
       headers: appendCors(new Headers({ 'content-type': 'application/json', 'cache-control': 'no-store' }), request),
     });
   }
 
-  const incoming = new URL(request.url);
   const target = new URL(`${incoming.pathname}${incoming.search}`, `${backendBaseUrl()}/`);
   const headers = new Headers(request.headers);
 
@@ -94,7 +300,24 @@ export default async function handler(request) {
     init.body = await request.arrayBuffer();
   }
 
-  const upstream = await fetch(target, init);
+  let upstream;
+  try {
+    upstream = await fetch(target, init);
+  } catch (error) {
+    if (incoming.pathname === '/health') {
+      return jsonResponse(voiceHealthPatch({ degraded: true, backend_error: 'unreachable' }), 200, request);
+    }
+    return jsonResponse({ detail: 'backend proxy unreachable', degraded: true }, 502, request);
+  }
+  if (incoming.pathname === '/health') {
+    try {
+      const body = await upstream.clone().json();
+      return jsonResponse(voiceHealthPatch(body), upstream.status, request);
+    } catch {
+      return jsonResponse(voiceHealthPatch(), 200, request);
+    }
+  }
+
   const responseHeaders = new Headers(upstream.headers);
   for (const header of HOP_BY_HOP_HEADERS) responseHeaders.delete(header);
   responseHeaders.delete('content-length');
