@@ -193,6 +193,10 @@ VIRTION_BACKEND_URL=https://your-backend-host
 BACKEND_SHARED_SECRET=the-same-secret-as-the-backend
 ```
 
+Use the **exact** public URL from Railway (**Settings → Networking / Generate domain**), for example `https://virtion-backend-production.up.railway.app`, with **no trailing slash**.
+
+If `https://virtion.netlify.app/health` returns `"backend_error":"unreachable"` or `"backend_proxy_configured":true` together with degraded upstream, `VIRTION_BACKEND_URL` in Netlify does not match your live Railway hostname — update it and **trigger a Netlify redeploy**.
+
 The Edge Function injects the shared secret so the browser can call same-origin `/voice/token` on `https://virtion.netlify.app` without exposing backend credentials.
 
 ## Render production backend
