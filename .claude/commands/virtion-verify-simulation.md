@@ -14,7 +14,7 @@ Run the loop runner (it wraps `npm run verify` and appends a line to
 `verify.log` in the repo root):
 
 ```
-node scripts/loop/verify-loop.ts
+node --experimental-strip-types scripts/loop/verify-loop.ts
 ```
 
 That single command is the whole thing. Do NOT re-run `npm run verify`

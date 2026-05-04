@@ -59,8 +59,8 @@ export function ExamineOverlay({ onClose, onDispatch }: Props) {
         position: 'fixed',
         inset: 0,
         zIndex: 50,
-        background: 'rgba(43,30,22,0.40)',
-        backdropFilter: 'blur(2px)',
+        background: 'rgba(234,243,251,0.62)',
+        backdropFilter: 'blur(10px) saturate(1.1)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
@@ -92,7 +92,7 @@ export function ExamineOverlay({ onClose, onDispatch }: Props) {
             gap: 12,
             padding: '14px 22px',
             background: 'var(--cream-2)',
-            borderBottom: '3px solid var(--line)',
+            borderBottom: '1px solid var(--line)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>

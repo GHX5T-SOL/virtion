@@ -44,9 +44,9 @@ function ModuleCard({ label, sub, meta, tone, available, onOpen }: ModuleCardPro
             width: '100%',
             height: 130,
             borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.14)',
+            border: '1px solid var(--line)',
             background:
-              `radial-gradient(circle at 50% 42%, ${accent}55, transparent 36%), linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))`,
+              `radial-gradient(circle at 50% 42%, ${accent}33, transparent 36%), linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.34))`,
             position: 'relative',
           }}
         >

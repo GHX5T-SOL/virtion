@@ -1,4 +1,4 @@
-import { Fragment, type CSSProperties, type ReactNode } from 'react';
+import { Fragment, useId, type CSSProperties, type ReactNode } from 'react';
 import { store } from '../game/store';
 
 // ─── PATIENT FACE ───────────────────────────────────────────
@@ -346,17 +346,20 @@ export function TopBar({
   const label = steps[here] ?? steps[steps.length - 1] ?? 'Training';
   return (
     <div
+      className="topbar"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 18,
-        padding: '12px 22px',
+        padding: '10px clamp(14px, 3vw, 28px)',
         borderBottom: '1px solid var(--line)',
-        background: 'rgba(3, 7, 17, 0.78)',
-        backdropFilter: 'blur(24px) saturate(1.2)',
-        position: 'relative',
+        background: 'rgba(255, 255, 255, 0.72)',
+        backdropFilter: 'blur(24px) saturate(1.35)',
+        position: 'sticky',
+        top: 0,
         zIndex: 30,
+        boxShadow: '0 14px 34px rgba(8,32,55,0.06)',
       }}
     >
       <span
@@ -368,20 +371,28 @@ export function TopBar({
         <Wordmark size={28} />
       </span>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>
-        <Breadcrumb steps={steps} here={here} />
+        <div className="topbar-crumbs">
+          <Breadcrumb steps={steps} here={here} />
+        </div>
       </div>
       {showProfile ? (
         <div
+          className="topbar-status"
           title="Virtion platform status"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            minWidth: 152,
+            minWidth: 150,
             justifyContent: 'flex-end',
+            padding: '6px 7px 6px 12px',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--r-pill)',
+            background: 'rgba(255,255,255,0.62)',
           }}
         >
           <span
+            className="topbar-status-dot"
             style={{
               width: 8,
               height: 8,
@@ -390,7 +401,7 @@ export function TopBar({
               boxShadow: '0 0 18px rgba(69, 240, 176, 0.75)',
             }}
           />
-          <span style={{ fontWeight: 800, fontSize: 11, color: 'var(--ink-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <span className="topbar-status-label" style={{ fontWeight: 800, fontSize: 11, color: 'var(--ink-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             {label}
           </span>
           <div
@@ -398,8 +409,8 @@ export function TopBar({
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, rgba(79,227,255,0.16), rgba(69,240,176,0.10))',
-              border: '1px solid rgba(255,255,255,0.18)',
+              background: 'linear-gradient(135deg, rgba(0,199,255,0.18), rgba(0,166,126,0.12))',
+              border: '1px solid rgba(8,32,55,0.12)',
               boxShadow: 'var(--plush-tiny)',
               display: 'flex',
               alignItems: 'center',
@@ -426,7 +437,8 @@ interface WordmarkProps {
 }
 
 export function Wordmark({ size = 36, dark = false }: WordmarkProps) {
-  const color = dark ? '#ffffff' : 'var(--ink)';
+  const gradientId = useId().replace(/:/g, '');
+  const color = dark ? '#ffffff' : '#071525';
   return (
     <div
       style={{
@@ -447,35 +459,85 @@ export function Wordmark({ size = 36, dark = false }: WordmarkProps) {
         viewBox="0 0 64 64"
         role="img"
         aria-label="Virtion mark"
-        style={{ flexShrink: 0, filter: dark ? 'none' : 'drop-shadow(0 0 18px rgba(79,227,255,0.28))' }}
+        style={{ flexShrink: 0, filter: dark ? 'none' : 'drop-shadow(0 0 18px rgba(0,199,255,0.24))' }}
       >
         <defs>
-          <linearGradient id="virtion-mark-gradient" x1="10" y1="7" x2="54" y2="58" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#4FE3FF" />
-            <stop offset="0.58" stopColor="#45F0B0" />
-            <stop offset="1" stopColor="#7AA7FF" />
+          <linearGradient id={`${gradientId}-mark`} x1="10" y1="7" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#00C7FF" />
+            <stop offset="0.58" stopColor="#00A67E" />
+            <stop offset="1" stopColor="#2E6BFF" />
           </linearGradient>
+          <radialGradient id={`${gradientId}-glass`} cx="50%" cy="34%" r="70%">
+            <stop stopColor="#FFFFFF" stopOpacity="0.9" />
+            <stop offset="0.42" stopColor="#FFFFFF" stopOpacity="0.18" />
+            <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+          </radialGradient>
         </defs>
+        <circle cx="32" cy="32" r="29" fill="rgba(255,255,255,0.62)" stroke="rgba(8,32,55,0.10)" />
+        <circle cx="32" cy="32" r="27" fill={`url(#${gradientId}-glass)`} />
         <path
           d="M13 13 L29.5 51 C30.4 53.2 33.6 53.2 34.5 51 L51 13"
           fill="none"
-          stroke="url(#virtion-mark-gradient)"
-          strokeWidth="7"
+          stroke={`url(#${gradientId}-mark)`}
+          strokeWidth="6.6"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
-          d="M18 42 C28 51 43 49 51 36 C57 26 52 14 40 11"
+          d="M16 42 C27 53 45 49 52 35 C58 23 51 12 39 10"
           fill="none"
-          stroke="rgba(255,255,255,0.72)"
-          strokeWidth="2.4"
+          stroke="rgba(255,255,255,0.82)"
+          strokeWidth="2.2"
           strokeLinecap="round"
         />
-        <circle cx="45" cy="15" r="4.2" fill="#45F0B0" />
+        <circle cx="45" cy="15" r="4.2" fill="#00A67E" />
+        <circle cx="45" cy="15" r="8" fill="none" stroke="rgba(0,166,126,0.18)" strokeWidth="2" />
       </svg>
       <span>
         Vir<span style={{ color: 'var(--peach-deep)' }}>tion</span>
       </span>
+    </div>
+  );
+}
+
+export function ClinicalOrbitVisual({ compact = false }: { compact?: boolean }) {
+  const size = compact ? 'min(82vw, 420px)' : 'min(88vw, 620px)';
+  const nodes = [
+    { label: 'Patient', value: 'voice', x: '9%', y: '31%', tone: 'mint' },
+    { label: 'AI attending', value: 'rubric', x: '63%', y: '12%', tone: 'peach' },
+    { label: 'Orders', value: 'labs', x: '67%', y: '69%', tone: 'sky' },
+    { label: 'Compute', value: 'R&D', x: '18%', y: '73%', tone: 'butter' },
+  ];
+
+  return (
+    <div
+      aria-hidden
+      className="clinical-orbit"
+      style={{
+        width: size,
+        aspectRatio: '1 / 1',
+        position: 'relative',
+        margin: '0 auto',
+      }}
+    >
+      <div className="clinical-orbit__halo" />
+      <div className="clinical-orbit__ring ring-a" />
+      <div className="clinical-orbit__ring ring-b" />
+      <div className="clinical-orbit__ring ring-c" />
+      <div className="clinical-orbit__core">
+        <Wordmark size={compact ? 38 : 54} />
+        <div>synthetic clinic</div>
+      </div>
+      {nodes.map((node, i) => (
+        <div
+          key={node.label}
+          className={`clinical-orbit__node popin chip ${node.tone}`}
+          style={{ left: node.x, top: node.y, animationDelay: `${0.08 + i * 0.045}s` }}
+        >
+          <span>{node.label}</span>
+          <strong>{node.value}</strong>
+        </div>
+      ))}
     </div>
   );
 }

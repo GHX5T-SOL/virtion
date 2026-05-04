@@ -70,7 +70,7 @@ function DomainRing({ label, score }: DomainRingProps) {
   return (
     <div
       style={{
-        background: 'rgba(255,255,255,0.07)',
+        background: 'rgba(255,255,255,0.66)',
         border: '1px solid var(--line)',
         borderRadius: 16,
         padding: 14,
@@ -153,7 +153,7 @@ function Criterion({ status, text, evidence, cite }: CriterionProps) {
         gap: 12,
         alignItems: 'flex-start',
         padding: 12,
-        background: 'rgba(255,255,255,0.07)',
+        background: 'rgba(255,255,255,0.66)',
         border: '1px solid var(--line)',
         borderRadius: 14,
         boxShadow: '0 2px 0 var(--line)',
@@ -320,7 +320,7 @@ function StatusBanner({
             style={{
               width: 110,
               height: 110,
-              background: 'rgba(255,255,255,0.07)',
+              background: 'rgba(255,255,255,0.72)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -348,11 +348,11 @@ function AttendingGlyph() {
         width: 86,
         height: 86,
         borderRadius: '50%',
-        border: '1px solid rgba(79,227,255,0.42)',
+        border: '1px solid rgba(0,199,255,0.30)',
         display: 'grid',
         placeItems: 'center',
-        boxShadow: '0 0 34px rgba(79,227,255,0.24), inset 0 0 24px rgba(79,227,255,0.12)',
-        background: 'radial-gradient(circle at 50% 45%, rgba(69,240,176,0.22), rgba(7,17,30,0.96))',
+        boxShadow: '0 0 34px rgba(0,199,255,0.20), inset 0 0 24px rgba(0,199,255,0.10)',
+        background: 'radial-gradient(circle at 50% 45%, rgba(215,251,239,0.92), rgba(255,255,255,0.96))',
       }}
     >
       <span style={{ fontFamily: 'Sora', fontSize: 34, fontWeight: 900, color: 'var(--peach-deep)' }}>V</span>
@@ -399,7 +399,7 @@ function GradingProgress({ partialNarration }: { partialNarration: string }) {
     <div
       className="plush-lg popin"
       style={{
-        background: 'linear-gradient(135deg, rgba(122,167,255,0.18), rgba(79,227,255,0.08))',
+        background: 'linear-gradient(135deg, rgba(220,236,255,0.82), rgba(191,241,255,0.48))',
         padding: 24,
         position: 'relative',
         marginBottom: 22,
@@ -416,7 +416,7 @@ function GradingProgress({ partialNarration }: { partialNarration: string }) {
             style={{
               width: 110,
               height: 110,
-              background: 'rgba(255,255,255,0.07)',
+              background: 'rgba(255,255,255,0.72)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -659,7 +659,7 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
       <div
         className="plush-lg popin"
         style={{
-            background: 'linear-gradient(135deg, rgba(255,92,122,0.18), rgba(255,255,255,0.05))',
+            background: 'linear-gradient(135deg, rgba(255,228,235,0.88), rgba(255,255,255,0.58))',
             padding: 18,
             marginBottom: 18,
             border: '1px solid var(--line)',
@@ -677,7 +677,7 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
               <div
                 style={{
                   marginTop: 10,
-                  background: 'rgba(255,255,255,0.07)',
+                  background: 'rgba(255,255,255,0.72)',
                   border: '1px dashed var(--line)',
                   borderRadius: 10,
                   padding: '8px 10px',
@@ -697,7 +697,7 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
       <div
         className="plush-lg popin"
         style={{
-          background: `linear-gradient(135deg, ${GLOBAL_BG[verdict]}33, rgba(79,227,255,0.08))`,
+          background: `linear-gradient(135deg, ${GLOBAL_BG[verdict]}33, rgba(191,241,255,0.46))`,
           padding: 24,
           position: 'relative',
           marginBottom: 22,
@@ -714,7 +714,7 @@ function EvaluationBody({ evaluation, patient, c }: BodyProps) {
               style={{
                 width: 110,
                 height: 110,
-                background: 'rgba(255,255,255,0.07)',
+                background: 'rgba(255,255,255,0.72)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

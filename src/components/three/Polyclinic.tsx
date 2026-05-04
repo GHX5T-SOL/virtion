@@ -63,27 +63,27 @@ const PALETTE = {
   skin: '#e4b896',
   sheet: '#dfe8f2',
   hair: '#1d2430',
-  scrubsDoc: '#154f68',
-  patientTop: '#445061',
-  patientPants: '#1c2430',
-  floor: '#1a2634',
-  floorPlank: '#223142',
-  floorSeam: '#07111e',
-  wall: '#b8c6d6',
-  wallLow: '#26374a',
-  wallTrim: '#d9e7f4',
-  ceiling: '#0c1624',
-  ceilingTrim: '#2b3c51',
-  trim: '#4fe3ff',
-  accent: '#4fe3ff',
-  wood: '#243247',
-  woodDark: '#0b121f',
-  leather: '#101823',
-  plant: '#45f0b0',
-  pot: '#1e2a38',
+  scrubsDoc: '#0b6f8d',
+  patientTop: '#5c6f86',
+  patientPants: '#2f3d4f',
+  floor: '#dfeaf5',
+  floorPlank: '#edf5fc',
+  floorSeam: '#b8c8d8',
+  wall: '#f7fbff',
+  wallLow: '#dbe9f5',
+  wallTrim: '#ffffff',
+  ceiling: '#eef6fd',
+  ceilingTrim: '#c8d8e8',
+  trim: '#00c7ff',
+  accent: '#00c7ff',
+  wood: '#d8e6f0',
+  woodDark: '#9ab0c4',
+  leather: '#eff6fb',
+  plant: '#00a67e',
+  pot: '#d9e8f2',
   paper: '#eaf4ff',
-  brass: '#7aa7ff',
-  rugRed: '#153a4a',
+  brass: '#2e6bff',
+  rugRed: '#cceaf5',
 };
 
 const FRONT_WALL_SEGMENTS = [
@@ -443,9 +443,9 @@ function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
   c.width = w; c.height = h;
   const ctx = c.getContext('2d')!;
 
-  ctx.fillStyle = '#07111e';
+  ctx.fillStyle = '#f7fbff';
   ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = 'rgba(79, 227, 255, 0.14)';
+  ctx.strokeStyle = 'rgba(0, 199, 255, 0.14)';
   ctx.lineWidth = 1;
   for (let x = 0; x < w; x += 32) {
     ctx.beginPath();
@@ -460,18 +460,18 @@ function makeMonitorTexture(patient: MonitorPatient | null): CanvasTexture {
     ctx.stroke();
   }
 
-  ctx.fillStyle = '#0d2033';
+  ctx.fillStyle = '#dcecff';
   ctx.fillRect(0, 0, w, 40);
-  ctx.fillStyle = '#f5fbff';
+  ctx.fillStyle = '#071525';
   ctx.font = 'bold 17px "Inter", sans-serif';
   ctx.fillText('Virtion · Patient Record', 14, 26);
-  ctx.fillStyle = '#45f0b0';
+  ctx.fillStyle = '#00a67e';
   ctx.font = 'bold 12px "Inter", sans-serif';
   ctx.fillText('● ACTIVE SESSION', w - 150, 26);
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.strokeStyle = 'rgba(8,32,55,0.12)';
   ctx.lineWidth = 2;
-  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillStyle = 'rgba(255,255,255,0.78)';
   const cardX = 18, cardY = 56, cardW = w - 36, cardH = h - 74;
   ctx.beginPath();
   ctx.roundRect(cardX, cardY, cardW, cardH, 14);

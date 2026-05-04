@@ -80,7 +80,7 @@ export function BriefScreen() {
 
           <div
             style={{
-              background: 'rgba(255,255,255,0.07)',
+              background: 'rgba(255,255,255,0.66)',
               border: '1px solid var(--line)',
               borderRadius: 'var(--r-md)',
               padding: 14,
@@ -107,7 +107,7 @@ export function BriefScreen() {
 
           <div
             style={{
-              background: 'rgba(255,255,255,0.07)',
+              background: 'rgba(255,255,255,0.66)',
               border: '1px solid var(--line)',
               borderRadius: 'var(--r-md)',
               padding: 12,
@@ -167,7 +167,7 @@ export function BriefScreen() {
           >
             <div
               style={{
-                background: 'rgba(255,255,255,0.07)',
+                background: 'rgba(255,255,255,0.66)',
                 borderRadius: 16,
                 border: '1px solid var(--line)',
                 display: 'flex',
@@ -207,7 +207,7 @@ export function BriefScreen() {
                 <div
                   key={v.label}
                   style={{
-                    background: `linear-gradient(135deg, ${v.color}33, rgba(255,255,255,0.04))`,
+                    background: `linear-gradient(135deg, ${v.color}22, rgba(255,255,255,0.66))`,
                     border: `1px solid ${v.color}`,
                     borderRadius: 12,
                     padding: '8px 4px',

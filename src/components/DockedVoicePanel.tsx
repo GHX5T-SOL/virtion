@@ -106,11 +106,12 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
         right: 18,
         zIndex: 60,
         width: 260,
-        background: 'rgba(10,23,39,0.9)',
+        background: 'rgba(255,255,255,0.88)',
         border: '1px solid var(--line)',
         borderRadius: 'var(--r-md)',
         boxShadow: 'var(--plush-sm)',
         padding: '12px 14px',
+        backdropFilter: 'blur(22px) saturate(1.25)',
         fontFamily: 'Inter, system-ui, sans-serif',
         color: 'var(--ink)',
       }}
@@ -143,7 +144,7 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
             whiteSpace: 'nowrap',
             padding: '3px 7px',
             borderRadius: 'var(--r-pill)',
-            background: 'rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.70)',
             border: '1px solid var(--line)',
           }}
         >

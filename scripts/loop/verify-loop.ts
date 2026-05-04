@@ -12,8 +12,8 @@
  * the submission video: over a multi-hour build, the loop keeps the
  * simulator honest without human supervision.
  *
- * Invoked either directly (`node scripts/loop/verify-loop.ts`) or from
- * the slash command `.claude/commands/virtion-verify-simulation.md`.
+ * Invoked either directly (`node --experimental-strip-types scripts/loop/verify-loop.ts`)
+ * or from the slash command `.claude/commands/virtion-verify-simulation.md`.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -44,7 +44,7 @@ function parseViolations(output: string): number {
 function runVerify(): RunResult {
   const result = spawnSync(
     process.execPath,
-    ['scripts/verify/run-all.ts'],
+    ['--experimental-strip-types', 'scripts/verify/run-all.ts'],
     { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
   );
   const rawOutput = `${result.stdout ?? ''}${result.stderr ?? ''}`;

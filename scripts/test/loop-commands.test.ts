@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../../..');
 const LOG_PATH = resolve(REPO_ROOT, 'verify.log');
 const BACKUP_PATH = resolve(REPO_ROOT, 'verify.log.test-backup');
+const VERIFY_LOOP_ARGS = ['--experimental-strip-types', 'scripts/loop/verify-loop.ts'];
 
 /** Save any existing verify.log so we can restore it after the test. */
 function backupLog(): void {
@@ -45,7 +46,7 @@ test('verify-loop writes one PASS line to verify.log on green', (t) => {
 
   const result = spawnSync(
     process.execPath,
-    ['scripts/loop/verify-loop.ts'],
+    VERIFY_LOOP_ARGS,
     { cwd: REPO_ROOT, encoding: 'utf8' },
   );
   assert.equal(
@@ -71,7 +72,7 @@ test('verify-loop appends (not overwrites) across firings', (t) => {
   for (let i = 0; i < 3; i += 1) {
     const result = spawnSync(
       process.execPath,
-      ['scripts/loop/verify-loop.ts'],
+      VERIFY_LOOP_ARGS,
       { cwd: REPO_ROOT, encoding: 'utf8' },
     );
     assert.equal(result.status, 0, `firing ${i} failed`);
@@ -93,7 +94,7 @@ test('virtion-verify-simulation command file exists, has frontmatter, and points
   assert.match(body, /description:/, 'frontmatter should include description');
   assert.match(
     body,
-    /node\s+scripts\/loop\/verify-loop\.ts/,
+    /node\s+--experimental-strip-types\s+scripts\/loop\/verify-loop\.ts/,
     'command should invoke scripts/loop/verify-loop.ts',
   );
   assert.match(
@@ -177,7 +178,7 @@ test('verify.log entries persist in chronological order', (t) => {
   for (let i = 0; i < 2; i += 1) {
     const result = spawnSync(
       process.execPath,
-      ['scripts/loop/verify-loop.ts'],
+      VERIFY_LOOP_ARGS,
       { cwd: REPO_ROOT, encoding: 'utf8' },
     );
     assert.equal(result.status, 0);

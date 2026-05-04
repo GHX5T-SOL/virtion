@@ -1,5 +1,5 @@
 import { store, useStore } from '../game/store';
-import { Wordmark } from './primitives';
+import { ClinicalOrbitVisual, Wordmark } from './primitives';
 
 interface Card {
   tag: string;
@@ -12,7 +12,7 @@ interface Card {
 const CARDS: Card[] = [
   {
     tag: '01 · simulation layer',
-    title: 'Practice the consultation before it matters.',
+    title: 'Practice the consultation.',
     body:
       'Virtion puts medical students inside synthetic clinical encounters: take the history, examine, order tests, diagnose, prescribe, counsel, and learn from the result.',
     metric: 'doctor POV',
@@ -20,7 +20,7 @@ const CARDS: Card[] = [
   },
   {
     tag: '02 · AI attending',
-    title: 'Feedback is structured, cited, and resilient.',
+    title: 'Feedback after every case.',
     body:
       'The attending debrief grades data gathering, management, and communication. Premium models lead, then fallback providers and deterministic rubrics keep the loop alive.',
     metric: 'never blank',
@@ -28,7 +28,7 @@ const CARDS: Card[] = [
   },
   {
     tag: '03 · future network',
-    title: 'A learning platform that can become research infrastructure.',
+    title: 'Learning today. Research rails tomorrow.',
     body:
       'The roadmap expands into AR, VR, mobile, desktop, and consent-first device nodes that can contribute idle compute to protein folding, gene sequencing, and drug-discovery simulations.',
     metric: 'R&D only',
@@ -42,9 +42,9 @@ export function OnboardingScreen() {
 
   return (
     <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
-      <div style={{ padding: '22px clamp(18px, 4vw, 48px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ padding: '22px clamp(18px, 4vw, 48px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <Wordmark size={32} />
-        <div className="chip mint">training simulator · synthetic cases</div>
+        <div className="chip mint">training simulator · synthetic cases · consent-first R&D</div>
       </div>
 
       <main
@@ -61,7 +61,7 @@ export function OnboardingScreen() {
       >
         <section className="glass-panel scanline" style={{ padding: 'clamp(22px, 4vw, 42px)' }}>
           <div className="chip sky">{card.tag}</div>
-          <h1 style={{ fontSize: 'var(--type-hero-md)', lineHeight: 1.02, marginTop: 18 }}>
+          <h1 style={{ fontSize: 'clamp(36px, 5.4vw, 58px)', lineHeight: 1.02, marginTop: 18 }}>
             {card.title}
           </h1>
           <p style={{ color: 'var(--ink-2)', fontSize: 18, lineHeight: 1.65, fontWeight: 600, margin: '22px 0 0' }}>
@@ -89,6 +89,7 @@ export function OnboardingScreen() {
         </section>
 
         <section style={{ display: 'grid', gap: 16 }}>
+          <ClinicalOrbitVisual compact />
           <div className="glass-panel" style={{ padding: 22 }}>
             <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               current module
@@ -113,8 +114,8 @@ export function OnboardingScreen() {
                   gap: 12,
                   alignItems: 'center',
                   textAlign: 'left',
-                  background: i === step ? 'rgba(79,227,255,0.12)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${i === step ? 'rgba(79,227,255,0.45)' : 'rgba(255,255,255,0.12)'}`,
+                  background: i === step ? 'rgba(0,199,255,0.12)' : 'rgba(255,255,255,0.58)',
+                  border: `1px solid ${i === step ? 'rgba(0,199,255,0.38)' : 'rgba(8,32,55,0.10)'}`,
                   borderRadius: 10,
                   padding: 12,
                   color: 'var(--ink)',
@@ -129,7 +130,7 @@ export function OnboardingScreen() {
                     borderRadius: '50%',
                     display: 'grid',
                     placeItems: 'center',
-                    background: i === step ? 'var(--peach-deep)' : 'rgba(255,255,255,0.08)',
+                    background: i === step ? 'var(--peach-deep)' : 'rgba(255,255,255,0.78)',
                     color: i === step ? '#02111b' : 'var(--ink-2)',
                     fontWeight: 900,
                   }}

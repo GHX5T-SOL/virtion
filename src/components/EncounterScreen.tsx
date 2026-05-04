@@ -152,7 +152,7 @@ function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <span
       style={{
-        background: 'rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.70)',
         padding: '2px 8px',
         borderRadius: 6,
         fontFamily: 'ui-monospace, monospace',
@@ -218,7 +218,7 @@ function SceneFallback({
         placeItems: 'center',
         padding: 28,
         background:
-          'radial-gradient(circle at 50% 42%, rgba(79,227,255,0.18), transparent 34%), linear-gradient(135deg, rgba(7,17,30,0.95), rgba(11,23,38,0.94))',
+          'radial-gradient(circle at 50% 42%, rgba(0,199,255,0.16), transparent 34%), linear-gradient(135deg, rgba(255,255,255,0.94), rgba(234,243,251,0.92))',
       }}
     >
       <div style={{ maxWidth: 620, textAlign: 'center' }}>
@@ -427,7 +427,7 @@ export function EncounterScreen() {
             <Canvas
               shadows
               camera={{ position: playerSpawn, fov: 55 }}
-              style={{ background: 'linear-gradient(#06101b, #0b1726)' }}
+              style={{ background: 'linear-gradient(#edf8ff, #dfeaf5)' }}
             >
               <AdaptiveCameraFov />
               <Suspense fallback={<Loader />}>
@@ -488,7 +488,7 @@ export function EncounterScreen() {
             display: 'flex',
             gap: 8,
             alignItems: 'center',
-            background: 'rgba(10,23,39,0.78)',
+            background: 'rgba(255,255,255,0.82)',
             border: '1px solid var(--line)',
             borderRadius: 'var(--r-pill)',
             padding: '6px 14px',
@@ -501,7 +501,7 @@ export function EncounterScreen() {
         >
           {pointerLocked ? (
             <>
-              Just talk — voice is live · <Kbd>E</Kbd> examine · <Kbd>T</Kbd> mute · <Kbd>Esc</Kbd> release
+              Just talk - voice is live · <Kbd>E</Kbd> examine · <Kbd>T</Kbd> mute · <Kbd>Esc</Kbd> release
             </>
           ) : (
             <>

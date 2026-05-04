@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { TopBar } from './primitives';
+import { ClinicalOrbitVisual, TopBar } from './primitives';
 import { store } from '../game/store';
 import { listEvalHistory, type EvalHistoryEntry } from '../data/evalHistory';
 import { CASES } from '../data/cases';
@@ -15,23 +15,23 @@ const VERDICT_SCORE: Record<EvalHistoryEntry['verdict'], number> = {
 
 const PRODUCT_PILLARS = [
   {
-    title: 'Interactive clinical simulation',
-    body: 'A doctor-POV clinic where students speak, investigate, treat, prescribe, and debrief on synthetic patients.',
+    title: 'Synthetic patient encounters',
+    body: 'Students practice history, examination, tests, treatment, prescribing, counseling, and disposition in a live clinic loop.',
     tag: 'now',
   },
   {
-    title: 'AI attending and rubric engine',
-    body: 'Premium model reasoning first, multi-provider fallbacks next, deterministic scoring last so a training case never ends blank.',
+    title: 'AI attending debriefs',
+    body: 'Structured feedback grades clinical reasoning, communication, and management with clear degraded fallbacks.',
     tag: 'resilient AI',
   },
   {
     title: 'AR / VR / mobile / desktop',
-    body: 'Roadmap clients turn every device into a portable clinical-skills lab for young doctors.',
+    body: 'Roadmap clients turn every device into a portable clinical-skills lab for students and educators.',
     tag: 'apps',
   },
   {
     title: 'Decentralized research compute',
-    body: 'Consent-first device nodes can contribute idle compute to future protein folding, gene sequencing, and drug discovery simulations.',
+    body: 'Opt-in device nodes may support future protein folding, sequencing, and drug-discovery simulations.',
     tag: 'R&D',
   },
 ];
@@ -90,11 +90,11 @@ export function HomeScreen() {
         >
           <div className="glass-panel scanline" style={{ padding: 'clamp(24px, 4.5vw, 54px)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div className="chip mint">training simulator · synthetic cases · not clinical advice</div>
-            <h1 style={{ fontSize: 'var(--type-hero-lg)', lineHeight: 0.98, marginTop: 20 }}>
-              Train the next generation of doctors and medical AI.
+            <h1 style={{ fontSize: 'clamp(40px, 6vw, 68px)', lineHeight: 0.98, marginTop: 20 }}>
+              A virtual hospital for AI-native medical students.
             </h1>
             <p style={{ margin: '24px 0 0', color: 'var(--ink-2)', fontSize: 19, lineHeight: 1.65, fontWeight: 600, maxWidth: 760 }}>
-              Virtion is an interactive medical learning environment: a 3D clinic, voice patients, AI attending feedback, and a roadmap toward immersive apps and consent-first biotech compute infrastructure.
+              Practice with synthetic patients, make decisions in a 3D consultation, and leave with a structured debrief educators can understand.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 34 }}>
               <button type="button" className="btn-plush primary" onClick={() => store.setScreen('mode')}>
@@ -110,13 +110,14 @@ export function HomeScreen() {
           </div>
 
           <aside style={{ display: 'grid', gap: 14 }}>
+            <ClinicalOrbitVisual compact />
             <div className="glass-panel" style={{ padding: 22 }}>
               <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                 live product surface
               </div>
               <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {stats.map((s) => (
-                  <div key={s.label} style={{ padding: 16, borderRadius: 10, background: 'rgba(255,255,255,0.055)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                  <div key={s.label} style={{ padding: 16, borderRadius: 10, background: 'rgba(255,255,255,0.58)', border: '1px solid var(--line)' }}>
                     <div style={{ fontFamily: 'Sora', fontSize: 32, fontWeight: 800, color: 'var(--peach-deep)' }}>{s.big}</div>
                     <div style={{ color: 'var(--ink-soft)', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{s.label}</div>
                   </div>
@@ -168,7 +169,7 @@ export function HomeScreen() {
           </div>
           <div className="glass-panel" style={{ padding: 18, display: 'grid', gap: 10 }}>
             {ROADMAP.map(([num, title, body]) => (
-              <div key={num} style={{ display: 'grid', gridTemplateColumns: '54px 1fr', gap: 12, padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.11)' }}>
+              <div key={num} style={{ display: 'grid', gridTemplateColumns: '54px 1fr', gap: 12, padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.58)', border: '1px solid var(--line)' }}>
                 <div style={{ fontFamily: 'Sora', color: 'var(--mint)', fontWeight: 800 }}>{num}</div>
                 <div>
                   <div style={{ fontWeight: 850 }}>{title}</div>
@@ -192,7 +193,7 @@ export function HomeScreen() {
             </div>
             <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
               {(recent.length ? recent : [{ id: 'empty', caseName: 'No completed cases yet', verdict: 'satisfactory' as const, savedAt: Date.now() } as EvalHistoryEntry]).map((entry) => (
-                <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'center', padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'center', padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.58)', border: '1px solid var(--line)' }}>
                   <div>
                     <div style={{ fontWeight: 850 }}>{entry.caseName}</div>
                     <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 700, marginTop: 2 }}>

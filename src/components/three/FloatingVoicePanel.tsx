@@ -131,7 +131,7 @@ export function FloatingVoicePanel({
           position: 'relative',
           minWidth: 240,
           maxWidth: 320,
-          background: 'rgba(10,23,39,0.88)',
+          background: 'rgba(255,255,255,0.88)',
           border: '1px solid var(--line)',
           borderRadius: 'var(--r-md)',
           boxShadow: 'var(--plush-sm)',
@@ -168,7 +168,7 @@ export function FloatingVoicePanel({
               whiteSpace: 'nowrap',
               padding: '3px 8px',
               borderRadius: 'var(--r-pill)',
-              background: 'rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.70)',
               border: '1px solid var(--line)',
             }}
           >
@@ -238,7 +238,7 @@ export function FloatingVoicePanel({
             height: 0,
             borderLeft: '9px solid transparent',
             borderRight: '9px solid transparent',
-            borderTop: '9px solid rgba(10,23,39,0.88)',
+            borderTop: '9px solid rgba(255,255,255,0.88)',
           }}
         />
       </div>

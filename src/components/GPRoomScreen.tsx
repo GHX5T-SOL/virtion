@@ -95,7 +95,7 @@ export function GPRoomScreen() {
             justifyContent: 'space-between',
             fontSize: 15,
             fontWeight: 800,
-            background: 'rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.68)',
           }}
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -164,7 +164,7 @@ export function GPRoomScreen() {
           className={`tap plush-lg popin ${next ? 'breathe' : ''}`}
           onClick={() => next && store.acceptNextPatient()}
           style={{
-            background: 'linear-gradient(145deg, rgba(69,240,176,0.2), rgba(79,227,255,0.08))',
+            background: 'linear-gradient(145deg, rgba(215,251,239,0.92), rgba(191,241,255,0.52))',
             padding: 32,
             position: 'relative',
             transform: 'none',
@@ -182,7 +182,7 @@ export function GPRoomScreen() {
               style={{
                 width: 160,
                 height: 160,
-                background: 'radial-gradient(circle at 50% 36%, rgba(79,227,255,0.22), rgba(7,17,30,0.94))',
+                background: 'radial-gradient(circle at 50% 36%, rgba(0,199,255,0.18), rgba(255,255,255,0.96))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -241,7 +241,7 @@ export function GPRoomScreen() {
           className="tap plush-lg popin"
           onClick={() => store.setScreen('library')}
           style={{
-            background: 'linear-gradient(145deg, rgba(122,167,255,0.2), rgba(79,227,255,0.08))',
+            background: 'linear-gradient(145deg, rgba(220,236,255,0.92), rgba(191,241,255,0.52))',
             padding: 32,
             position: 'relative',
             transform: 'none',
@@ -257,7 +257,7 @@ export function GPRoomScreen() {
               style={{
                 width: 160,
                 height: 160,
-                background: 'radial-gradient(circle at 50% 40%, rgba(122,167,255,0.18), rgba(7,17,30,0.96))',
+                background: 'radial-gradient(circle at 50% 40%, rgba(46,107,255,0.12), rgba(255,255,255,0.96))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -308,7 +308,7 @@ function ChartFolder() {
   const stroke = 'var(--line)';
   return (
     <svg width="120" height="120" viewBox="0 0 120 120">
-      <rect x="18" y="18" width="84" height="84" rx="18" fill="rgba(255,255,255,0.06)" stroke={stroke} strokeWidth="2" />
+      <rect x="18" y="18" width="84" height="84" rx="18" fill="rgba(255,255,255,0.70)" stroke={stroke} strokeWidth="2" />
       <path d="M34 42h52M34 58h38M34 74h48" stroke="var(--peach-deep)" strokeWidth="4" strokeLinecap="round" />
       <circle cx="86" cy="78" r="12" fill="rgba(69,240,176,0.18)" stroke="var(--mint)" strokeWidth="3" />
       <path d="M80 78h12M86 72v12" stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" />

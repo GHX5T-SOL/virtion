@@ -69,7 +69,7 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
           style={{
             background: bg,
             borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.16)',
+          border: '1px solid rgba(8,32,55,0.10)',
             height: 140,
             display: 'flex',
             alignItems: 'flex-end',
@@ -84,7 +84,7 @@ function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)',
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.32) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.28) 1px, transparent 1px)',
               backgroundSize: '22px 22px',
               opacity: 0.35,
             }}
@@ -219,6 +219,7 @@ export function CaseLibraryScreen() {
           alignItems: 'flex-start',
           justifyContent: 'space-between',
           gap: 16,
+          flexWrap: 'wrap',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -241,7 +242,7 @@ export function CaseLibraryScreen() {
         <button
           type="button"
           className="btn-plush mint"
-          style={{ fontSize: 16, padding: '12px 22px', whiteSpace: 'nowrap' }}
+          style={{ fontSize: 16, padding: '12px 22px', whiteSpace: 'nowrap', maxWidth: '100%' }}
           onClick={shuffle}
         >
           Shuffle ({totalVisible})
@@ -282,7 +283,7 @@ export function CaseLibraryScreen() {
                 gap: 10,
                 marginBottom: 14,
                 paddingBottom: 8,
-                borderBottom: '1px solid rgba(255,255,255,0.12)',
+                borderBottom: '1px solid var(--line)',
               }}
             >
               <span className="chip mint" style={{ fontSize: 11 }}>{CLINIC_ICON[clinic] ?? 'CLINIC'}</span>

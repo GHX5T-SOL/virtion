@@ -1,4 +1,4 @@
-import { DoodleScatter, PatientFace, TopBar } from './primitives';
+import { PatientFace, TopBar } from './primitives';
 import { getCase } from '../data/cases';
 import { store, useStore, useTweaks } from '../game/store';
 import type { EndConfirmChecks } from '../game/types';
@@ -22,83 +22,47 @@ export function EndConfirmScreen() {
   const c = getCase(caseId);
 
   return (
-    <div className="screen" style={{ background: 'var(--cream)', position: 'relative' }}>
+    <div className="screen virtion-shell" style={{ position: 'relative', overflowY: 'auto' }}>
       <TopBar here={5} steps={['Polyclinic', 'GP', 'Case', 'Brief', 'Encounter', 'Wrap']} />
-
-      <DoodleScatter
-        items={[
-          { kind: 'sparkle', x: 60, y: 90, size: 22, color: '#FFD86B' },
-          { kind: 'sparkle', x: '88%', y: 130, size: 20, color: '#5AB7F2' },
-        ]}
-      />
 
       <div
         style={{
-          position: 'absolute',
-          inset: 0,
-          top: 67,
+          minHeight: 'calc(100vh - 62px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 40,
+          padding: 'clamp(22px, 5vw, 48px)',
         }}
       >
         <div
-          className="plush-lg"
+          className="glass-panel"
           style={{
-            width: 720,
-            background: '#FFFCF3',
-            padding: 36,
+            width: 'min(820px, 100%)',
+            background: 'rgba(255,255,255,0.84)',
+            padding: 'clamp(24px, 4.4vw, 40px)',
             position: 'relative',
-            transform: 'rotate(-0.8deg)',
+            overflow: 'hidden',
           }}
         >
-          <div style={{ position: 'absolute', right: -38, top: -50 }}>
+          <div style={{ position: 'absolute', right: -18, top: -24, opacity: 0.92 }}>
             <div className="floaty">
               <PatientFace style={tweaks.avatarStyle} skin={c.skin} hair={c.hair} size={110} mood="happy" />
             </div>
-            <div style={{ position: 'absolute', left: -156, top: 16, width: 160 }}>
-              <div
-                style={{
-                  position: 'relative',
-                  background: 'white',
-                  border: '3.5px solid var(--line)',
-                  borderRadius: 'var(--r-md)',
-                  padding: '8px 12px',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  boxShadow: 'var(--plush-sm)',
-                }}
-              >
-                "Is there anything else I should know?"
-                <svg style={{ position: 'absolute', right: -14, top: 14 }} width="20" height="22" viewBox="0 0 20 22">
-                  <path
-                    d="M 0 4 L 18 12 L 0 18 Z"
-                    fill="white"
-                    stroke="var(--line)"
-                    strokeWidth="3.5"
-                    strokeLinejoin="round"
-                  />
-                  <line x1="0" y1="4" x2="0" y2="18" stroke="white" strokeWidth="4" />
-                </svg>
-              </div>
-            </div>
           </div>
 
-          <div className="chip butter" style={{ marginBottom: 16 }}>
-            BEFORE YOU FINISH
-          </div>
-          <h1 style={{ fontSize: 32, lineHeight: 1.1, marginBottom: 8 }}>Take a breath.</h1>
+          <div className="chip butter" style={{ marginBottom: 16 }}>before debrief</div>
+          <h1 style={{ fontSize: 'clamp(34px, 5vw, 56px)', lineHeight: 1.02, marginBottom: 10 }}>Wrap the consultation.</h1>
           <div
             style={{
-              fontSize: 15,
+              fontSize: 17,
               color: 'var(--ink-2)',
               fontWeight: 600,
-              marginBottom: 22,
-              maxWidth: 460,
+              lineHeight: 1.55,
+              marginBottom: 24,
+              maxWidth: 560,
             }}
           >
-            One last check — these affect your debrief. Tick what you actually did.
+            One last check before the AI attending grades the encounter. Tick only what you actually covered.
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 22 }}>
@@ -115,8 +79,8 @@ export function EndConfirmScreen() {
                     gap: 14,
                     padding: '12px 14px',
                     background: on ? 'var(--mint)' : 'white',
-                    border: '3px solid var(--line)',
-                    borderRadius: 16,
+                    border: '1px solid var(--line)',
+                    borderRadius: 12,
                     boxShadow: 'var(--plush-tiny)',
                   }}
                 >
@@ -126,7 +90,7 @@ export function EndConfirmScreen() {
                       height: 32,
                       borderRadius: 8,
                       background: on ? 'white' : 'var(--cream)',
-                      border: '3px solid var(--line)',
+                      border: '1px solid var(--line)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -153,7 +117,7 @@ export function EndConfirmScreen() {
               style={{ flex: 1 }}
               onClick={() => store.setScreen('encounter')}
             >
-              ← Back to the room
+              Back to room
             </button>
             <button
               type="button"
@@ -161,7 +125,7 @@ export function EndConfirmScreen() {
               style={{ flex: 1.4 }}
               onClick={() => store.setScreen('debrief')}
             >
-              End consultation →
+              End consultation
             </button>
           </div>
         </div>

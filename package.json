@@ -7,8 +7,8 @@
     "dev": "node node_modules/vite/bin/vite.js",
     "build": "node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build",
     "preview": "node node_modules/vite/bin/vite.js preview",
-    "verify": "node scripts/verify/run-all.ts",
-    "test": "node scripts/test/run-all.ts"
+    "verify": "node --experimental-strip-types scripts/verify/run-all.ts",
+    "test": "node --experimental-strip-types scripts/test/run-all.ts"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
