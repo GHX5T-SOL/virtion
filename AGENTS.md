@@ -1,13 +1,13 @@
 # Virtion — Codex project notes
 
-Browser-based ER + polyclinic clinical training simulator. Doctor-POV game: new patients arrive at triage, you diagnose, order tests, treat, disposition. Voice conversations with the patient run real-time over LiveKit: Deepgram Nova-3 (STT) + Codex Haiku 4.5 (dialog) + Cartesia Sonic-2 (TTS). Polyclinic is a second flow — one outpatient at a time, tests resolve instantly.
+Browser-based ER + polyclinic clinical training simulator. Doctor-POV game: new patients arrive at triage, you diagnose, order tests, treat, disposition. Voice conversations with the patient run real-time over LiveKit with provider fallbacks: Deepgram/OpenAI STT, Anthropic/OpenAI dialog, and Cartesia/ElevenLabs/OpenAI TTS. Polyclinic is a second flow — one outpatient at a time, tests resolve instantly.
 
 ## Tech stack
 
 - **Frontend:** React 18 + TypeScript + Vite, Three.js via `@react-three/fiber` and `@react-three/drei`.
 - **Voice (transport):** LiveKit Cloud (WebRTC). Browser publishes mic, subscribes to remote audio. `livekit-client` in the browser; the worker lives in `backend/voice_agent.py`.
-- **Voice (backend worker):** `livekit-agents` Python framework with `deepgram` STT, `anthropic` LLM (Haiku 4.5), `cartesia` TTS, `silero` VAD. Runs in its own venv (`backend/.venv-voice`).
-- **Backend HTTP:** FastAPI at `http://127.0.0.1:8787` — Managed Agents proxy + `/voice/token` mint (creates the LiveKit room with patient persona metadata, returns a JWT for the browser).
+- **Voice (backend worker):** `livekit-agents` Python framework with Deepgram/OpenAI STT, Anthropic/OpenAI LLM, Cartesia/ElevenLabs/OpenAI TTS, and Silero VAD. Runs in its own venv (`backend/.venv-voice`).
+- **Backend HTTP:** FastAPI at `http://127.0.0.1:8787` — Managed Agents proxy + local-dev `/voice/token` mint. Netlify/Vercel edge middleware can also mint LiveKit rooms/tokens directly for production resilience.
 - **LLM (attending grading):** Anthropic SDK server-side. Patient persona Haiku 4.5 lives inside the LiveKit agent; the virtion-attending Managed Agent (Opus 4.7) lives in `backend/server.py`.
 - **State:** single `Store` class with `useSyncExternalStore` (see `src/game/store.ts`). No Redux/Zustand — don't add one.
 
@@ -23,7 +23,8 @@ Browser-based ER + polyclinic clinical training simulator. Doctor-POV game: new 
 - `src/voice/Codex.ts` — Anthropic SDK wrapper with prompt caching, used only by the text-chat path now.
 - `src/agents/managedAgent.ts` / `customTools.ts` / `eventStreamRenderer.tsx` — Codex Managed Agents integration (the attending physician). See `.Codex/skills/virtion-managed-agent-setup.md`.
 - `backend/server.py` — FastAPI: Managed Agents proxy under `/agent/*` + `/voice/token`.
-- `backend/voice_agent.py` — LiveKit Agents worker. Reads room metadata for persona + voice ID and wires Deepgram → Haiku → Cartesia.
+- `backend/voice_agent.py` — LiveKit Agents worker. Reads room metadata for persona + voice ID and wires provider-fallback STT → LLM → TTS.
+- `middleware.ts` / `netlify/edge-functions/backend-proxy.js` — production edge token mint + backend proxy.
 - `spec.md` — hackathon submission plan, canonical source for Managed Agents scope.
 
 ## Commands
@@ -32,8 +33,8 @@ Browser-based ER + polyclinic clinical training simulator. Doctor-POV game: new 
 - `npm run build` — tsc + vite build.
 - `npm run preview` — preview production build.
 - `npm run verify` — deterministic invariant checks on `src/data/*` (see `.Codex/skills/virtion-verify-simulation.md`). Run after every data/type/store edit.
-- Backend (FastAPI): `backend/.venv/Scripts/python.exe backend/server.py` — listens on 8787, hosts Managed Agents proxy + `/voice/token`.
-- Voice worker: `backend/.venv-voice/Scripts/python.exe backend/voice_agent.py dev` — separate process, registers with LiveKit Cloud and dispatches into rooms created by `/voice/token`. Both processes must be up for voice to work.
+- Backend (FastAPI): `backend/.venv/bin/python backend/server.py` — listens on 8787, hosts Managed Agents proxy + local `/voice/token`.
+- Voice worker: `backend/.venv-voice/bin/python backend/voice_agent.py dev` — separate process, registers with LiveKit Cloud and dispatches into rooms created by `/voice/token`. Both processes must be up for voice to work.
 
 ### Running node-binary wrappers on this machine
 
@@ -52,7 +53,7 @@ When adding a new script that would normally invoke a binary wrapper, use the sa
 - **Data files are data.** If you're adding a new case/test/medication, edit the data file — don't plumb new shape through the store unless the game mechanic genuinely changed.
 - **Three.js scene edits:** the polyclinic and ER rooms have fixed floor/wall dimensions. New meshes must respect the floor plane and not overlap existing furniture — verify by running the dev server and rotating the camera, not by eyeballing numbers.
 - **No new state libraries.** The `Store` class handles everything. If you need derived state, compute it in a selector or in the component.
-- **Voice runs over the network now.** Browser doesn't load STT/TTS models — Deepgram + Cartesia are upstream services reached via the LiveKit room. There's nothing to preload on the frontend.
+- **Voice runs over the network now.** Browser doesn't load STT/TTS models — speech providers are upstream services reached via the LiveKit room. There's nothing to preload on the frontend.
 - **Prompt caching is on** in `src/voice/Codex.ts`. When you add a new Codex call, set `cache_control: { type: 'ephemeral' }` on the system prompt.
 
 ## Model routing
@@ -60,6 +61,7 @@ When adding a new script that would normally invoke a binary wrapper, use the sa
 | Call | Model | Why |
 |---|---|---|
 | Patient voice persona (in the LiveKit agent) | Haiku 4.5 | Fast, cheap, good enough for in-character reply |
+| Real-time speech stack | Deepgram → OpenAI STT, Anthropic → OpenAI LLM, Cartesia → ElevenLabs → OpenAI TTS | Premium voice first, then resilient fallbacks |
 | `virtion-attending` Managed Agent (clinical grading) | **Opus 4.7** | Clinical reasoning, precision matters |
 | Demo video narration generation | Opus 4.7 | One-off, polish matters |
 
@@ -70,9 +72,9 @@ When you add a new Codex-backed feature, decide which bucket it falls in.
 All keys server-side only, in `backend/.env.local`. The browser never sees them.
 
 - `ANTHROPIC_API_KEY` — used by the FastAPI server (Managed Agents + `/agent/patient/stream` for the text-chat path) AND by the LiveKit voice worker (Haiku patient persona).
-- `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` — used by FastAPI to mint room JWTs and by the worker to register.
-- `DEEPGRAM_API_KEY` — voice worker (streaming STT).
-- `CARTESIA_API_KEY` — voice worker (streaming TTS).
+- `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` — used by FastAPI and edge middleware to mint room JWTs, and by the worker to register.
+- `DEEPGRAM_API_KEY` / `OPENAI_API_KEY` — voice worker STT fallback lane.
+- `CARTESIA_API_KEY` / `ELEVEN_API_KEY` or `ELEVENLABS_API_KEY` / `OPENAI_API_KEY` — voice worker TTS fallback lane.
 
 Vite proxies `/agent/*` and `/voice/*` to `127.0.0.1:8787` in dev. When you add a new Codex-backed feature, route it through the backend the same way — never reintroduce a `VITE_*` Anthropic key.
 

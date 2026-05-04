@@ -424,17 +424,14 @@ export class Conversation {
         // (doctor) in the room, so any remote participant is the patient
         // agent. Match by identity prefix or, failing that, take the first.
         const remotes = Array.from(this.room.remoteParticipants.values());
-        console.log('[farewell] remote participants:', remotes.map((p) => p.identity));
         const agent =
           remotes.find((p) => p.identity.startsWith('agent-')) ?? remotes[0];
         if (agent) {
-          console.log('[farewell] performing RPC to', agent.identity);
-          const result = await this.room.localParticipant.performRpc({
+          await this.room.localParticipant.performRpc({
             destinationIdentity: agent.identity,
             method: 'farewell',
             payload: '',
           });
-          console.log('[farewell] RPC result:', result);
         } else {
           console.warn('[farewell] no agent participant in room');
         }
