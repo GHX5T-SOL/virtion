@@ -12,6 +12,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+RUN python - <<'PY'
+from pathlib import Path
+
+target = Path("/usr/local/bin/uvicorn")
+backup = Path("/usr/local/bin/uvicorn-real")
+if target.exists() and not backup.exists():
+    target.rename(backup)
+
+target.write_text(
+    """#!/usr/bin/env python3
+import os
+import runpy
+import sys
+
+port = os.environ.get("PORT") or "8787"
+sys.argv = [
+    sys.argv[0],
+    *[
+        port if arg in {"$PORT", "${PORT}", "${PORT:-8787}"} else arg
+        for arg in sys.argv[1:]
+    ],
+]
+runpy.run_module("uvicorn", run_name="__main__")
+""",
+    encoding="utf-8",
+)
+target.chmod(0o755)
+PY
 
 COPY . .
 
