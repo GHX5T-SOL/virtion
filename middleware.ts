@@ -72,7 +72,7 @@ function normalizeProvider(name: string): string {
 }
 
 function providerOrder(envName: string, defaultOrder: string[]): string[] {
-  const requested = env(envName).split(',').map(normalizeProvider).filter(Boolean);
+  const requested = String(env(envName) || '').split(',').map(normalizeProvider).filter(Boolean);
   const ordered: string[] = [];
   for (const name of [...requested, ...defaultOrder]) {
     if (name && !ordered.includes(name)) ordered.push(name);

@@ -99,7 +99,7 @@ function normalizeProvider(name) {
 }
 
 function providerOrder(envName, defaultOrder) {
-  const requested = readEnv(envName).split(',').map(normalizeProvider).filter(Boolean);
+  const requested = String(readEnv(envName) || '').split(',').map(normalizeProvider).filter(Boolean);
   const ordered = [];
   for (const name of [...requested, ...defaultOrder]) {
     if (name && !ordered.includes(name)) ordered.push(name);
