@@ -59,6 +59,27 @@ function safeCaseId(value: unknown): string {
   return String(value || 'case').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 32) || 'case';
 }
 
+function normalizeProvider(name: string): string {
+  const normalized = String(name || '').trim().toLowerCase().replace(/\s+/g, '-');
+  const aliases: Record<string, string> = {
+    eleven: 'elevenlabs',
+    eleven_labs: 'elevenlabs',
+    vercel: 'vercel-ai-gateway',
+    vercel_ai_gateway: 'vercel-ai-gateway',
+    'vercel-gateway': 'vercel-ai-gateway',
+  };
+  return aliases[normalized] || normalized;
+}
+
+function providerOrder(envName: string, defaultOrder: string[]): string[] {
+  const requested = env(envName).split(',').map(normalizeProvider).filter(Boolean);
+  const ordered: string[] = [];
+  for (const name of [...requested, ...defaultOrder]) {
+    if (name && !ordered.includes(name)) ordered.push(name);
+  }
+  return ordered;
+}
+
 function jsonResponse(body: unknown, status = 200): Response {
   return Response.json(body, {
     status,
@@ -84,9 +105,9 @@ function voiceHealthPatch(body: Record<string, any> = {}): Record<string, any> {
       elevenlabs_configured: Boolean(env('ELEVEN_API_KEY') || env('ELEVENLABS_API_KEY')),
       openai_voice_configured: Boolean(env('OPENAI_API_KEY')),
       fallback_order: {
-        stt: ['deepgram', 'openai', 'text_fallback'],
-        llm: ['anthropic', 'vercel-ai-gateway', 'openrouter', 'gemini', 'cerebras', 'openai', 'text_fallback'],
-        tts: ['cartesia', 'elevenlabs', 'openai', 'text_fallback'],
+        stt: providerOrder('VOICE_STT_ORDER', ['deepgram', 'openai', 'text_fallback']),
+        llm: providerOrder('VOICE_LLM_ORDER', ['openai', 'openrouter', 'gemini', 'vercel-ai-gateway', 'cerebras', 'anthropic', 'text_fallback']),
+        tts: providerOrder('VOICE_TTS_ORDER', ['openai', 'elevenlabs', 'cartesia', 'text_fallback']),
       },
     },
   };

@@ -3,7 +3,7 @@
 Two Python processes power the simulator:
 
 1. **FastAPI server** (`server.py`) — Managed Agents proxy (`/agent/*`), provider-fallback text routes, patient-text-chat SSE (`/agent/patient/stream`), and the LiveKit token mint (`/voice/token`). Lives at `127.0.0.1:8787`.
-2. **LiveKit voice worker** (`voice_agent.py`) — joins every room created by `/voice/token`, runs provider-fallback STT/LLM/TTS over WebRTC: Deepgram → OpenAI for STT, Anthropic → Vercel AI Gateway → OpenRouter → Gemini → Cerebras → OpenAI for patient dialogue, and Cartesia → ElevenLabs → OpenAI for speech output.
+2. **LiveKit voice worker** (`voice_agent.py`) — joins every room created by `/voice/token`, runs provider-fallback STT/LLM/TTS over WebRTC: Deepgram → OpenAI for STT, OpenAI → OpenRouter → Gemini → Vercel AI Gateway → Cerebras → Anthropic for patient dialogue, and OpenAI → ElevenLabs → Cartesia for speech output.
 
 Both must be running for real-time voice to work.
 
@@ -29,9 +29,10 @@ Copy `.env.example` to `.env.local` and fill in:
 
 - `ANTHROPIC_API_KEY` — Managed Agent + primary direct LLM.
 - Optional fallback keys: `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `VERCEL_AI_GATEWAY_API_KEY`, `GEMINI_API_KEY`, `CEREBRAS_API_KEY`.
+- Optional order overrides: `MODEL_ROUTER_ORDER`, `VOICE_STT_ORDER`, `VOICE_LLM_ORDER`, `VOICE_TTS_ORDER`.
 - `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` — from LiveKit Cloud.
-- `DEEPGRAM_API_KEY` — primary streaming STT. If missing, the worker tries OpenAI STT.
-- `CARTESIA_API_KEY` — primary streaming TTS. If missing, the worker tries `ELEVEN_API_KEY` / `ELEVENLABS_API_KEY`, then OpenAI TTS.
+- `DEEPGRAM_API_KEY` — streaming STT. The worker can fail over between Deepgram and OpenAI at runtime.
+- `CARTESIA_API_KEY` — streaming TTS fallback. The worker can fail over between OpenAI, ElevenLabs, and Cartesia at runtime.
 - `VIRTION_AGENT_ID`, `VIRTION_ENV_ID` — leave blank on first run, paste back from `/agent/bootstrap`.
 - Netlify and Vercel use the same server-side proxy variables: `VIRTION_BACKEND_URL` (or `BACKEND_URL`) and `BACKEND_SHARED_SECRET`.
 
@@ -50,7 +51,10 @@ The worker logs `registered worker` once it's connected to LiveKit Cloud. From t
 ## Deploy on Railway (recommended setup)
 
 If Railway auto-detects Node and runs `npm ci`, your deploy will fail with `pip: not found`.
-Use Dockerfile-based services so Railway always builds with Python:
+Use Dockerfile-based services so Railway always builds with Python. Do not add a
+repo-level `railway.json` for this app: the backend and worker need different
+Dockerfiles and start commands, and a single root config will override both
+services on Git deploy.
 
 1) Create two Railway services from this repo:
 - `virtion-backend` (web)
@@ -63,23 +67,28 @@ Use Dockerfile-based services so Railway always builds with Python:
 - Web service Dockerfile path: `backend/Dockerfile.backend`
 - Worker service Dockerfile path: `backend/Dockerfile.worker`
 
-4) Set environment variables on both services:
+4) Configure start commands:
+- Web service: `sh -c "exec uvicorn server:app --host 0.0.0.0 --port ${PORT:-8787}"`
+- Worker service: `python voice_agent.py start`
+
+5) Set environment variables on both services:
 - `BACKEND_SHARED_SECRET`
 - `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`
 - `ANTHROPIC_API_KEY`
 - Optional fallback providers: `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `VERCEL_AI_GATEWAY_API_KEY`, `GEMINI_API_KEY`, `CEREBRAS_API_KEY`
+- Runtime order overrides: `MODEL_ROUTER_ORDER`, `VOICE_STT_ORDER`, `VOICE_LLM_ORDER`, `VOICE_TTS_ORDER`
 - Voice providers: `DEEPGRAM_API_KEY`, `CARTESIA_API_KEY`, `ELEVEN_API_KEY` or `ELEVENLABS_API_KEY`
 - `VIRTION_AGENT_ID`, `VIRTION_ENV_ID` (can be empty first deploy)
 
-5) After web is healthy, bootstrap once:
+6) After web is healthy, bootstrap once:
 - `POST https://<railway-backend-domain>/agent/bootstrap` with header `x-virtion-auth: <BACKEND_SHARED_SECRET>`
 - Save returned values to `VIRTION_AGENT_ID` and `VIRTION_ENV_ID`, redeploy web service.
 
-6) Wire Netlify:
+7) Wire Netlify:
 - `VIRTION_BACKEND_URL=https://<railway-backend-domain>`
 - `BACKEND_SHARED_SECRET=<same secret as Railway backend>`
 
-7) Verify:
+8) Verify:
 - `https://<railway-backend-domain>/health`
 - `https://virtion.netlify.app/agent/model-health`
 

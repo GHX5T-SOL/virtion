@@ -77,6 +77,24 @@ PUBLIC_BROWSER_ORIGINS = {
     "https://virtion.vercel.app",
     "https://virtion.netlify.app",
 }
+ORDER_ALIASES = {
+    "eleven": "elevenlabs",
+    "eleven_labs": "elevenlabs",
+    "vercel": "vercel-ai-gateway",
+    "vercel_ai_gateway": "vercel-ai-gateway",
+    "vercel-gateway": "vercel-ai-gateway",
+}
+DEFAULT_VOICE_STT_ORDER = ["deepgram", "openai", "text_fallback"]
+DEFAULT_VOICE_LLM_ORDER = [
+    "openai",
+    "openrouter",
+    "gemini",
+    "vercel-ai-gateway",
+    "cerebras",
+    "anthropic",
+    "text_fallback",
+]
+DEFAULT_VOICE_TTS_ORDER = ["openai", "elevenlabs", "cartesia", "text_fallback"]
 
 # Per-IP rate limit caps even authenticated abuse. SSE streams count as one
 # request, so 120/min leaves plenty of headroom for legitimate use.
@@ -121,6 +139,21 @@ app.add_middleware(
 )
 
 
+def _normalize_provider(name: str) -> str:
+    normalized = name.strip().lower().replace(" ", "-")
+    return ORDER_ALIASES.get(normalized, normalized)
+
+
+def _health_order(env_name: str, default: list[str]) -> list[str]:
+    raw = os.environ.get(env_name, "")
+    requested = [_normalize_provider(part) for part in raw.split(",") if part.strip()]
+    ordered: list[str] = []
+    for name in [*requested, *default]:
+        if name and name not in ordered:
+            ordered.append(name)
+    return ordered
+
+
 @app.get("/health")
 def health():
     """Frontend polls this before showing the attending dock so a missing
@@ -147,17 +180,9 @@ def health():
             ),
             "openai_voice_configured": bool(os.environ.get("OPENAI_API_KEY")),
             "fallback_order": {
-                "stt": ["deepgram", "openai", "text_fallback"],
-                "llm": [
-                    "anthropic",
-                    "vercel-ai-gateway",
-                    "openrouter",
-                    "gemini",
-                    "cerebras",
-                    "openai",
-                    "text_fallback",
-                ],
-                "tts": ["cartesia", "elevenlabs", "openai", "text_fallback"],
+                "stt": _health_order("VOICE_STT_ORDER", DEFAULT_VOICE_STT_ORDER),
+                "llm": _health_order("VOICE_LLM_ORDER", DEFAULT_VOICE_LLM_ORDER),
+                "tts": _health_order("VOICE_TTS_ORDER", DEFAULT_VOICE_TTS_ORDER),
             },
         },
         "model_router": {

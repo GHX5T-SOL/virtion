@@ -3,7 +3,7 @@
 Runs as a separate process from the FastAPI server. Joins every LiveKit
 room created by the frontend and roleplays the patient over WebRTC:
 
-    Browser mic → Deepgram/OpenAI STT → Claude/OpenAI LLM → Cartesia/ElevenLabs/OpenAI TTS → Browser
+    Browser mic → Deepgram/OpenAI STT → OpenAI/OpenRouter/Gemini/Claude LLM → OpenAI/ElevenLabs/Cartesia TTS → Browser
 
 The persona prompt and voice ID come from room metadata (set by the
 backend `/voice/token` endpoint when the room is created), so this
@@ -20,12 +20,14 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
 from dotenv import load_dotenv
 from livekit import agents, rtc
 from livekit.agents import Agent, AgentSession, RoomInputOptions, WorkerOptions, cli
 from livekit.agents import llm as lk_llm
+from livekit.agents import stt as lk_stt
+from livekit.agents import tts as lk_tts
 from livekit.agents.types import (
     APIConnectOptions,
     DEFAULT_API_CONNECT_OPTIONS,
@@ -53,6 +55,7 @@ load_dotenv(_ROOT / ".env")
 
 logger = logging.getLogger("virtion.voice-agent")
 logger.setLevel(logging.INFO)
+T = TypeVar("T")
 
 
 # Cartesia Sonic-2 voice IDs — verified via /voices API (gender attr).
@@ -78,6 +81,16 @@ ELEVENLABS_VOICE_IDS = {
     "M": "pNInz6obpgDQGcFmaJgB",
     "F": "EXAVITQu4vr4xnSDxMaL",
 }
+DEFAULT_STT_ORDER = ["deepgram", "openai"]
+DEFAULT_LLM_ORDER = ["openai", "openrouter", "gemini", "vercel-ai-gateway", "cerebras", "anthropic"]
+DEFAULT_TTS_ORDER = ["openai", "elevenlabs", "cartesia"]
+ORDER_ALIASES = {
+    "eleven": "elevenlabs",
+    "eleven_labs": "elevenlabs",
+    "vercel": "vercel-ai-gateway",
+    "vercel_ai_gateway": "vercel-ai-gateway",
+    "vercel-gateway": "vercel-ai-gateway",
+}
 
 
 def _env(*names: str) -> str:
@@ -90,6 +103,48 @@ def _env(*names: str) -> str:
 
 def _env_default(default: str, *names: str) -> str:
     return _env(*names) or default
+
+
+def _int_env(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name) or default)
+    except ValueError:
+        logger.warning("invalid integer env %s=%r; using %s", name, os.environ.get(name), default)
+        return default
+
+
+def _float_env(name: str, default: float) -> float:
+    try:
+        return float(os.environ.get(name) or default)
+    except ValueError:
+        logger.warning("invalid float env %s=%r; using %s", name, os.environ.get(name), default)
+        return default
+
+
+def _normalize_provider(name: str) -> str:
+    normalized = name.strip().lower().replace(" ", "-")
+    return ORDER_ALIASES.get(normalized, normalized)
+
+
+def _provider_order(env_name: str, default: list[str]) -> list[str]:
+    raw = os.environ.get(env_name, "")
+    requested = [_normalize_provider(part) for part in raw.split(",") if part.strip()]
+    ordered: list[str] = []
+    for name in [*requested, *default]:
+        if name and name not in ordered:
+            ordered.append(name)
+    return ordered
+
+
+def _ordered_candidates(candidates: list[tuple[str, T]], order: list[str]) -> list[tuple[str, T]]:
+    remaining = {_normalize_provider(name): (name, candidate) for name, candidate in candidates}
+    ordered: list[tuple[str, T]] = []
+    for name in order:
+        match = remaining.pop(_normalize_provider(name), None)
+        if match:
+            ordered.append(match)
+    ordered.extend(remaining.values())
+    return ordered
 
 
 def _openai_base(default: str, *names: str) -> str:
@@ -132,16 +187,28 @@ def parse_metadata(raw: str | None) -> dict:
         return {}
 
 
-def build_stt():
+def build_stt(vad: Any | None = None):
+    candidates: list[tuple[str, lk_stt.STT]] = []
     if os.environ.get("DEEPGRAM_API_KEY"):
         model = os.environ.get("DEEPGRAM_STT_MODEL", "nova-3")
-        logger.info("voice STT provider=deepgram model=%s", model)
-        return deepgram.STT(model=model, language="en")
+        candidates.append(("deepgram", deepgram.STT(model=model, language="en")))
     if openai and os.environ.get("OPENAI_API_KEY"):
         model = os.environ.get("OPENAI_STT_MODEL", "gpt-4o-transcribe")
-        logger.info("voice STT provider=openai model=%s", model)
-        return openai.STT(model=model, language="en")
-    raise RuntimeError("No voice STT provider configured. Add DEEPGRAM_API_KEY or OPENAI_API_KEY.")
+        candidates.append(("openai", openai.STT(model=model, language="en")))
+    if not candidates:
+        raise RuntimeError("No voice STT provider configured. Add DEEPGRAM_API_KEY or OPENAI_API_KEY.")
+
+    candidates = _ordered_candidates(candidates, _provider_order("VOICE_STT_ORDER", DEFAULT_STT_ORDER))
+    logger.info("voice STT fallback chain=%s", " -> ".join(name for name, _ in candidates))
+    if len(candidates) == 1:
+        return candidates[0][1]
+    return lk_stt.FallbackAdapter(
+        [candidate for _, candidate in candidates],
+        vad=vad,
+        attempt_timeout=_float_env("VOICE_STT_ATTEMPT_TIMEOUT", 10.0),
+        max_retry_per_stt=_int_env("VOICE_STT_RETRIES", 1),
+        retry_interval=_float_env("VOICE_STT_RETRY_INTERVAL", 1.0),
+    )
 
 
 def build_llm():
@@ -242,7 +309,7 @@ def build_llm_candidates() -> list[tuple[str, lk_llm.LLM]]:
         _env_default("gpt-4o-mini", "OPENAI_VOICE_MODEL", "OPENAI_PATIENT_MODEL"),
         _openai_base("https://api.openai.com/v1", "OPENAI_BASE_URL"),
     )
-    return candidates
+    return _ordered_candidates(candidates, _provider_order("VOICE_LLM_ORDER", DEFAULT_LLM_ORDER))
 
 
 def _short_error(exc: BaseException) -> str:
@@ -368,10 +435,10 @@ class CascadingLLMStream(lk_llm.LLMStream):
 
 
 def build_tts(voice_id: str, gender: str):
+    candidates: list[tuple[str, lk_tts.TTS]] = []
     if os.environ.get("CARTESIA_API_KEY"):
         model = os.environ.get("CARTESIA_TTS_MODEL", "sonic-2")
-        logger.info("voice TTS provider=cartesia model=%s voice=%s", model, voice_id)
-        return cartesia.TTS(model=model, voice=voice_id)
+        candidates.append(("cartesia", cartesia.TTS(model=model, voice=voice_id)))
 
     eleven_key = _env("ELEVEN_API_KEY", "ELEVENLABS_API_KEY")
     if elevenlabs and eleven_key:
@@ -381,20 +448,33 @@ def build_tts(voice_id: str, gender: str):
             or ELEVENLABS_VOICE_IDS.get(gender, ELEVENLABS_VOICE_IDS["M"])
         )
         model = _env("ELEVENLABS_TTS_MODEL", "ELEVEN_TTS_MODEL") or "eleven_flash_v2_5"
-        logger.info("voice TTS provider=elevenlabs model=%s voice=%s", model, eleven_voice)
-        return elevenlabs.TTS(voice_id=eleven_voice, model=model)
+        candidates.append(("elevenlabs", elevenlabs.TTS(voice_id=eleven_voice, model=model)))
 
     if openai and os.environ.get("OPENAI_API_KEY"):
         model = os.environ.get("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
         voice = _env(f"OPENAI_TTS_VOICE_{gender}", "OPENAI_TTS_VOICE") or "ash"
-        logger.info("voice TTS provider=openai model=%s voice=%s", model, voice)
-        return openai.TTS(
-            model=model,
-            voice=voice,
-            instructions="Speak naturally as a concise patient in a clinical simulation.",
+        candidates.append(
+            (
+                "openai",
+                openai.TTS(
+                    model=model,
+                    voice=voice,
+                    instructions="Speak naturally as a concise patient in a clinical simulation.",
+                ),
+            )
         )
 
-    raise RuntimeError("No voice TTS provider configured. Add CARTESIA_API_KEY, ELEVENLABS_API_KEY, or OPENAI_API_KEY.")
+    if not candidates:
+        raise RuntimeError("No voice TTS provider configured. Add CARTESIA_API_KEY, ELEVENLABS_API_KEY, or OPENAI_API_KEY.")
+
+    candidates = _ordered_candidates(candidates, _provider_order("VOICE_TTS_ORDER", DEFAULT_TTS_ORDER))
+    logger.info("voice TTS fallback chain=%s", " -> ".join(name for name, _ in candidates))
+    if len(candidates) == 1:
+        return candidates[0][1]
+    return lk_tts.FallbackAdapter(
+        [candidate for _, candidate in candidates],
+        max_retry_per_tts=_int_env("VOICE_TTS_RETRIES", 1),
+    )
 
 
 async def entrypoint(ctx: agents.JobContext):
@@ -414,11 +494,12 @@ async def entrypoint(ctx: agents.JobContext):
         ctx.room.name, case_id, speaker_gender, voice_id,
     )
 
+    vad = silero.VAD.load()
     session = AgentSession(
-        stt=build_stt(),
+        stt=build_stt(vad=vad),
         llm=build_llm(),
         tts=build_tts(voice_id, speaker_gender),
-        vad=silero.VAD.load(),
+        vad=vad,
         use_tts_aligned_transcript=True,
     )
 

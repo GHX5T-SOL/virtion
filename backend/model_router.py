@@ -18,6 +18,12 @@ from typing import Any, Literal
 import httpx
 
 ModelTask = Literal["patient", "triage", "debrief"]
+DEFAULT_MODEL_ORDER = ["openai", "openrouter", "gemini", "vercel-ai-gateway", "cerebras", "anthropic"]
+ORDER_ALIASES = {
+    "vercel": "vercel-ai-gateway",
+    "vercel_ai_gateway": "vercel-ai-gateway",
+    "vercel-gateway": "vercel-ai-gateway",
+}
 
 
 @dataclass
@@ -72,6 +78,32 @@ def _chat_completions_url(env: str, default: str) -> str:
     return f"{base}/chat/completions"
 
 
+def _normalize_provider(name: str) -> str:
+    normalized = name.strip().lower().replace(" ", "-")
+    return ORDER_ALIASES.get(normalized, normalized)
+
+
+def provider_order(task: ModelTask) -> list[str]:
+    raw = os.environ.get(f"{task.upper()}_MODEL_ORDER") or os.environ.get("MODEL_ROUTER_ORDER") or ""
+    requested = [_normalize_provider(part) for part in raw.split(",") if part.strip()]
+    ordered: list[str] = []
+    for name in [*requested, *DEFAULT_MODEL_ORDER]:
+        if name and name not in ordered:
+            ordered.append(name)
+    return ordered
+
+
+def _ordered_specs(specs: list[ProviderSpec], task: ModelTask) -> list[ProviderSpec]:
+    remaining = {_normalize_provider(spec.name): spec for spec in specs}
+    ordered: list[ProviderSpec] = []
+    for name in provider_order(task):
+        spec = remaining.pop(_normalize_provider(name), None)
+        if spec:
+            ordered.append(spec)
+    ordered.extend(remaining.values())
+    return ordered
+
+
 def provider_specs(task: ModelTask) -> list[ProviderSpec]:
     if task == "triage":
         anthropic_model = _model("ANTHROPIC_TRIAGE_MODEL", "claude-opus-4-7")
@@ -95,7 +127,7 @@ def provider_specs(task: ModelTask) -> list[ProviderSpec]:
         gemini_model = _model("GEMINI_PATIENT_MODEL", "gemini-2.0-flash-lite")
         cerebras_model = _model("CEREBRAS_PATIENT_MODEL", "llama-3.1-8b")
 
-    return [
+    specs = [
         ProviderSpec("anthropic", anthropic_model, "ANTHROPIC_API_KEY", "anthropic", "https://api.anthropic.com/v1/messages"),
         ProviderSpec("openai", openai_model, "OPENAI_API_KEY", "openai", "https://api.openai.com/v1/chat/completions"),
         ProviderSpec("vercel-ai-gateway", gateway_model, "VERCEL_AI_GATEWAY_API_KEY", "openai", _chat_completions_url("VERCEL_AI_GATEWAY_BASE_URL", "https://ai-gateway.vercel.sh/v1")),
@@ -103,6 +135,7 @@ def provider_specs(task: ModelTask) -> list[ProviderSpec]:
         ProviderSpec("gemini", gemini_model, "GEMINI_API_KEY", "gemini", "https://generativelanguage.googleapis.com/v1beta/models"),
         ProviderSpec("cerebras", cerebras_model, "CEREBRAS_API_KEY", "openai", "https://api.cerebras.ai/v1/chat/completions"),
     ]
+    return _ordered_specs(specs, task)
 
 
 def provider_health(task: ModelTask = "patient") -> list[ProviderHealth]:
