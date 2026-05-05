@@ -18,7 +18,7 @@ from typing import Any, Literal
 import httpx
 
 ModelTask = Literal["patient", "triage", "debrief"]
-DEFAULT_MODEL_ORDER = ["openai", "openrouter", "gemini", "vercel-ai-gateway", "cerebras", "anthropic"]
+DEFAULT_MODEL_ORDER = ["cerebras", "vercel-ai-gateway", "openai", "openrouter", "gemini", "anthropic"]
 ORDER_ALIASES = {
     "vercel": "vercel-ai-gateway",
     "vercel_ai_gateway": "vercel-ai-gateway",

@@ -106,8 +106,8 @@ function voiceHealthPatch(body: Record<string, any> = {}): Record<string, any> {
       openai_voice_configured: Boolean(env('OPENAI_API_KEY')),
       fallback_order: {
         stt: providerOrder('VOICE_STT_ORDER', ['deepgram', 'openai', 'text_fallback']),
-        llm: providerOrder('VOICE_LLM_ORDER', ['openai', 'openrouter', 'gemini', 'vercel-ai-gateway', 'cerebras', 'anthropic', 'text_fallback']),
-        tts: providerOrder('VOICE_TTS_ORDER', ['openai', 'elevenlabs', 'cartesia', 'text_fallback']),
+        llm: providerOrder('VOICE_LLM_ORDER', ['cerebras', 'vercel-ai-gateway', 'openai', 'openrouter', 'gemini', 'anthropic', 'text_fallback']),
+        tts: providerOrder('VOICE_TTS_ORDER', ['elevenlabs', 'cartesia', 'openai', 'text_fallback']),
       },
     },
   };

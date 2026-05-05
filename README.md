@@ -20,10 +20,10 @@ The product vision extends beyond the browser simulator: mobile and desktop trai
 |---|---|
 | Frontend | React 18 + TypeScript + Vite, Three.js (`@react-three/fiber`, `@react-three/drei`) |
 | Voice transport | LiveKit Cloud (WebRTC) via `livekit-client` |
-| Voice worker | Python `livekit-agents` — Deepgram/OpenAI STT → Anthropic/OpenAI patient dialogue → Cartesia/ElevenLabs/OpenAI TTS |
+| Voice worker | Python `livekit-agents` — Deepgram/OpenAI STT → Cerebras/Vercel/OpenAI/OpenRouter/Gemini/Anthropic patient dialogue → ElevenLabs/Cartesia/OpenAI TTS |
 | HTTP backend | FastAPI on `127.0.0.1:8787` — Managed Agents proxy + LiveKit JWT mint |
 | Attending grader | Claude **Opus 4.7** as a Managed Agent (`virtion-attending`) with direct-model and deterministic fallbacks |
-| Model fallback router | OpenAI, OpenRouter, Gemini, Vercel AI Gateway, Cerebras, Anthropic, then local deterministic rubric fallback |
+| Model fallback router | Cerebras, Vercel AI Gateway, OpenAI, OpenRouter, Gemini, Anthropic, then local deterministic rubric fallback |
 | State | Single `Store` class with `useSyncExternalStore` (no Redux/Zustand) |
 
 Two flows:
@@ -50,7 +50,7 @@ All keys are server-side only — the browser never sees them. Get one of each:
 | **OpenAI / OpenRouter / Vercel AI Gateway / Gemini / Cerebras** | Optional direct-model fallbacks for triage, patient text, and debrief degradation | Provider consoles | Varies |
 | **LiveKit Cloud** | Real-time WebRTC transport between browser ↔ voice worker | https://cloud.livekit.io → create project → Settings → Keys (gives `URL`, `API Key`, `API Secret`) | Yes — generous free tier |
 | **Deepgram** | Streaming speech-to-text inside the voice worker | https://console.deepgram.com → API Keys | Yes — $200 free credit |
-| **OpenAI / ElevenLabs / Cartesia TTS** | Streaming text-to-speech inside the voice worker, in fallback order | Provider consoles | Varies |
+| **ElevenLabs / Cartesia / OpenAI TTS** | Streaming text-to-speech inside the voice worker, in fallback order | Provider consoles | Varies |
 
 ---
 
@@ -107,10 +107,10 @@ VERCEL_AI_GATEWAY_API_KEY=
 OPENROUTER_API_KEY=
 GEMINI_API_KEY=
 CEREBRAS_API_KEY=
-MODEL_ROUTER_ORDER=openai,openrouter,gemini,vercel-ai-gateway,cerebras,anthropic
+MODEL_ROUTER_ORDER=cerebras,vercel-ai-gateway,openai,openrouter,gemini,anthropic
 VOICE_STT_ORDER=deepgram,openai
-VOICE_LLM_ORDER=openai,openrouter,gemini,vercel-ai-gateway,cerebras,anthropic
-VOICE_TTS_ORDER=openai,elevenlabs,cartesia
+VOICE_LLM_ORDER=cerebras,vercel-ai-gateway,openai,openrouter,gemini,anthropic
+VOICE_TTS_ORDER=elevenlabs,cartesia,openai
 ```
 
 ### 4. Bootstrap the Managed Agent (one-time)
@@ -183,9 +183,9 @@ scripts/verify/       # Deterministic data-integrity checks
 
 | Call | Model | Why |
 |---|---|---|
-| Patient voice persona | OpenAI `gpt-4o-mini` default, with OpenRouter/Gemini/Gateway/Cerebras/Anthropic fallbacks | Fast in-character replies even when one provider is out of credits |
-| Real-time speech stack | Deepgram → OpenAI STT, OpenAI → OpenRouter → Gemini → Vercel AI Gateway → Cerebras → Anthropic LLM, OpenAI → ElevenLabs → Cartesia TTS | Fast working voice first, then deeper fallbacks |
-| Patient text / triage fallback | OpenAI → OpenRouter → Gemini → Vercel AI Gateway → Cerebras → Anthropic → deterministic | Keeps the simulator responsive when one provider fails |
+| Patient voice persona | Cerebras/Vercel AI Gateway default path, with OpenAI/OpenRouter/Gemini/Anthropic and deterministic fallbacks | Fast in-character replies even when one provider is out of credits |
+| Real-time speech stack | Deepgram → OpenAI STT, Cerebras → Vercel AI Gateway → OpenAI → OpenRouter → Gemini → Anthropic LLM, ElevenLabs → Cartesia → OpenAI TTS | Working providers first, then deeper fallbacks |
+| Patient text / triage fallback | Cerebras → Vercel AI Gateway → OpenAI → OpenRouter → Gemini → Anthropic → deterministic | Keeps the simulator responsive when one provider fails |
 | `virtion-attending` grading | **Opus 4.7** Managed Agent → direct debrief fallback → deterministic rubric | Clinical reasoning first, graceful degradation last |
 
 ## Netlify fallback host

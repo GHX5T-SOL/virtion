@@ -3,7 +3,7 @@
 Runs as a separate process from the FastAPI server. Joins every LiveKit
 room created by the frontend and roleplays the patient over WebRTC:
 
-    Browser mic → Deepgram/OpenAI STT → OpenAI/OpenRouter/Gemini/Claude LLM → OpenAI/ElevenLabs/Cartesia TTS → Browser
+    Browser mic → Deepgram/OpenAI STT → Cerebras/Vercel/OpenAI/OpenRouter/Gemini/Claude LLM → ElevenLabs/Cartesia/OpenAI TTS → Browser
 
 The persona prompt and voice ID come from room metadata (set by the
 backend `/voice/token` endpoint when the room is created), so this
@@ -82,8 +82,8 @@ ELEVENLABS_VOICE_IDS = {
     "F": "EXAVITQu4vr4xnSDxMaL",
 }
 DEFAULT_STT_ORDER = ["deepgram", "openai"]
-DEFAULT_LLM_ORDER = ["openai", "openrouter", "gemini", "vercel-ai-gateway", "cerebras", "anthropic"]
-DEFAULT_TTS_ORDER = ["openai", "elevenlabs", "cartesia"]
+DEFAULT_LLM_ORDER = ["cerebras", "vercel-ai-gateway", "openai", "openrouter", "gemini", "anthropic"]
+DEFAULT_TTS_ORDER = ["elevenlabs", "cartesia", "openai"]
 ORDER_ALIASES = {
     "eleven": "elevenlabs",
     "eleven_labs": "elevenlabs",
@@ -317,6 +317,13 @@ def _short_error(exc: BaseException) -> str:
     return text[:240] or exc.__class__.__name__
 
 
+def _deterministic_patient_reply() -> str:
+    return (
+        os.environ.get("VOICE_LLM_DETERMINISTIC_REPLY")
+        or "I'm sorry, doctor. I still feel unwell, and the pain started this morning."
+    )
+
+
 def _fast_fail_options(options: APIConnectOptions) -> APIConnectOptions:
     return APIConnectOptions(
         max_retry=0,
@@ -431,7 +438,17 @@ class CascadingLLMStream(lk_llm.LLMStream):
                     candidate.model,
                     detail,
                 )
-        raise RuntimeError("All voice LLM providers failed before response: " + " | ".join(failures))
+        fallback = _deterministic_patient_reply()
+        logger.error(
+            "all voice LLM providers failed before response; using deterministic patient reply: %s",
+            " | ".join(failures),
+        )
+        self._event_ch.send_nowait(
+            lk_llm.ChatChunk(
+                id="virtion-deterministic-voice-fallback",
+                delta=lk_llm.ChoiceDelta(role="assistant", content=fallback),
+            )
+        )
 
 
 def build_tts(voice_id: str, gender: str):

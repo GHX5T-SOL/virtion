@@ -1,12 +1,12 @@
 # Virtion — Codex project notes
 
-Browser-based ER + polyclinic clinical training simulator. Doctor-POV game: new patients arrive at triage, you diagnose, order tests, treat, disposition. Voice conversations with the patient run real-time over LiveKit with provider fallbacks: Deepgram/OpenAI STT, OpenAI/OpenRouter/Gemini/Vercel AI Gateway/Cerebras/Anthropic dialog, and OpenAI/ElevenLabs/Cartesia TTS. Polyclinic is a second flow — one outpatient at a time, tests resolve instantly.
+Browser-based ER + polyclinic clinical training simulator. Doctor-POV game: new patients arrive at triage, you diagnose, order tests, treat, disposition. Voice conversations with the patient run real-time over LiveKit with provider fallbacks: Deepgram/OpenAI STT, Cerebras/Vercel AI Gateway/OpenAI/OpenRouter/Gemini/Anthropic dialog, and ElevenLabs/Cartesia/OpenAI TTS. Polyclinic is a second flow — one outpatient at a time, tests resolve instantly.
 
 ## Tech stack
 
 - **Frontend:** React 18 + TypeScript + Vite, Three.js via `@react-three/fiber` and `@react-three/drei`.
 - **Voice (transport):** LiveKit Cloud (WebRTC). Browser publishes mic, subscribes to remote audio. `livekit-client` in the browser; the worker lives in `backend/voice_agent.py`.
-- **Voice (backend worker):** `livekit-agents` Python framework with Deepgram/OpenAI STT, OpenAI/OpenRouter/Gemini/Vercel AI Gateway/Cerebras/Anthropic LLM, OpenAI/ElevenLabs/Cartesia TTS, and Silero VAD. Runs in its own venv (`backend/.venv-voice`).
+- **Voice (backend worker):** `livekit-agents` Python framework with Deepgram/OpenAI STT, Cerebras/Vercel AI Gateway/OpenAI/OpenRouter/Gemini/Anthropic LLM, ElevenLabs/Cartesia/OpenAI TTS, and Silero VAD. Runs in its own venv (`backend/.venv-voice`).
 - **Backend HTTP:** FastAPI at `http://127.0.0.1:8787` — Managed Agents proxy + local-dev `/voice/token` mint. Netlify/Vercel edge middleware can also mint LiveKit rooms/tokens directly for production resilience.
 - **LLM (attending grading):** Anthropic SDK server-side. Patient voice defaults to OpenAI `gpt-4o-mini` with provider fallbacks inside the LiveKit agent; the virtion-attending Managed Agent (Opus 4.7) lives in `backend/server.py`.
 - **State:** single `Store` class with `useSyncExternalStore` (see `src/game/store.ts`). No Redux/Zustand — don't add one.
@@ -60,8 +60,8 @@ When adding a new script that would normally invoke a binary wrapper, use the sa
 
 | Call | Model | Why |
 |---|---|---|
-| Patient voice persona (in the LiveKit agent) | OpenAI `gpt-4o-mini` default, then OpenRouter/Gemini/Gateway/Cerebras/Anthropic | Fast replies even when one provider is unavailable |
-| Real-time speech stack | Deepgram → OpenAI STT, OpenAI → OpenRouter → Gemini → Vercel AI Gateway → Cerebras → Anthropic LLM, OpenAI → ElevenLabs → Cartesia TTS | Working voice first, then resilient fallbacks |
+| Patient voice persona (in the LiveKit agent) | Cerebras/Vercel AI Gateway default path, then OpenAI/OpenRouter/Gemini/Anthropic/deterministic | Fast replies even when one provider is unavailable |
+| Real-time speech stack | Deepgram → OpenAI STT, Cerebras → Vercel AI Gateway → OpenAI → OpenRouter → Gemini → Anthropic LLM, ElevenLabs → Cartesia → OpenAI TTS | Working voice first, then resilient fallbacks |
 | `virtion-attending` Managed Agent (clinical grading) | **Opus 4.7** | Clinical reasoning, precision matters |
 | Demo video narration generation | Opus 4.7 | One-off, polish matters |
 

@@ -86,15 +86,15 @@ ORDER_ALIASES = {
 }
 DEFAULT_VOICE_STT_ORDER = ["deepgram", "openai", "text_fallback"]
 DEFAULT_VOICE_LLM_ORDER = [
+    "cerebras",
+    "vercel-ai-gateway",
     "openai",
     "openrouter",
     "gemini",
-    "vercel-ai-gateway",
-    "cerebras",
     "anthropic",
     "text_fallback",
 ]
-DEFAULT_VOICE_TTS_ORDER = ["openai", "elevenlabs", "cartesia", "text_fallback"]
+DEFAULT_VOICE_TTS_ORDER = ["elevenlabs", "cartesia", "openai", "text_fallback"]
 
 # Per-IP rate limit caps even authenticated abuse. SSE streams count as one
 # request, so 120/min leaves plenty of headroom for legitimate use.
