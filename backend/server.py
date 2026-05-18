@@ -1711,6 +1711,7 @@ class VoiceTokenRequest(BaseModel):
     initialLine: str
     gender: str  # 'M' | 'F' — speaker gender (parent for pediatric)
     voiceId: Optional[str] = None  # explicit override
+    voiceProfile: Optional[dict[str, str]] = None
     identity: Optional[str] = None  # browser-side participant identity
 
 
@@ -1743,6 +1744,7 @@ async def voice_token(req: VoiceTokenRequest):
             "initialLine": req.initialLine,
             "voiceGender": req.gender,
             "voiceId": req.voiceId,
+            "voiceProfile": req.voiceProfile,
         }
     )
 

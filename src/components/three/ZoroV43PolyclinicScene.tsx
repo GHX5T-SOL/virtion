@@ -569,8 +569,8 @@ function ZoroPatientActor({
   );
   const mixer = useMemo(() => new THREE.AnimationMixer(avatarScene), [avatarScene]);
   const clinicPoseRig = useMemo(() => buildRpmClinicPoseRig(avatarScene), [avatarScene]);
-  const speaking = status === 'speaking';
-  const thinking = status === 'thinking';
+  const speaking = !useMixamoSeatedPatient && status === 'speaking';
+  const thinking = !useMixamoSeatedPatient && status === 'thinking';
   const baseYaw = PATIENT_BASE_YAW;
 
   useLayoutEffect(() => {
@@ -606,7 +606,13 @@ function ZoroPatientActor({
     if (!group.current) return;
     const t = clock.elapsedTime;
     const verticalOffset = useMixamoSeatedPatient ? PATIENT_POOL_VERTICAL_OFFSET : 0;
-    group.current.position.y = position.y + PATIENT_GROUND_Y_OFFSET + verticalOffset + Math.sin(t * 1.2) * PATIENT_IDLE_Y_AMPLITUDE;
+    const idleYOffset = useMixamoSeatedPatient ? 0 : Math.sin(t * 1.2) * PATIENT_IDLE_Y_AMPLITUDE;
+    group.current.position.y = position.y + PATIENT_GROUND_Y_OFFSET + verticalOffset + idleYOffset;
+    if (useMixamoSeatedPatient) {
+      group.current.rotation.y = baseYaw;
+      group.current.rotation.x = 0;
+      return;
+    }
     group.current.rotation.y = baseYaw + Math.sin(t * (speaking ? 1.7 : 0.45)) * (speaking ? 0.045 : 0.022);
     group.current.rotation.x = thinking ? Math.sin(t * 0.9) * 0.018 : 0;
   });
@@ -625,7 +631,7 @@ function ZoroPatientActor({
         <primitive object={avatarScene} />
         <Suspense fallback={null}>
           {useMixamoSeatedPatient ? (
-            <EmbeddedPatientAnimationController mixer={mixer} fallbackClips={gltf.animations} status={status} />
+            <EmbeddedPatientAnimationController mixer={mixer} fallbackClips={gltf.animations} />
           ) : (
             <RpmPatientAnimationController
               avatarScene={avatarScene}
@@ -644,11 +650,9 @@ function ZoroPatientActor({
 function EmbeddedPatientAnimationController({
   mixer,
   fallbackClips,
-  status,
 }: {
   mixer: THREE.AnimationMixer;
   fallbackClips: THREE.AnimationClip[];
-  status: ConversationStatus;
 }) {
   const actionRef = useRef<THREE.AnimationAction | null>(null);
   const clip = useMemo(() => {
@@ -660,8 +664,6 @@ function EmbeddedPatientAnimationController({
       .map((track) => track.clone());
     return new THREE.AnimationClip(`${source.name}-anchored-rotation`, source.duration, anchoredTracks);
   }, [fallbackClips]);
-  const speaking = status === 'speaking';
-  const thinking = status === 'thinking';
 
   useEffect(() => {
     if (!clip) return undefined;
@@ -669,10 +671,12 @@ function EmbeddedPatientAnimationController({
     const previous = actionRef.current;
     if (previous && previous !== next) previous.fadeOut(0.2);
     next.reset().setLoop(THREE.LoopRepeat, Infinity).fadeIn(0.24).play();
-    next.timeScale = speaking ? 0.82 : thinking ? 0.42 : 0.34;
+    next.timeScale = 1;
     actionRef.current = next;
-    return undefined;
-  }, [clip, mixer, speaking, thinking]);
+    return () => {
+      next.fadeOut(0.12);
+    };
+  }, [clip, mixer]);
 
   return null;
 }

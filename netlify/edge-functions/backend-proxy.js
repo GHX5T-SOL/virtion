@@ -248,6 +248,7 @@ async function handleVoiceToken(request) {
     initialLine: body.initialLine,
     voiceGender: body.gender,
     voiceId: body.voiceId,
+    voiceProfile: body.voiceProfile,
   });
 
   try {

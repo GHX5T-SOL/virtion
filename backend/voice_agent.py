@@ -451,25 +451,39 @@ class CascadingLLMStream(lk_llm.LLMStream):
         )
 
 
-def build_tts(voice_id: str, gender: str):
+def _metadata_voice_id(voice_profile: dict[str, Any], key: str) -> str:
+    value = voice_profile.get(key)
+    return value if isinstance(value, str) and value.strip() else ""
+
+
+def build_tts(voice_id: str, gender: str, voice_profile: dict[str, Any] | None = None):
+    voice_profile = voice_profile or {}
     candidates: list[tuple[str, lk_tts.TTS]] = []
     if os.environ.get("CARTESIA_API_KEY"):
         model = os.environ.get("CARTESIA_TTS_MODEL", "sonic-2")
-        candidates.append(("cartesia", cartesia.TTS(model=model, voice=voice_id)))
+        cartesia_voice = _metadata_voice_id(voice_profile, "cartesiaVoiceId") or voice_id
+        candidates.append(("cartesia", cartesia.TTS(model=model, voice=cartesia_voice)))
 
     eleven_key = _env("ELEVEN_API_KEY", "ELEVENLABS_API_KEY")
     if elevenlabs and eleven_key:
         eleven_voice = (
-            _env(f"ELEVENLABS_VOICE_ID_{gender}", f"ELEVEN_VOICE_ID_{gender}")
-            or _env("ELEVENLABS_VOICE_ID", "ELEVEN_VOICE_ID")
+            _metadata_voice_id(voice_profile, "elevenlabsVoiceId")
+            or _env(f"ELEVENLABS_VOICE_ID_{gender}", f"ELEVEN_VOICE_ID_{gender}")
             or ELEVENLABS_VOICE_IDS.get(gender, ELEVENLABS_VOICE_IDS["M"])
+            or _env("ELEVENLABS_VOICE_ID", "ELEVEN_VOICE_ID")
         )
         model = _env("ELEVENLABS_TTS_MODEL", "ELEVEN_TTS_MODEL") or "eleven_flash_v2_5"
         candidates.append(("elevenlabs", elevenlabs.TTS(voice_id=eleven_voice, model=model)))
 
     if openai and os.environ.get("OPENAI_API_KEY"):
         model = os.environ.get("OPENAI_TTS_MODEL", "gpt-4o-mini-tts")
-        voice = _env(f"OPENAI_TTS_VOICE_{gender}", "OPENAI_TTS_VOICE") or "ash"
+        default_openai_voice = "shimmer" if gender == "F" else "ash"
+        voice = (
+            _metadata_voice_id(voice_profile, "openaiVoice")
+            or _env(f"OPENAI_TTS_VOICE_{gender}")
+            or default_openai_voice
+            or _env("OPENAI_TTS_VOICE")
+        )
         candidates.append(
             (
                 "openai",
@@ -501,10 +515,13 @@ async def entrypoint(ctx: agents.JobContext):
     meta = parse_metadata(ctx.room.metadata)
     case_id = meta.get("caseId") or meta.get("case_id") or "unknown"
     speaker_gender = (meta.get("voiceGender") or meta.get("gender") or "M").upper()
+    if speaker_gender not in ("M", "F"):
+        speaker_gender = "M"
     system_prompt = meta.get("systemPrompt") or DEFAULT_INSTRUCTIONS
     initial_line = meta.get("initialLine") or DEFAULT_INITIAL
+    voice_profile = meta.get("voiceProfile") if isinstance(meta.get("voiceProfile"), dict) else {}
 
-    voice_id = meta.get("voiceId") or pick_voice(case_id, speaker_gender)
+    voice_id = meta.get("voiceId") or _metadata_voice_id(voice_profile, "cartesiaVoiceId") or pick_voice(case_id, speaker_gender)
 
     logger.info(
         "joining room=%s case=%s gender=%s voice=%s",
@@ -515,7 +532,7 @@ async def entrypoint(ctx: agents.JobContext):
     session = AgentSession(
         stt=build_stt(vad=vad),
         llm=build_llm(),
-        tts=build_tts(voice_id, speaker_gender),
+        tts=build_tts(voice_id, speaker_gender, voice_profile),
         vad=vad,
         use_tts_aligned_transcript=True,
     )

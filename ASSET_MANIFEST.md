@@ -7,11 +7,11 @@ This is a local prototype manifest, not commercial-license clearance.
 ## Runtime Payload
 
 ```text
-395M public/assets
+380M public/assets
 574M source-assets
 ```
 
-The runtime payload is still large, but Phase51 removed the unused 182 MB public room GLB and switched `/encounter` to a 30 MB optimized room GLB.
+The runtime payload is still large, but Phase51 removed the unused 182 MB public room GLB and switched `/encounter` to a 15 MB optimized room GLB.
 
 ## Active Runtime Assets
 
@@ -305,7 +305,7 @@ Meshy spend requires explicit cost approval before generation. The rejected Phas
 ## Current Large Asset Risk
 
 ```text
-30M public/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb
+15M public/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb
 18M public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.glb
 17M public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.fbx
 14M public/assets/medical-suite/props/stethoscope/stethoscope-unity-clean.glb
