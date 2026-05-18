@@ -71,6 +71,8 @@ Motion:
 - `fizer-chart-avatar`: initials/status identity stamp for patient cards. Do not use the old low-poly patient faces.
 - `fizer-exam`: Fizer-styled examination overlay while preserving the existing clinical tab logic.
 - `fizer-hero-stage`: interactive splash hero scene built from CSS layers, pointer-reactive room perspective, diagnostic orbits, and Fizer status strips. It replaces the old static preview card without adding heavyweight generated assets.
+- `fizer-company`, `fizer-platform-card`, `fizer-network-panel`, and `fizer-roadmap-card`: homepage sections for the professional startup story, university education use case, future discipline expansion, and consent-first biomedical compute roadmap.
+- Header treatment: all learner screens use the Fizer wordmark lockup, navy/cyan breadcrumb pill, dark encounter status pill, and icon-only ambient-audio control. Do not restore the old yellow active breadcrumb or text `ON/OFF` audio chip.
 
 ## Copy Rules
 

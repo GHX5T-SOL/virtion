@@ -314,12 +314,10 @@ export function Breadcrumb({ steps, here }: BreadcrumbProps) {
               <span className="here">{s}</span>
             ) : (
               <span
+                className={clickable ? 'breadcrumb-link' : undefined}
                 onClick={clickable ? () => store.setScreen(target) : undefined}
                 style={{
                   cursor: clickable ? 'pointer' : 'default',
-                  textDecoration: clickable ? 'underline' : 'none',
-                  textDecorationStyle: 'dotted',
-                  textUnderlineOffset: 3,
                 }}
               >
                 {s}
@@ -348,20 +346,20 @@ export function TopBar({
   const label = steps[here] ?? steps[steps.length - 1] ?? 'Training';
   return (
     <div
-      className="topbar"
+      className="topbar fizer-topbar"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 18,
-        padding: '10px clamp(14px, 3vw, 28px)',
-        borderBottom: '1px solid var(--line)',
-        background: 'rgba(255, 255, 255, 0.72)',
+        padding: '12px clamp(14px, 3vw, 32px)',
+        borderBottom: '1px solid rgba(7, 20, 49, 0.08)',
+        background: 'linear-gradient(90deg, rgba(255,255,255,0.94), rgba(245,251,255,0.86))',
         backdropFilter: 'blur(24px) saturate(1.35)',
         position: 'sticky',
         top: 0,
-        zIndex: 30,
-        boxShadow: '0 14px 34px rgba(8,32,55,0.06)',
+        zIndex: 60,
+        boxShadow: '0 18px 46px rgba(6,20,49,0.08)',
       }}
     >
       <span
@@ -370,7 +368,7 @@ export function TopBar({
         title="Back to start"
         style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}
       >
-        <Wordmark size={34} />
+        <Wordmark size={42} />
       </span>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>
         <div className="topbar-crumbs">
@@ -387,10 +385,11 @@ export function TopBar({
             gap: 10,
             minWidth: 150,
             justifyContent: 'flex-end',
-            padding: '6px 7px 6px 12px',
-            border: '1px solid var(--line)',
+            padding: '7px 8px 7px 13px',
+            border: '1px solid rgba(24,199,232,0.24)',
             borderRadius: 'var(--r-pill)',
-            background: 'rgba(255,255,255,0.62)',
+            background: 'linear-gradient(135deg, rgba(6,20,49,0.96), rgba(23,63,143,0.88))',
+            boxShadow: '0 18px 42px rgba(6,20,49,0.14), 0 0 20px rgba(24,199,232,0.12)',
           }}
         >
           <span
@@ -399,11 +398,11 @@ export function TopBar({
               width: 8,
               height: 8,
               borderRadius: '50%',
-              background: 'var(--mint)',
-              boxShadow: '0 0 18px rgba(69, 240, 176, 0.75)',
+              background: 'var(--fizer-teal)',
+              boxShadow: '0 0 18px rgba(55,214,221,0.86)',
             }}
           />
-          <span className="topbar-status-label" style={{ fontWeight: 800, fontSize: 11, color: 'var(--ink-2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <span className="topbar-status-label" style={{ fontWeight: 850, fontSize: 11, color: '#e7fbff', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             {label}
           </span>
           <div
@@ -411,9 +410,9 @@ export function TopBar({
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, rgba(0,199,255,0.18), rgba(0,166,126,0.12))',
-              border: '1px solid rgba(8,32,55,0.12)',
-              boxShadow: 'var(--plush-tiny)',
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(184,247,255,0.22)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -440,7 +439,10 @@ interface WordmarkProps {
 
 export function Wordmark({ size = 36, dark = false }: WordmarkProps) {
   return (
-    <div
+    <span
+      role="img"
+      aria-label="Fizer"
+      className="fizer-wordmark"
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -450,18 +452,28 @@ export function Wordmark({ size = 36, dark = false }: WordmarkProps) {
       }}
     >
       <img
-        src="/fizer_logo.png"
-        alt={dark ? 'Fizer' : 'Fizer home'}
+        src="/fizer_favicon.png"
+        alt=""
+        aria-hidden="true"
         style={{
-          width: size * 8.2,
-          maxWidth: 'min(54vw, 360px)',
-          height: size * 2.1,
+          width: size,
+          height: size * 0.9,
           objectFit: 'contain',
-          objectPosition: 'left center',
           filter: dark ? 'drop-shadow(0 18px 34px rgba(0,0,0,0.35))' : 'drop-shadow(0 12px 26px rgba(16, 43, 104, 0.12))',
         }}
       />
-    </div>
+      <span
+        style={{
+          color: dark ? '#f5fbff' : 'var(--fizer-navy)',
+          fontFamily: 'Sora, Inter, system-ui, sans-serif',
+          fontSize: size * 0.38,
+          fontWeight: 800,
+          letterSpacing: `${size * 0.09}px`,
+        }}
+      >
+        FIZER
+      </span>
+    </span>
   );
 }
 

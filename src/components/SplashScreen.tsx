@@ -8,6 +8,49 @@ const SIGNALS = [
   ['Structured debrief', 'after every case'],
 ];
 
+const PLATFORM_PILLARS = [
+  {
+    label: 'Simulation layer',
+    title: 'University-ready clinical practice',
+    body: 'Synthetic cases let medical students rehearse history taking, examination, investigations, diagnosis, prescribing, counselling, and debrief without patient risk.',
+  },
+  {
+    label: 'Assessment layer',
+    title: 'Structured feedback after every case',
+    body: 'The simulator captures learner decisions and turns them into a debrief across data gathering, clinical management, and communication.',
+  },
+  {
+    label: 'Research layer',
+    title: 'Consent-first compute network',
+    body: 'The long-term roadmap is a decentralized device network that can contribute idle compute to protein folding, gene sequencing, and drug-discovery simulations.',
+  },
+];
+
+const ROADMAP = [
+  {
+    phase: '01',
+    title: '3D clinical simulation',
+    body: 'Ship the core doctor-POV consultation loop for medical students, with robust fallback-safe voice and debriefs.',
+  },
+  {
+    phase: '02',
+    title: 'Curriculum and institutions',
+    body: 'Package specialty modules for universities, skills labs, OSCE preparation, and supervised training cohorts.',
+  },
+  {
+    phase: '03',
+    title: 'More disciplines',
+    body: 'Extend the case engine into dentistry, veterinary medicine, emergency care, allied health, and non-medical decision training.',
+  },
+  {
+    phase: '04',
+    title: 'Biomedical compute rails',
+    body: 'Explore consent-first distributed compute for research workloads such as protein folding and drug-discovery simulations.',
+  },
+];
+
+const EXPANSIONS = ['Medicine', 'Dentistry', 'Veterinary', 'Emergency', 'Nursing', 'Allied health', 'Biotech R&D', 'Decision training'];
+
 function ClinicPreview() {
   const stageRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +138,56 @@ function ClinicPreview() {
   );
 }
 
+function CompanyStory() {
+  return (
+    <section className="fizer-company" aria-label="Fizer company roadmap">
+      <div className="fizer-section-heading">
+        <div className="fizer-kicker">Platform vision</div>
+        <h2>Clinical education first. Biomedical infrastructure next.</h2>
+        <p>
+          Fizer starts as a high-fidelity education tool for university students. The same simulation, assessment, and consent-first infrastructure can grow into a broader training platform and, later, a research compute network.
+        </p>
+      </div>
+
+      <div className="fizer-platform-grid">
+        {PLATFORM_PILLARS.map((pillar) => (
+          <article key={pillar.label} className="fizer-platform-card">
+            <span>{pillar.label}</span>
+            <h3>{pillar.title}</h3>
+            <p>{pillar.body}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="fizer-network-panel">
+        <div>
+          <div className="fizer-kicker">Future compute opportunity</div>
+          <h2>Idle devices as a consent-first science network.</h2>
+        </div>
+        <p>
+          The long-term opportunity is to let opted-in devices contribute compute to biomedical simulations. That can support protein folding, sequencing workloads, and drug-discovery research while keeping today&apos;s product focused on synthetic education.
+        </p>
+      </div>
+
+      <div className="fizer-roadmap">
+        {ROADMAP.map((item) => (
+          <article key={item.phase} className="fizer-roadmap-card">
+            <strong>{item.phase}</strong>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="fizer-expansion-strip" aria-label="Expansion opportunities">
+        {EXPANSIONS.map((item) => (
+          <span key={item} className="fizer-expansion-chip">{item}</span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function SplashScreen() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -120,7 +213,7 @@ export function SplashScreen() {
           padding: '18px 0',
         }}
       >
-        <Wordmark size={38} />
+        <Wordmark size={54} />
         <div className="fizer-kicker">3D clinical simulation</div>
       </header>
 
@@ -137,7 +230,7 @@ export function SplashScreen() {
         >
           <div className="popin" style={{ maxWidth: 670 }}>
             <div style={{ marginBottom: 18 }}>
-              <Wordmark size={56} />
+              <Wordmark size={92} />
             </div>
             <h1 style={{ fontSize: 'clamp(46px, 7vw, 84px)', lineHeight: 0.94, letterSpacing: 0 }}>
               Practice patient encounters in a 3D clinic.
@@ -159,6 +252,8 @@ export function SplashScreen() {
 
           <ClinicPreview />
         </section>
+
+        <CompanyStory />
       </main>
     </div>
   );

@@ -12,7 +12,7 @@ The current default scene uses Zoro's v43 room donor asset inside the Fizer enco
 
 ## Current Product Focus
 
-Room and HUD are acceptable for now. The 2026-05-18 product pass rebranded the app from Virtion to Fizer, removed the old platform CTA and module picker, replaced the static splash preview with a lightweight interactive hero scene, and redesigned the home, control room, chart browser, brief, and examination overlay while preserving the 3D clinic scene. Phase46 completed patient-specific name/avatar assignment. Phase49 accepted a high-quality seated animated Mpho Molefe (`im-001`) sample. Phase50 extends that approach with eight user-supplied Mixamo seated/talking patient-pool assets:
+Room and HUD are acceptable for now. The 2026-05-18 product pass rebranded the app from Virtion to Fizer, removed the old platform CTA and module picker, replaced the static splash preview with a lightweight interactive hero scene, added professional company/roadmap homepage sections, and redesigned the home, control room, chart browser, brief, top navigation, and examination overlay while preserving the 3D clinic scene. Phase46 completed patient-specific name/avatar assignment. Phase49 accepted a high-quality seated animated Mpho Molefe (`im-001`) sample. Phase50 extends that approach with eight user-supplied Mixamo seated/talking patient-pool assets:
 
 1. preserve female cases rendering female avatars and male cases rendering male avatars;
 2. use broad `avatarRace` mapping for black, white, indian, and asian pool assets;

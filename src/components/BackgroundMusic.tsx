@@ -135,17 +135,17 @@ export function BackgroundMusic() {
       aria-label={userMuted ? 'Unmute ambient audio' : 'Mute ambient audio'}
       style={{
         position: 'fixed',
-        top: 18,
-        right: 176,
+        top: 23,
+        right: 'clamp(84px, 16vw, 224px)',
         zIndex: 1000,
-        width: 38,
-        height: 38,
-        borderRadius: 12,
-        border: '1px solid rgba(255,255,255,0.18)',
-        background: off ? 'rgba(255,255,255,0.06)' : 'rgba(79,227,255,0.16)',
-        boxShadow: off ? 'var(--plush-tiny)' : '0 0 24px rgba(79,227,255,0.26), var(--plush-tiny)',
+        width: 34,
+        height: 34,
+        borderRadius: 999,
+        border: '1px solid rgba(24,199,232,0.24)',
+        background: off ? 'rgba(255,255,255,0.78)' : 'rgba(24,199,232,0.16)',
+        boxShadow: off ? '0 10px 26px rgba(6,20,49,0.08)' : '0 0 24px rgba(24,199,232,0.26), 0 12px 28px rgba(6,20,49,0.10)',
         cursor: 'pointer',
-        color: off ? 'var(--ink-soft)' : 'var(--peach-deep)',
+        color: off ? 'var(--ink-soft)' : 'var(--fizer-blue)',
         fontFamily: 'Sora, Inter, sans-serif',
         fontWeight: 900,
         display: 'grid',
@@ -153,7 +153,23 @@ export function BackgroundMusic() {
         padding: 0,
       }}
     >
-      <span aria-hidden>{off ? 'OFF' : 'ON'}</span>
+      <span aria-hidden style={{ position: 'relative', fontSize: 17, lineHeight: 1 }}>
+        ♪
+        {off && (
+          <span
+            style={{
+              position: 'absolute',
+              left: -4,
+              top: 8,
+              width: 24,
+              height: 2,
+              borderRadius: 999,
+              background: 'currentColor',
+              transform: 'rotate(-35deg)',
+            }}
+          />
+        )}
+      </span>
     </button>
   );
 }
