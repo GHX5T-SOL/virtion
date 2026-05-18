@@ -103,6 +103,7 @@ async function fetchVoiceToken(opts: {
   systemPrompt: string;
   initialLine: string;
   gender: 'M' | 'F';
+  voiceId?: string;
   voiceProfile?: PatientVoiceProfile;
 }): Promise<VoiceTokenResponse> {
   const r = await fetch('/voice/token', {
@@ -386,6 +387,7 @@ export class Conversation {
         systemPrompt: this.systemPrompt,
         initialLine,
         gender: this.voiceGender,
+        voiceId: this.voiceProfile?.cartesiaVoiceId,
         voiceProfile: this.voiceProfile,
       });
 

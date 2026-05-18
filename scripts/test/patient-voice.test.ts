@@ -13,6 +13,12 @@ test('patient voice profiles are gender-specific across providers', () => {
   assert.notEqual(female.openaiVoice, male.openaiVoice);
 });
 
+test('female patient voice profile has a cartesia voice for the primary voice id', () => {
+  const female = buildPatientVoiceProfile('im-004', 'F');
+
+  assert.equal(female.cartesiaVoiceId, 'cec7cae1-ac8b-4a59-9eac-ec48366f37ae');
+});
+
 test('patient voice profile selection is stable per case', () => {
   assert.deepEqual(
     buildPatientVoiceProfile('card-002', 'F'),

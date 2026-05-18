@@ -75,6 +75,8 @@ envVarGroups:
         value: llama-3.3-70b
       - key: CEREBRAS_PATIENT_MODEL
         value: llama-3.1-8b
+      - key: VOICE_TTS_ORDER
+        value: cartesia,elevenlabs,openai
       - key: CARTESIA_TTS_MODEL
         value: sonic-2
       - key: ELEVENLABS_TTS_MODEL

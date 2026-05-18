@@ -83,7 +83,7 @@ ELEVENLABS_VOICE_IDS = {
 }
 DEFAULT_STT_ORDER = ["deepgram", "openai"]
 DEFAULT_LLM_ORDER = ["cerebras", "vercel-ai-gateway", "openai", "openrouter", "gemini", "anthropic"]
-DEFAULT_TTS_ORDER = ["elevenlabs", "cartesia", "openai"]
+DEFAULT_TTS_ORDER = ["cartesia", "elevenlabs", "openai"]
 ORDER_ALIASES = {
     "eleven": "elevenlabs",
     "eleven_labs": "elevenlabs",
