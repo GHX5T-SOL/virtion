@@ -55,194 +55,104 @@ export function ExamineOverlay({ onClose, onDispatch }: Props) {
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 50,
-        background: 'rgba(234,243,251,0.62)',
-        backdropFilter: 'blur(10px) saturate(1.1)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: '36px 36px 24px',
-        overflowY: 'auto',
-      }}
+      className="fizer-exam-backdrop"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
-        className="plush-lg popin"
-        style={{
-          width: 'min(960px, 100%)',
-          background: 'var(--paper)',
-          padding: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: 'calc(100vh - 60px)',
-        }}
-      >
-        {/* Header strip */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            padding: '14px 22px',
-            background: 'var(--cream-2)',
-            borderBottom: '1px solid var(--line)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-            <span className="chip butter" style={{ fontSize: 11 }}>
-              EXAMINE
-            </span>
-            <h2 style={{ margin: 0, fontSize: 22, lineHeight: 1.1 }}>{c.name}</h2>
-            <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--ink-2)' }}>
-              {c.age} · {c.gender === 'F' ? 'Female' : 'Male'}
-            </span>
-            <span
-              className={`chip ${c.severity === 'critical' ? 'rose' : c.severity === 'urgent' ? 'peach' : 'mint'}`}
-              style={{ fontSize: 11 }}
-            >
-              {c.severity}
-            </span>
+      <div className="fizer-exam fizer-panel popin">
+        <aside className="fizer-exam__side">
+          <div className="fizer-kicker" style={{ color: '#bff5ff', background: 'rgba(255,255,255,0.07)', borderColor: 'rgba(24,199,232,0.30)' }}>
+            Examination
           </div>
-          <button
-            type="button"
-            className="btn-plush ghost"
-            onClick={onClose}
-            style={{ fontSize: 13, padding: '8px 16px' }}
-            title="Close (Esc)"
-          >
-            ✕ Close
+          <h2 style={{ marginTop: 16, fontSize: 30, lineHeight: 1.02 }}>{c.name}</h2>
+          <div style={{ marginTop: 8, color: '#a9c6dd', fontWeight: 800 }}>
+            {c.age} · {c.gender === 'F' ? 'Female' : 'Male'}
+          </div>
+          <span className={`chip ${c.severity === 'critical' ? 'rose' : c.severity === 'urgent' ? 'peach' : 'mint'}`} style={{ marginTop: 14 }}>
+            {c.severity}
+          </span>
+
+          <div style={{ marginTop: 24, display: 'grid', gap: 8 }}>
+            <Vital icon="HR" label="HR" value={String(c.vitals.hr)} unit="bpm" tone="var(--rose)" />
+            <Vital icon="BP" label="BP" value={c.vitals.bp} unit="mmHg" tone="var(--peach)" />
+            <Vital icon="O2" label="SpO2" value={`${c.vitals.spo2}`} unit="%" tone="var(--mint)" />
+            <Vital icon="TC" label="Temp" value={c.vitals.temp.toFixed(1)} unit="C" tone="var(--butter)" />
+            <Vital icon="RR" label="RR" value={String(c.vitals.rr)} unit="/min" tone="var(--sky)" />
+          </div>
+
+          <div style={{ marginTop: 22, padding: 14, border: '1px solid rgba(255,255,255,0.14)', borderRadius: 8, background: 'rgba(255,255,255,0.07)' }}>
+            <div style={{ color: '#a9c6dd', fontSize: 11, fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              Chief complaint
+            </div>
+            <p style={{ margin: '8px 0 0', color: '#fff', fontWeight: 700, lineHeight: 1.45 }}>
+              "{c.chiefComplaint}"
+            </p>
+          </div>
+
+          <button type="button" className="fizer-button" onClick={onClose} style={{ width: '100%', marginTop: 18 }} title="Close (Esc)">
+            Close
           </button>
-        </div>
+        </aside>
 
-        {/* Vitals strip */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: 8,
-            padding: '12px 22px',
-            background: 'var(--cream)',
-            borderBottom: '3px solid var(--line)',
-          }}
-        >
-          <Vital icon="❤" label="HR" value={String(c.vitals.hr)} unit="bpm" tone="var(--rose)" />
-          <Vital icon="⌥" label="BP" value={c.vitals.bp} unit="mmHg" tone="var(--peach)" />
-          <Vital icon="○" label="SpO₂" value={`${c.vitals.spo2}`} unit="%" tone="var(--mint)" />
-          <Vital icon="☼" label="Temp" value={c.vitals.temp.toFixed(1)} unit="°C" tone="var(--butter)" />
-          <Vital icon="~" label="RR" value={String(c.vitals.rr)} unit="/min" tone="var(--sky)" />
-        </div>
+        <section className="fizer-exam__main">
+          <div className="fizer-tabbar">
+            {tabs.map((t) => {
+              const active = tab === t.id;
+              const disabled = !!t.disabled;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`fizer-tab ${active ? 'active' : ''}`}
+                  onClick={() => !disabled && setTab(t.id)}
+                  disabled={disabled}
+                  title={disabled ? 'Submit a diagnosis first' : undefined}
+                  style={{ opacity: disabled ? 0.45 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
+                >
+                  {t.label}
+                  {t.badge !== undefined && <span style={{ marginLeft: 6 }}>{t.badge}</span>}
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Tab strip */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 8,
-            padding: '12px 22px 0',
-            borderBottom: '3px solid var(--line)',
-            background: 'white',
-          }}
-        >
-          {tabs.map((t) => {
-            const active = tab === t.id;
-            const disabled = !!t.disabled;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                className="tap"
-                onClick={() => !disabled && setTab(t.id)}
-                disabled={disabled}
-                title={disabled ? 'Submit a diagnosis first' : undefined}
-                style={{
-                  background: active ? 'var(--butter)' : 'white',
-                  border: '3px solid var(--line)',
-                  borderBottom: active ? '3px solid var(--butter)' : '3px solid var(--line)',
-                  borderRadius: '14px 14px 0 0',
-                  padding: '10px 16px',
-                  fontWeight: 800,
-                  fontSize: 13,
-                  cursor: disabled ? 'not-allowed' : 'pointer',
-                  marginBottom: -3,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontFamily: 'inherit',
-                  color: 'var(--ink)',
-                  opacity: disabled ? 0.45 : 1,
-                }}
-              >
-                {t.label}
-                {t.badge !== undefined && (
-                  <span
-                    className="chip"
-                    style={{ fontSize: 10, padding: '1px 7px', background: 'white' }}
-                  >
-                    {t.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+          <div style={{ padding: 18, overflowY: 'auto', flex: 1 }}>
+            {tab === 'history' && <HistoryTab patient={patient} />}
+            {tab === 'chat' && <ChatTab patientName={c.name} />}
+            {tab === 'tests' && <TestsTab patient={patient} />}
+            {tab === 'results' && <ResultsTab patient={patient} />}
+            {tab === 'diagnose' && (
+              <DiagnoseTab
+                patient={patient}
+                onDispatch={onDispatch}
+                onGoToRx={() => setTab('rx')}
+                submitted={submitted}
+              />
+            )}
+            {tab === 'rx' && (
+              <RxTab patient={patient} onDispatch={onDispatch} unlocked={rxUnlocked} />
+            )}
+          </div>
 
-        {/* Tab body */}
-        <div style={{ padding: 22, overflowY: 'auto', flex: 1 }}>
           <div
             style={{
-              padding: '12px 14px',
-              background: 'var(--cream-2)',
-              border: '3px solid var(--line)',
-              borderRadius: 'var(--r-md)',
-              boxShadow: 'var(--plush-tiny)',
-              marginBottom: 18,
-              fontSize: 14,
-              fontWeight: 700,
-              fontStyle: 'italic',
+              padding: '10px 16px',
+              borderTop: '1px solid rgba(6,20,49,0.10)',
+              background: 'rgba(255,255,255,0.78)',
+              fontSize: 11,
+              fontWeight: 800,
+              color: 'var(--ink-2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 12,
+              flexWrap: 'wrap',
             }}
           >
-            "{c.chiefComplaint}"
+            <span>Esc closes · {ordered.size} test{ordered.size === 1 ? '' : 's'} ordered</span>
+            <span>{submitted ? `Diagnosis: ${diagLabel(submitted)}` : 'Diagnosis pending'}</span>
           </div>
-
-          {tab === 'history' && <HistoryTab patient={patient} />}
-          {tab === 'chat' && <ChatTab patientName={c.name} />}
-          {tab === 'tests' && <TestsTab patient={patient} />}
-          {tab === 'results' && <ResultsTab patient={patient} />}
-          {tab === 'diagnose' && (
-            <DiagnoseTab
-              patient={patient}
-              onDispatch={onDispatch}
-              onGoToRx={() => setTab('rx')}
-              submitted={submitted}
-            />
-          )}
-          {tab === 'rx' && (
-            <RxTab patient={patient} onDispatch={onDispatch} unlocked={rxUnlocked} />
-          )}
-        </div>
-
-        {/* Footer hint */}
-        <div
-          style={{
-            padding: '10px 22px',
-            borderTop: '3px solid var(--line)',
-            background: 'var(--cream-2)',
-            fontSize: 11,
-            fontWeight: 700,
-            color: 'var(--ink-2)',
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span>Press Esc to close · {ordered.size} test{ordered.size === 1 ? '' : 's'} ordered</span>
-          <span>{submitted ? `Diagnosis: ${diagLabel(submitted)}` : 'Diagnosis pending'}</span>
-        </div>
+        </section>
       </div>
     </div>
   );
@@ -266,18 +176,24 @@ function Vital({
   return (
     <div
       style={{
-        background: tone,
-        border: '3px solid var(--line)',
-        borderRadius: 12,
-        padding: '6px 4px',
-        textAlign: 'center',
-        boxShadow: 'var(--plush-tiny)',
+        display: 'grid',
+        gridTemplateColumns: '34px 1fr',
+        alignItems: 'center',
+        gap: 10,
+        background: 'rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        borderRadius: 8,
+        padding: '10px',
       }}
     >
-      <div style={{ fontSize: 14 }}>{icon}</div>
-      <div style={{ fontWeight: 900, fontSize: 16, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 10, fontWeight: 700 }}>
-        {label} <span style={{ opacity: 0.6 }}>{unit}</span>
+      <div style={{ width: 34, height: 34, borderRadius: 8, display: 'grid', placeItems: 'center', background: tone, color: 'var(--fizer-navy)', fontSize: 11, fontWeight: 900 }}>
+        {icon}
+      </div>
+      <div>
+        <div style={{ fontWeight: 900, fontSize: 16, lineHeight: 1, color: '#fff' }}>{value}</div>
+        <div style={{ fontSize: 10, fontWeight: 800, color: '#a9c6dd', marginTop: 4 }}>
+          {label} <span style={{ opacity: 0.75 }}>{unit}</span>
+        </div>
       </div>
     </div>
   );
@@ -394,7 +310,7 @@ function TestsTab({ patient }: { patient: NonNullable<ReturnType<typeof useGameS
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>
-        Polyclinic tests return <strong>instantly</strong>. Sections are collapsed — click a row to open it.
+        3D clinic tests return <strong>instantly</strong>. Sections are collapsed - click a row to open it.
       </div>
 
       {/* Panels — clinic-scoped, collapsible. */}

@@ -7,18 +7,22 @@ This is a local prototype manifest, not commercial-license clearance.
 ## Runtime Payload
 
 ```text
-380M public/assets
+306M public/assets
 574M source-assets
 ```
 
-The runtime payload is still large, but Phase51 removed the unused 182 MB public room GLB and switched `/encounter` to a 15 MB optimized room GLB.
+The runtime payload is still large, but Phase51 removed the unused 182 MB public room GLB, switched `/encounter` to a 3.6 MB meshopt-compressed room GLB, removed the blocking HDRI load from the first render path, and recompressed the active Mixamo patient pool to sub-1.1 MB GLBs.
+
+Phase52 added the Fizer rebrand assets and replaced the static splash card with a lightweight interactive CSS hero scene. No new heavy bitmap hero asset was introduced.
 
 ## Active Runtime Assets
 
 | Asset | Path | Use |
 | --- | --- | --- |
+| Fizer logo | `public/fizer_logo.png` | Rebrand wordmark for splash and navigation |
+| Fizer favicon | `public/fizer_favicon.png` | Browser favicon, app mark, and small in-UI brand mark |
 | Zoro v43 room optimized | `public/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb` | Default `/encounter` room |
-| v43 support assets | `public/assets/medical-suite/environment/v43/visual-upgrade-v11/` | HDRI/textures/backplates |
+| v43 support assets | `public/assets/medical-suite/environment/v43/visual-upgrade-v11/` | Support textures/backplates; HDRI retained on disk but not loaded in the `/encounter` critical path |
 | Phase34 patient | `public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.glb` | Legacy/fallback patient |
 | Zoro patient candidates | `public/assets/medical-suite/patients/zoro/` | Registered candidates/fallbacks |
 | Local RPM avatars | `public/assets/medical-suite/patients/rpm-local/` | Active Phase46 patient avatar pool; Phase48 placeholders unless seated animation path is proven |
@@ -269,14 +273,14 @@ Runtime files:
 
 | Runtime GLB | Approx size | Mapping |
 | --- | ---: | --- |
-| `patient-pool-female-black.glb` | 7.4 MB | F / black |
-| `patient-pool-female-white.glb` | 8.5 MB | F / white |
-| `patient-pool-female-indian.glb` | 8.8 MB | F / indian |
-| `patient-pool-female-asian.glb` | 7.0 MB | F / asian |
-| `patient-pool-male-black.glb` | 5.8 MB | M / black |
-| `patient-pool-male-white.glb` | 8.9 MB | M / white |
-| `patient-pool-male-indian.glb` | 11.5 MB | M / indian |
-| `patient-pool-male-asian.glb` | 7.4 MB | M / asian |
+| `patient-pool-female-black.glb` | 864 KB | F / black |
+| `patient-pool-female-white.glb` | 1.0 MB | F / white |
+| `patient-pool-female-indian.glb` | 1.0 MB | F / indian |
+| `patient-pool-female-asian.glb` | 832 KB | F / asian |
+| `patient-pool-male-black.glb` | 608 KB | M / black |
+| `patient-pool-male-white.glb` | 1.1 MB | M / white |
+| `patient-pool-male-indian.glb` | 1.1 MB | M / indian |
+| `patient-pool-male-asian.glb` | 952 KB | M / asian |
 
 Each runtime GLB has a matching metadata JSON and is included in `patient-pool-manifest.json`.
 
@@ -284,7 +288,7 @@ Source/provenance notes:
 
 1. These are user-supplied Mixamo FBXs, not procedural characters.
 2. Local Blender audit found one 65-bone Mixamo armature and one embedded seated/talking action per source FBX.
-3. Textures were resized to 1024 px during conversion.
+3. Textures were resized to 1024 px during conversion, then Phase51 recompressed runtime GLBs with meshopt and WebP texture payloads for Netlify load time.
 4. Public/commercial clearance still needs explicit user/license review before claims beyond prototype/MVP use.
 
 Visual proof:
@@ -305,7 +309,6 @@ Meshy spend requires explicit cost approval before generation. The rejected Phas
 ## Current Large Asset Risk
 
 ```text
-15M public/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb
 18M public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.glb
 17M public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.fbx
 14M public/assets/medical-suite/props/stethoscope/stethoscope-unity-clean.glb

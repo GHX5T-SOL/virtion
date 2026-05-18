@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
-import { PatientFace, TopBar } from './primitives';
+import { useMemo } from 'react';
+import { TopBar } from './primitives';
 import { CASES, getCase } from '../data/cases';
 import { CLINIC_IDS, CLINIC_LABELS, type ClinicId } from '../game/clinic';
-import { store, useGameState, useTweaks } from '../game/store';
+import { store, useGameState } from '../game/store';
 
 const CLINIC_ICON: Record<ClinicId, string> = {
   'all-specialties': 'ALL',
@@ -32,286 +32,169 @@ const CLINIC_ICON: Record<ClinicId, string> = {
   'cardiothoracic-vascular-surgery': 'CTS',
 };
 
+function ChartAvatar({ name, cond }: { name: string; cond: string }) {
+  const initials = name.split(' ').map((part) => part[0]).slice(0, 2).join('');
+  return (
+    <div className="fizer-chart-avatar">
+      <strong>{initials}</strong>
+      <span
+        style={{
+          position: 'absolute',
+          right: 6,
+          bottom: 6,
+          width: 22,
+          height: 22,
+          borderRadius: 6,
+          display: 'grid',
+          placeItems: 'center',
+          background: cond.toLowerCase().includes('red') ? 'var(--rose)' : 'var(--mint)',
+          color: 'var(--fizer-navy)',
+          fontSize: 10,
+          fontWeight: 900,
+          border: '1px solid rgba(6,20,49,0.12)',
+        }}
+      >
+        {cond.slice(0, 2).toUpperCase()}
+      </span>
+    </div>
+  );
+}
+
 export function GPRoomScreen() {
-  const tweaks = useTweaks();
   const state = useGameState();
   const activeClinic = state.polyclinic.clinic;
-  const [pickerOpen, setPickerOpen] = useState(false);
 
-  // Cases from the active clinic — that's what "Accept the next patient"
-  // will walk through. 'all-specialties' pulls from every roster.
   const clinicCases = useMemo(() => {
     if (activeClinic === 'all-specialties') return CASES;
     return CASES.filter((c) => c.clinic === activeClinic);
   }, [activeClinic]);
 
-  const totalAll = CASES.length;
-  const queueAhead = clinicCases.length;
   const nextId = store.pickNextCaseId() ?? clinicCases[0]?.id ?? CASES[0]?.id;
   const next = nextId ? getCase(nextId) : null;
 
-  // Only show clinics that actually have at least one case in the
-  // catalogue, plus the synthetic "all" option at the top.
   const availableClinics = useMemo(() => {
     return CLINIC_IDS.filter(
       (id) => id === 'all-specialties' || CASES.some((c) => c.clinic === id),
     );
   }, []);
 
+  const queuePreview = clinicCases.slice(0, 4);
+
   return (
-    <div className="screen virtion-shell" style={{ position: 'relative', overflowY: 'auto' }}>
-      <TopBar here={1} steps={['Polyclinic', 'GP']} />
+    <div className="screen fizer-page" style={{ overflowY: 'auto' }}>
+      <TopBar here={1} steps={['Fizer', '3D Clinic']} />
 
-      <div style={{ padding: '36px 36px 12px', textAlign: 'center' }}>
-        <span className="chip mint" style={{ marginBottom: 12 }}>
-          POLYCLINIC CONTROL ROOM
-        </span>
-        <h1 style={{ fontSize: 42, lineHeight: 1.05, marginTop: 12 }}>How would you like to start?</h1>
-        <div
-          style={{
-            fontSize: 16,
-            color: 'var(--ink-2)',
-            fontWeight: 600,
-            marginTop: 8,
-            maxWidth: 620,
-            margin: '8px auto 0',
-          }}
-        >
-          Pick a polyclinic and the next patient on the bench will walk straight in. Or browse the case folder.
-        </div>
-      </div>
-
-      {/* Clinic picker — collapsible */}
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '12px 36px 4px' }}>
-        <button
-          type="button"
-          onClick={() => setPickerOpen((v) => !v)}
-          className="btn-plush ghost"
-          style={{
-            width: '100%',
-            padding: '14px 18px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: 15,
-            fontWeight: 800,
-            background: 'rgba(255,255,255,0.68)',
-          }}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 800,
-                color: 'var(--ink-2)',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-              }}
-            >
-              Specialty
-            </span>
-            <span>
-              {CLINIC_ICON[activeClinic]} {CLINIC_LABELS[activeClinic]}
-            </span>
-          </span>
-          <span style={{ fontWeight: 800, color: 'var(--ink-2)' }}>{pickerOpen ? '▴' : '▾'}</span>
-        </button>
-
-        {pickerOpen && (
-          <div
-            className="plush"
-            style={{
-              marginTop: 8,
-              padding: 12,
-              background: 'var(--glass-strong)',
-              display: 'flex',
-              gap: 8,
-              flexWrap: 'wrap',
-            }}
-          >
-            {availableClinics.map((id) => {
-              const isActive = activeClinic === id;
-              return (
-                <span
-                  key={id}
-                  className={`chip ${isActive ? 'butter' : ''}`}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    store.setPolyclinicClinic(id);
-                    setPickerOpen(false);
-                  }}
-                >
-                  {CLINIC_ICON[id]} {CLINIC_LABELS[id]}
-                </span>
-              );
-            })}
+      <main className="fizer-shell" style={{ padding: '34px 0 72px' }}>
+        <section style={{ display: 'flex', justifyContent: 'space-between', gap: 18, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 20 }}>
+          <div style={{ maxWidth: 760 }}>
+            <div className="fizer-kicker">Control room</div>
+            <h1 style={{ marginTop: 12, fontSize: 'clamp(38px, 5.6vw, 68px)', lineHeight: 0.98 }}>
+              Choose the next consultation.
+            </h1>
+            <p style={{ color: 'var(--ink-2)', fontWeight: 650, fontSize: 18, lineHeight: 1.55, margin: '16px 0 0' }}>
+              Accept the next patient from the active 3D clinic queue, or open the chart browser and pick a specific case.
+            </p>
           </div>
-        )}
-      </div>
+          <button type="button" className="fizer-button fizer-button--quiet" onClick={() => store.setScreen('splash')}>
+            Home
+          </button>
+        </section>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
-          gap: 28,
-          padding: '20px 36px 40px',
-          maxWidth: 1080,
-          margin: '0 auto',
-        }}
-      >
-        {/* LEFT — accept next patient (clinic-aware) */}
-        <div
-          className={`tap plush-lg popin ${next ? 'breathe' : ''}`}
-          onClick={() => next && store.acceptNextPatient()}
-          style={{
-            background: 'linear-gradient(145deg, rgba(215,251,239,0.92), rgba(191,241,255,0.52))',
-            padding: 32,
-            position: 'relative',
-            transform: 'none',
-            animationDelay: '.05s',
-            opacity: next ? 1 : 0.55,
-            cursor: next ? 'pointer' : 'not-allowed',
-          }}
-        >
-          <div style={{ position: 'absolute', top: -14, left: 24 }} className="chip rose">
-            01 · ACCEPT
-          </div>
-          <div className="floaty" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <div
-              className="plush"
-              style={{
-                width: 160,
-                height: 160,
-                background: 'radial-gradient(circle at 50% 36%, rgba(0,199,255,0.18), rgba(255,255,255,0.96))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              {next ? (
-                <PatientFace
-                  style={tweaks.avatarStyle}
-                  skin={next.skin}
-                  hair={next.hair}
-                  size={130}
-                  mood={next.mood}
-                  accessory={next.accessory}
-                />
-              ) : (
-                <span style={{ fontSize: 42 }}>{CLINIC_ICON[activeClinic]}</span>
-              )}
+        <section className="fizer-control-grid">
+          <div className="fizer-panel-dark" style={{ padding: 24, display: 'grid', gap: 22 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div>
+                <div className="fizer-kicker" style={{ color: '#bff5ff', background: 'rgba(255,255,255,0.07)', borderColor: 'rgba(24,199,232,0.34)' }}>
+                  Active queue
+                </div>
+                <h2 style={{ marginTop: 12, fontSize: 30 }}>{CLINIC_LABELS[activeClinic]}</h2>
+              </div>
+              <div style={{ color: '#75e7ff', fontFamily: 'Sora', fontSize: 36, fontWeight: 850 }}>
+                {clinicCases.length}
+              </div>
             </div>
-          </div>
-          <h2 style={{ fontSize: 28, lineHeight: 1.1, textAlign: 'center', marginBottom: 8 }}>
-            Accept the next patient
-          </h2>
-          <div
-            style={{
-              fontSize: 14,
-              color: 'var(--ink-2)',
-              fontWeight: 600,
-              textAlign: 'center',
-              marginBottom: 16,
-              minHeight: 42,
-            }}
-          >
-            {next
-              ? `${next.name} walks in next — straight into the consultation.`
-              : `No cases queued for ${CLINIC_LABELS[activeClinic]} yet.`}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+
             {next && (
-              <>
-                <span className="chip">
-                  {next.name.split(' ')[0]} · {next.age}
-                </span>
-                <span className="chip rose">{next.cond}</span>
-              </>
+              <div style={{ display: 'grid', gridTemplateColumns: '86px 1fr', gap: 16, alignItems: 'center', padding: 16, border: '1px solid rgba(24,199,232,0.20)', borderRadius: 8, background: 'rgba(255,255,255,0.07)' }}>
+                <ChartAvatar name={next.name} cond={next.cond} />
+                <div>
+                  <div style={{ color: '#a9c6dd', fontSize: 11, fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    Next patient
+                  </div>
+                  <h3 style={{ marginTop: 5, fontSize: 24, color: '#fff' }}>{next.name}</h3>
+                  <div style={{ marginTop: 4, color: '#b9c9dc', fontWeight: 700 }}>{next.age} · {next.sex} · {next.cond}</div>
+                  <p style={{ margin: '10px 0 0', color: '#d8eaff', fontWeight: 650, lineHeight: 1.45 }}>{next.complaint}</p>
+                </div>
+              </div>
             )}
-            <span className="chip butter">
-              {CLINIC_ICON[activeClinic]} {queueAhead} in {CLINIC_LABELS[activeClinic]}
-            </span>
-          </div>
-        </div>
 
-        {/* RIGHT — browse charts */}
-        <div
-          className="tap plush-lg popin"
-          onClick={() => store.setScreen('library')}
-          style={{
-            background: 'linear-gradient(145deg, rgba(220,236,255,0.92), rgba(191,241,255,0.52))',
-            padding: 32,
-            position: 'relative',
-            transform: 'none',
-            animationDelay: '.15s',
-          }}
-        >
-          <div style={{ position: 'absolute', top: -14, left: 24 }} className="chip butter">
-            02 · BROWSE
-          </div>
-          <div className="floaty" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <div
-              className="plush"
-              style={{
-                width: 160,
-                height: 160,
-                background: 'radial-gradient(circle at 50% 40%, rgba(46,107,255,0.12), rgba(255,255,255,0.96))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <ChartFolder />
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="fizer-button fizer-button--primary"
+                style={{ flex: '1 1 220px' }}
+                onClick={() => next && store.acceptNextPatient()}
+                disabled={!next}
+              >
+                Accept Next Patient
+              </button>
+              <button type="button" className="fizer-button" style={{ flex: '1 1 180px' }} onClick={() => store.setScreen('library')}>
+                Pick from Charts
+              </button>
             </div>
           </div>
-          <h2 style={{ fontSize: 28, lineHeight: 1.1, textAlign: 'center', marginBottom: 8 }}>
-            Pick from the charts
-          </h2>
-          <div
-            style={{
-              fontSize: 14,
-              color: 'var(--ink-2)',
-              fontWeight: 600,
-              textAlign: 'center',
-              marginBottom: 16,
-              minHeight: 42,
-            }}
-          >
-            Open the case folder, filter by specialty or red-flag, attempted ribbons on completed.
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span className="chip">
-              {totalAll} case files
-            </span>
-            <span className="chip butter">filterable</span>
-          </div>
-        </div>
-      </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 36 }}>
-        <button
-          type="button"
-          className="btn-plush ghost"
-          style={{ fontSize: 14, padding: '10px 18px' }}
-          onClick={() => store.setScreen('mode')}
-        >
-          Back to corridor
-        </button>
-      </div>
+          <aside className="fizer-panel" style={{ padding: 20, display: 'grid', gap: 18 }}>
+            <div>
+              <div className="fizer-kicker">Specialty roster</div>
+              <p style={{ margin: '10px 0 0', color: 'var(--ink-2)', fontWeight: 650, lineHeight: 1.45 }}>
+                This controls the next-patient queue. The 3D clinic opens directly after accepting.
+              </p>
+            </div>
+            <div className="fizer-specialty-grid">
+              {availableClinics.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`fizer-specialty-chip ${activeClinic === id ? 'active' : ''}`}
+                  onClick={() => store.setPolyclinicClinic(id)}
+                >
+                  <span style={{ display: 'block', color: activeClinic === id ? 'var(--fizer-blue)' : 'var(--ink-soft)', fontSize: 11, letterSpacing: '0.08em' }}>
+                    {CLINIC_ICON[id]}
+                  </span>
+                  {CLINIC_LABELS[id]}
+                </button>
+              ))}
+            </div>
+          </aside>
+        </section>
+
+        <section className="fizer-panel" style={{ marginTop: 18, padding: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', marginBottom: 12 }}>
+            <div>
+              <div className="fizer-kicker">Queue preview</div>
+              <h2 style={{ marginTop: 8, fontSize: 24 }}>Upcoming charts</h2>
+            </div>
+            <button type="button" className="fizer-button fizer-button--quiet" onClick={() => store.setScreen('library')}>
+              Open Full Chart Browser
+            </button>
+          </div>
+          <div className="fizer-case-grid">
+            {queuePreview.map((c) => (
+              <button key={c.id} type="button" className="fizer-case-card" onClick={() => store.selectCase(c.id)}>
+                <div style={{ display: 'grid', gridTemplateColumns: '74px 1fr', gap: 12, alignItems: 'center' }}>
+                  <ChartAvatar name={c.name} cond={c.cond} />
+                  <div>
+                    <div style={{ fontWeight: 900, fontSize: 16 }}>{c.name}</div>
+                    <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 800, marginTop: 3 }}>{c.age} · {c.sex} · {c.cond}</div>
+                    <div style={{ color: 'var(--ink-2)', fontSize: 13, fontWeight: 650, lineHeight: 1.35, marginTop: 8 }}>{c.complaint}</div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
-  );
-}
-
-function ChartFolder() {
-  const stroke = 'var(--line)';
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120">
-      <rect x="18" y="18" width="84" height="84" rx="18" fill="rgba(255,255,255,0.70)" stroke={stroke} strokeWidth="2" />
-      <path d="M34 42h52M34 58h38M34 74h48" stroke="var(--peach-deep)" strokeWidth="4" strokeLinecap="round" />
-      <circle cx="86" cy="78" r="12" fill="rgba(69,240,176,0.18)" stroke="var(--mint)" strokeWidth="3" />
-      <path d="M80 78h12M86 72v12" stroke="var(--mint)" strokeWidth="3" strokeLinecap="round" />
-    </svg>
   );
 }

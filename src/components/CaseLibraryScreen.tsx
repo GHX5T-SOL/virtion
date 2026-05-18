@@ -1,127 +1,8 @@
 import { useMemo, useState } from 'react';
-import { PatientFace, TopBar } from './primitives';
-import { CASES, CONDITION_COLORS, type Case } from '../data/cases';
+import { TopBar } from './primitives';
+import { CASES, type Case } from '../data/cases';
 import { CLINIC_IDS, CLINIC_LABELS, type ClinicId } from '../game/clinic';
-import { store, useTweaks } from '../game/store';
-
-interface CaseCardProps {
-  c: Case;
-  delay?: number;
-  avatarStyle: ReturnType<typeof useTweaks>['avatarStyle'];
-}
-
-function CaseCard({ c, delay = 0, avatarStyle }: CaseCardProps) {
-  const bg = CONDITION_COLORS[c.cond] ?? 'var(--butter)';
-  return (
-    <div
-      className="tap popin"
-      onClick={() => store.selectCase(c.id)}
-      style={{ animationDelay: `${delay}s`, position: 'relative' }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: -10,
-          left: 18,
-          zIndex: 2,
-          background: bg,
-          border: '1px solid var(--line)',
-          borderRadius: '8px 8px 0 0',
-          padding: '4px 14px',
-          fontWeight: 800,
-          fontSize: 12,
-          boxShadow: 'var(--glow-cyan)',
-        }}
-      >
-        {c.cond}
-      </div>
-
-      <div
-        className="glass-panel"
-        style={{
-          padding: 14,
-          opacity: c.attempted ? 0.92 : 1,
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {c.attempted && c.score && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 14,
-              right: -28,
-              transform: 'rotate(38deg)',
-              background: 'var(--mint-deep)',
-              color: 'white',
-              border: '1px solid var(--line)',
-              padding: '2px 36px',
-              fontWeight: 900,
-              fontSize: 11,
-              boxShadow: '0 2px 0 var(--line)',
-            }}
-          >
-            {c.score}
-          </div>
-        )}
-
-        <div
-          style={{
-            background: bg,
-            borderRadius: 12,
-          border: '1px solid rgba(8,32,55,0.10)',
-            height: 140,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            marginBottom: 10,
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-        >
-          <div
-            aria-hidden
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.32) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.28) 1px, transparent 1px)',
-              backgroundSize: '22px 22px',
-              opacity: 0.35,
-            }}
-          />
-          <div style={{ marginBottom: -8 }} className="floaty">
-            <PatientFace
-              name={c.name}
-              style={avatarStyle}
-              skin={c.skin}
-              hair={c.hair}
-              size={120}
-              mood={c.mood}
-              accessory={c.accessory}
-            />
-          </div>
-        </div>
-
-        <div style={{ fontWeight: 900, fontSize: 16, lineHeight: 1.15 }}>{c.name}</div>
-        <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--ink-2)', marginBottom: 6 }}>
-          {c.age} · {c.sex}
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--ink)', minHeight: 36, lineHeight: 1.3, fontWeight: 600 }}>
-          "{c.complaint}"
-        </div>
-
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8 }}>
-          {c.tags.slice(0, 2).map((t) => (
-            <span key={t} className="chip" style={{ fontSize: 11, padding: '3px 9px' }}>
-              {t}
-            </span>
-          ))}
-        </div>
-        <div style={{ marginTop: 8, fontSize: 11, fontWeight: 800, color: 'var(--ink-2)' }}>GUIDELINE · {c.guideline}</div>
-      </div>
-    </div>
-  );
-}
+import { store } from '../game/store';
 
 type ClinicFilter = ClinicId | 'all' | 'red-flag';
 
@@ -153,12 +34,65 @@ const CLINIC_ICON: Record<ClinicId, string> = {
   'cardiothoracic-vascular-surgery': 'CTS',
 };
 
+function ChartAvatar({ c }: { c: Case }) {
+  const initials = c.name.split(' ').map((part) => part[0]).slice(0, 2).join('');
+  const urgent = c.tags.some((t) => t.toLowerCase().includes('red flag')) || c.cond.toLowerCase().includes('red');
+  return (
+    <div className="fizer-chart-avatar">
+      <strong>{initials}</strong>
+      <span
+        style={{
+          position: 'absolute',
+          left: 7,
+          top: 7,
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
+          background: urgent ? 'var(--rose-deep)' : 'var(--mint-deep)',
+          boxShadow: urgent ? '0 0 0 5px rgba(198,56,92,0.12)' : '0 0 0 5px rgba(26,159,123,0.12)',
+        }}
+      />
+    </div>
+  );
+}
+
+function CaseCard({ c }: { c: Case }) {
+  const urgent = c.tags.some((t) => t.toLowerCase().includes('red flag')) || c.cond.toLowerCase().includes('red');
+  return (
+    <button type="button" className="fizer-case-card" onClick={() => store.selectCase(c.id)}>
+      <div style={{ display: 'grid', gridTemplateColumns: '74px 1fr', gap: 12, alignItems: 'start' }}>
+        <ChartAvatar c={c} />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
+            <div>
+              <h3 style={{ fontSize: 17, lineHeight: 1.15 }}>{c.name}</h3>
+              <div style={{ color: 'var(--ink-soft)', fontSize: 12, fontWeight: 850, marginTop: 4 }}>
+                {c.age} · {c.sex} · {c.cond}
+              </div>
+            </div>
+            <span className={`chip ${urgent ? 'rose' : 'mint'}`} style={{ fontSize: 10, padding: '3px 7px' }}>
+              {urgent ? 'Priority' : 'Stable'}
+            </span>
+          </div>
+          <p style={{ color: 'var(--ink-2)', fontSize: 13, fontWeight: 650, lineHeight: 1.4, margin: '10px 0 0' }}>
+            {c.complaint}
+          </p>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+            {c.tags.slice(0, 2).map((tag) => (
+              <span key={tag} className="chip" style={{ fontSize: 10, padding: '3px 7px' }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 export function CaseLibraryScreen() {
-  const tweaks = useTweaks();
   const [filter, setFilter] = useState<ClinicFilter>('all');
 
-  // Group every case by its clinic once. The grouping respects
-  // CLINIC_IDS order so sections render in the same canonical order.
   const grouped = useMemo(() => {
     const map = new Map<ClinicId, Case[]>();
     for (const id of CLINIC_IDS) {
@@ -172,14 +106,12 @@ export function CaseLibraryScreen() {
     return map;
   }, []);
 
-  // Apply the active filter to the grouped data so we can render it as
-  // sections without having to re-group inside the JSX.
   const visibleGroups = useMemo<Array<[ClinicId, Case[]]>>(() => {
     if (filter === 'red-flag') {
       const out: Array<[ClinicId, Case[]]> = [];
       for (const [clinic, list] of grouped) {
-        const reds = list.filter((c) => c.tags.some((t) => t.toLowerCase().includes('red flag')));
-        if (reds.length) out.push([clinic, reds]);
+        const red = list.filter((c) => c.tags.some((t) => t.toLowerCase().includes('red flag')));
+        if (red.length) out.push([clinic, red]);
       }
       return out;
     }
@@ -188,9 +120,16 @@ export function CaseLibraryScreen() {
     }
     const list = grouped.get(filter as ClinicId) ?? [];
     return list.length ? [[filter as ClinicId, list]] : [];
-  }, [grouped, filter]);
+  }, [filter, grouped]);
 
   const totalVisible = visibleGroups.reduce((n, [, list]) => n + list.length, 0);
+  const clinicChips: Array<{ id: ClinicFilter; label: string; icon?: string }> = [
+    { id: 'all', label: 'All charts', icon: 'ALL' },
+    { id: 'red-flag', label: 'Priority', icon: 'RF' },
+    ...CLINIC_IDS.filter((id) => id !== 'all-specialties' && (grouped.get(id)?.length ?? 0) > 0).map(
+      (id) => ({ id: id as ClinicFilter, label: CLINIC_LABELS[id], icon: CLINIC_ICON[id] }),
+    ),
+  ];
 
   const shuffle = () => {
     const pool = visibleGroups.flatMap(([, list]) => list);
@@ -199,124 +138,77 @@ export function CaseLibraryScreen() {
     store.selectCase(pick.id);
   };
 
-  const clinicChips: Array<{ id: ClinicFilter; label: string; icon?: string }> = [
-    { id: 'all', label: 'All clinics', icon: 'ALL' },
-    { id: 'red-flag', label: 'Red-flag only', icon: 'RF' },
-    ...CLINIC_IDS.filter((id) => id !== 'all-specialties' && (grouped.get(id)?.length ?? 0) > 0).map(
-      (id) => ({ id: id as ClinicFilter, label: CLINIC_LABELS[id], icon: CLINIC_ICON[id] }),
-    ),
-  ];
-
   return (
-    <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
-      <TopBar here={2} steps={['Polyclinic', 'GP', 'Case']} />
+    <div className="screen fizer-page" style={{ overflowY: 'auto' }}>
+      <TopBar here={2} steps={['Fizer', '3D Clinic', 'Charts']} />
 
-      {/* Header row: back button + title + shuffle */}
-      <div
-        style={{
-          padding: '22px 28px 0',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: 16,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <button
-            type="button"
-            className="btn-plush ghost"
-            style={{ fontSize: 14, padding: '10px 18px' }}
-            onClick={() => store.setScreen('gpRoom')}
-            title="Back to the GP room"
-          >
-            Back
-          </button>
-          <div>
-            <h1 style={{ fontSize: 36, marginBottom: 4 }}>Pick a patient</h1>
-            <div style={{ fontWeight: 600, color: 'var(--ink-2)', fontSize: 14 }}>
-              Cases are grouped by polyclinic — pick a specialty chip to focus.
-            </div>
-          </div>
-        </div>
-        <button
-          type="button"
-          className="btn-plush mint"
-          style={{ fontSize: 16, padding: '12px 22px', whiteSpace: 'nowrap', maxWidth: '100%' }}
-          onClick={shuffle}
-        >
-          Shuffle ({totalVisible})
-        </button>
-      </div>
-
-      {/* Clinic filter chip row */}
-      <div
-        style={{
-          padding: '18px 28px 6px',
-          display: 'flex',
-          gap: 8,
-          flexWrap: 'wrap',
-          alignItems: 'center',
-        }}
-      >
-        {clinicChips.map((chip) => (
-          <span
-            key={chip.id}
-            className={`chip ${filter === chip.id ? 'butter' : ''}`}
-            style={{ cursor: 'pointer' }}
-            onClick={() => setFilter(chip.id)}
-          >
-            {chip.icon ? `${chip.icon} ` : ''}
-            {chip.label}
-          </span>
-        ))}
-      </div>
-
-      {/* Grouped sections */}
-      <div style={{ padding: '18px 28px 28px', display: 'flex', flexDirection: 'column', gap: 28 }}>
-        {visibleGroups.map(([clinic, list]) => (
-          <section key={clinic}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: 10,
-                marginBottom: 14,
-                paddingBottom: 8,
-                borderBottom: '1px solid var(--line)',
-              }}
-            >
-              <span className="chip mint" style={{ fontSize: 11 }}>{CLINIC_ICON[clinic] ?? 'CLINIC'}</span>
-              <h2 style={{ fontSize: 22, margin: 0, letterSpacing: 0 }}>
-                {CLINIC_LABELS[clinic]}
-              </h2>
-              <span className="chip" style={{ fontSize: 11, marginLeft: 6 }}>
-                {list.length} case{list.length === 1 ? '' : 's'}
-              </span>
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                gap: 18,
-              }}
-            >
-              {list.map((c, i) => (
-                <CaseCard key={c.id} c={c} delay={(i % 8) * 0.04} avatarStyle={tweaks.avatarStyle} />
+      <main className="fizer-shell" style={{ padding: '28px 0 64px' }}>
+        <section style={{ display: 'grid', gridTemplateColumns: '250px minmax(0, 1fr)', gap: 18, alignItems: 'start' }} className="fizer-library-layout">
+          <aside className="fizer-panel" style={{ padding: 16, position: 'sticky', top: 94 }}>
+            <button type="button" className="fizer-button fizer-button--quiet" style={{ width: '100%', marginBottom: 14 }} onClick={() => store.setScreen('gpRoom')}>
+              Back to Control Room
+            </button>
+            <div className="fizer-kicker">Chart filters</div>
+            <div style={{ display: 'grid', gap: 7, marginTop: 14 }}>
+              {clinicChips.map((chip) => (
+                <button
+                  key={chip.id}
+                  type="button"
+                  className={`fizer-specialty-chip ${filter === chip.id ? 'active' : ''}`}
+                  onClick={() => setFilter(chip.id)}
+                >
+                  <span style={{ display: 'block', color: filter === chip.id ? 'var(--fizer-blue)' : 'var(--ink-soft)', fontSize: 11, letterSpacing: '0.08em' }}>
+                    {chip.icon}
+                  </span>
+                  {chip.label}
+                </button>
               ))}
             </div>
-          </section>
-        ))}
+          </aside>
 
-        {visibleGroups.length === 0 && (
-          <div
-            className="plush"
-            style={{ padding: 24, textAlign: 'center', color: 'var(--ink-2)', fontWeight: 700 }}
-          >
-            No cases match this filter — try another chip.
-          </div>
-        )}
-      </div>
+          <section style={{ minWidth: 0 }}>
+            <div className="fizer-panel" style={{ padding: 22, marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                <div>
+                  <div className="fizer-kicker">Pick from Charts</div>
+                  <h1 style={{ marginTop: 10, fontSize: 'clamp(34px, 4.8vw, 56px)', lineHeight: 1 }}>
+                    {totalVisible} available patient charts
+                  </h1>
+                  <p style={{ margin: '12px 0 0', color: 'var(--ink-2)', fontWeight: 650, lineHeight: 1.5 }}>
+                    Select any chart to review the brief before entering the 3D clinic.
+                  </p>
+                </div>
+                <button type="button" className="fizer-button fizer-button--primary" onClick={shuffle}>
+                  Shuffle Chart
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gap: 18 }}>
+              {visibleGroups.map(([clinic, list]) => (
+                <section key={clinic} className="fizer-panel" style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
+                    <span className="chip mint">{CLINIC_ICON[clinic] ?? 'CLINIC'}</span>
+                    <h2 style={{ fontSize: 24 }}>{CLINIC_LABELS[clinic]}</h2>
+                    <span className="chip">{list.length} chart{list.length === 1 ? '' : 's'}</span>
+                  </div>
+                  <div className="fizer-case-grid">
+                    {list.map((c) => (
+                      <CaseCard key={c.id} c={c} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+
+              {visibleGroups.length === 0 && (
+                <div className="fizer-panel" style={{ padding: 24, color: 'var(--ink-2)', fontWeight: 750 }}>
+                  No charts match this filter.
+                </div>
+              )}
+            </div>
+          </section>
+        </section>
+      </main>
     </div>
   );
 }

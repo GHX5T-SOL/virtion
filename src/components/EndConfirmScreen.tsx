@@ -23,7 +23,7 @@ export function EndConfirmScreen() {
 
   return (
     <div className="screen virtion-shell" style={{ position: 'relative', overflowY: 'auto' }}>
-      <TopBar here={5} steps={['Polyclinic', 'GP', 'Case', 'Brief', 'Encounter', 'Wrap']} />
+      <TopBar here={5} steps={['Fizer', '3D Clinic', 'Charts', 'Brief', 'Encounter', 'Wrap']} />
 
       <div
         style={{

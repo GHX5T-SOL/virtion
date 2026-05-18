@@ -14,7 +14,7 @@ const CARDS: Card[] = [
     tag: '01 · simulation layer',
     title: 'Practice the consultation.',
     body:
-      'Virtion puts medical students inside synthetic clinical encounters: take the history, examine, order tests, diagnose, prescribe, counsel, and learn from the result.',
+      'Fizer puts medical students inside synthetic clinical encounters: take the history, examine, order tests, diagnose, prescribe, counsel, and learn from the result.',
     metric: 'doctor POV',
     detail: 'A clinic environment built for repeated decisions, not passive revision.',
   },
@@ -24,7 +24,7 @@ const CARDS: Card[] = [
     body:
       'The attending debrief grades data gathering, management, and communication. Premium models lead, then fallback providers and deterministic rubrics keep the loop alive.',
     metric: 'never blank',
-    detail: 'If upstream AI fails, Virtion degrades clearly instead of breaking the case.',
+    detail: 'If upstream AI fails, Fizer degrades clearly instead of breaking the case.',
   },
   {
     tag: '03 · future network',
@@ -82,7 +82,7 @@ export function OnboardingScreen() {
               </button>
             ) : (
               <button type="button" className="btn-plush primary" onClick={() => store.finishOnboarding()}>
-                Enter Virtion
+                Enter Fizer
               </button>
             )}
           </div>

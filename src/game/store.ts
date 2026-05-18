@@ -16,7 +16,7 @@ import type { Case as VirtionCase } from '../data/cases';
 import { CASES, getCase, getCaseClinic, getPatientCase } from '../data/cases';
 import { ensureAudioContext } from '../voice/conversationStore';
 
-const ONBOARDED_KEY = 'virtion:onboarded';
+const ONBOARDED_KEY = 'fizer:onboarded';
 
 /** Sentinel used as `bedIndex` for polyclinic patients across the store,
  *  the conversation cache, and the 3D scene. `voice/conversationStore.ts`
@@ -140,9 +140,10 @@ class Store {
 
   clearViewedEval = () => this.set({ viewedEvalHistoryId: null });
 
-  /** Splash → onboarding (first run) or polyclinic (returning). */
+  /** Splash → control room. The old module picker is intentionally skipped. */
   beginFromSplash = () => {
-    this.set({ screen: this.state.hasOnboarded ? 'mode' : 'onboarding' });
+    writeOnboarded(true);
+    this.set({ hasOnboarded: true, screen: 'gpRoom', onboardingStep: 0 });
   };
 
   // ── onboarding ────────────────────────────────
@@ -151,7 +152,7 @@ class Store {
 
   finishOnboarding = () => {
     writeOnboarded(true);
-    this.set({ hasOnboarded: true, screen: 'mode', onboardingStep: 0 });
+    this.set({ hasOnboarded: true, screen: 'gpRoom', onboardingStep: 0 });
   };
 
   // ── tweaks ────────────────────────────────────

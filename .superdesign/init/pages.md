@@ -1,12 +1,20 @@
 # Pages
 
-Status date: 2026-05-14
+Status date: 2026-05-18
+
+## `/`
+
+Fizer launch screen. It has one primary action: `Start Simulation`. Do not restore the old `See the Platform` branch in the visible learner flow.
+
+## Control Room
+
+Internal screen `gpRoom`. This is now the first screen after `Start Simulation`, replacing the old module picker. Users can accept the next patient or open `Pick from Charts`.
 
 ## `/encounter`
 
 This is the current acceptance page.
 
-Dependency tree for Phase48 visual work:
+Dependency tree for current visual work:
 
 ```text
 src/App.tsx
@@ -34,4 +42,4 @@ Static screenshot gallery and evidence page.
 
 Use normal 1440x900 seated doctor POV. Close-ups support but do not replace the main frame.
 
-The accepted view must show one high-quality seated animated Mpho Molefe (`im-001`) sample in the existing room, with visible chair contact, adult scale, resolved legs/feet, and real idle/listening/speaking motion. The sample should strictly match female gender and loosely match adult age band / patient description where the source asset supports it.
+The accepted encounter view preserves the existing 3D clinic room, HUD, patient placement, and animation setup. Current redesign work is around the website shell, chart flow, and examination overlay styling.

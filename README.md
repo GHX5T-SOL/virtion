@@ -1,4 +1,4 @@
-# Virtion Web Production MVP
+# Fizer Web Production MVP
 
 Local playable clinical training slice for the 3D Clinic project.
 
@@ -8,11 +8,11 @@ Local playable clinical training slice for the 3D Clinic project.
 http://127.0.0.1:5173/encounter
 ```
 
-The current default scene uses Zoro's v43 room donor asset inside Ghost's Virtion encounter flow.
+The current default scene uses Zoro's v43 room donor asset inside the Fizer encounter flow.
 
 ## Current Product Focus
 
-Room and HUD are acceptable for now. Phase46 completed patient-specific name/avatar assignment. Phase47 proved that standing RPM clips plus manual seated bone posing are not enough. Phase48 proved that direct runtime retargeting from Quaternius to the RPM skeleton is also not enough. Phase49 accepted a high-quality seated animated Mpho Molefe (`im-001`) sample. Phase50 extends that approach with eight user-supplied Mixamo seated/talking patient-pool assets:
+Room and HUD are acceptable for now. The 2026-05-18 product pass rebranded the app from Virtion to Fizer, removed the old platform CTA and module picker, replaced the static splash preview with a lightweight interactive hero scene, and redesigned the home, control room, chart browser, brief, and examination overlay while preserving the 3D clinic scene. Phase46 completed patient-specific name/avatar assignment. Phase49 accepted a high-quality seated animated Mpho Molefe (`im-001`) sample. Phase50 extends that approach with eight user-supplied Mixamo seated/talking patient-pool assets:
 
 1. preserve female cases rendering female avatars and male cases rendering male avatars;
 2. use broad `avatarRace` mapping for black, white, indian, and asian pool assets;

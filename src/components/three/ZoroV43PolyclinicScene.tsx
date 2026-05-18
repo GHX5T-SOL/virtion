@@ -1,10 +1,8 @@
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { Html, RoundedBox, useGLTF } from '@react-three/drei';
-import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Group } from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { ConversationStatus } from '../../voice/conversation';
 import { useGameState, POLYCLINIC_BED_INDEX } from '../../game/store';
@@ -22,7 +20,6 @@ import {
 } from '../../data/medicalSuiteModelRegistry';
 
 const OFFICE_SHELL_GLB = '/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb';
-const OFFICE_HDRI = '/assets/medical-suite/environment/v43/visual-upgrade-v11/hdr/garden_nook_2k.hdr';
 const OFFICE_ROOT_SCALE = 2.5;
 const CAMERA_SEATED_EYE_HEIGHT = 1.52;
 const CAMERA_FOV = 45;
@@ -358,22 +355,6 @@ function RendererContract() {
   return null;
 }
 
-function HdriEnvironment() {
-  const hdri = useLoader(RGBELoader, OFFICE_HDRI) as THREE.DataTexture;
-  const { gl, scene } = useThree();
-  useEffect(() => {
-    const pmrem = new THREE.PMREMGenerator(gl);
-    const target = pmrem.fromEquirectangular(hdri);
-    scene.environment = target.texture;
-    return () => {
-      if (scene.environment === target.texture) scene.environment = null;
-      target.dispose();
-      pmrem.dispose();
-    };
-  }, [gl, hdri, scene]);
-  return null;
-}
-
 function FixedDragLookCamera({ rig }: { rig: CameraRig }) {
   const { camera, gl } = useThree();
   const initialized = useRef(false);
@@ -482,7 +463,7 @@ function usePatientOverviewTexture(patientName: string, age: number, complaint: 
     ctx.fillRect(0, 0, 1024, 640);
     ctx.fillStyle = '#9eedff';
     ctx.font = '800 38px Inter, Arial';
-    ctx.fillText('VIRTION POLYCLINIC', 42, 58);
+    ctx.fillText('FIZER 3D CLINIC', 42, 58);
     ctx.strokeStyle = 'rgba(84, 225, 255, 0.52)';
     ctx.lineWidth = 3;
     ctx.strokeRect(26, 26, 972, 588);
@@ -897,7 +878,7 @@ export function ZoroV43PolyclinicScene({
     conversationStatus === 'speaking' ? 'Speaking' :
     conversationStatus === 'thinking' ? 'Thinking' :
     voiceActive ? 'Listening' : 'Muted';
-  const gltf = useLoader(GLTFLoader, OFFICE_SHELL_GLB) as { scene: Group };
+  const gltf = useGLTF(OFFICE_SHELL_GLB, true, true) as unknown as { scene: Group };
   const root = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
   useEffect(() => scheduleRpmPatientAssetWarmup(), []);
   const rig = useMemo(() => {
@@ -916,7 +897,6 @@ export function ZoroV43PolyclinicScene({
   return (
     <group>
       <RendererContract />
-      <HdriEnvironment />
       <primitive object={root} />
       <directionalLight
         color={0xfff2df}
@@ -953,5 +933,4 @@ export function ZoroV43PolyclinicScene({
   );
 }
 
-useLoader.preload(GLTFLoader, OFFICE_SHELL_GLB);
-useLoader.preload(RGBELoader, OFFICE_HDRI);
+useGLTF.preload(OFFICE_SHELL_GLB, true, true);

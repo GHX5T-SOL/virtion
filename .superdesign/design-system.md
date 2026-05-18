@@ -1,71 +1,91 @@
-# Virtion Design System
+# Fizer Design System
 
-Status date: 2026-05-14
+Status date: 2026-05-18
 
 ## Product Context
-Virtion is a premium BioMed and AI education company. The product today is a training-only clinical simulator for medical students: synthetic patients, a doctor-POV consultation loop, live voice or text interaction, orders and treatment decisions, and an AI attending debrief. The platform roadmap includes AR/VR training grounds, mobile and desktop clients, consent-first learning datasets, and opt-in decentralized compute for biomedical research.
 
-Primary flows:
-- Launch: quickly communicate "synthetic clinical training" and start the simulation.
-- Product intro: optional, visual-first, no heavy pitch copy.
-- Module select: choose the active training environment.
-- Polyclinic: pick a specialty, accept a patient or browse cases, read a brief, consult, wrap, and debrief.
-- Platform views: explain agent routing and R&D roadmap without exposing secrets or implying active clinical diagnosis.
+Fizer is the rebranded 3D clinical simulation experience. The current product is a training-only simulator for synthetic patient consultations: accept a chart, enter the 3D clinic, examine, order investigations, diagnose, prescribe, and complete a structured debrief.
+
+The visible product flow is intentionally short:
+
+- Launch: show the Fizer identity and one primary `Start Simulation` action.
+- Control room: accept the next patient or open `Pick from Charts`.
+- Chart browser: choose a synthetic case without low-poly patient mascots.
+- Brief: read the doorway summary and enter the 3D clinic.
+- Encounter: preserve the existing 3D clinic scene and HUD while using Fizer styling for overlays.
+- Debrief: show structured feedback and return to the 3D clinic control room.
+
+Do not reintroduce the old `See the Platform` CTA, the module picker, or visible "Polyclinic" language in the main learner flow.
 
 ## Visual Direction
-Theme: white clinical luxury with liquid glass. The interface should feel like an Apple or Meta-caliber startup product: bright, precise, spatial, alive, and quiet enough for repeated use. Use glass panels, luminous cyan, deep navy typography, restrained biotech green, and subtle holographic surfaces. Avoid dark generic AI dashboards, cartoon doodle clutter, oversized marketing hero copy, and low-contrast translucent text.
 
-Signature color: Virtion Cyan `#00C7FF`.
+Theme: premium clinical software with deep navy, cyan, teal, glass, and white. The interface should feel polished, focused, and operational rather than like a landing-page pitch. Use dense but readable information layouts, clean cards, clear hierarchy, and restrained motion. Avoid low-quality generated props, procedural filler, cartoon patient thumbnails, and marketing-heavy copy.
+
+Signature colors:
+
+- Fizer navy: `#061431`
+- Fizer blue: `#173f8f`
+- Fizer cyan: `#18c7e8`
+- Fizer teal: `#37d6dd`
+- Fizer ice: `#f5fbff`
 
 ## Tokens
+
 Fonts:
+
 - Primary: Inter, system-ui, sans-serif.
 - Display: Sora, Inter, system-ui, sans-serif.
 - Numeric/technical: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace.
 
 Colors:
-- Canvas: `#ffffff`, `#f7fbff`, `#eaf3fb`.
-- Deep ink: `#071525`; secondary ink: `#526579`; soft ink: `#7c91a7`.
-- Glass: `rgba(255, 255, 255, 0.68)` and `rgba(255, 255, 255, 0.88)`.
-- Primary cyan: `#00c7ff`; soft cyan: `#bff1ff`.
-- Biotech green: `#00a67e`; soft green: `#d7fbef`.
-- Data blue: `#2e6bff`; soft blue: `#dcecff`.
-- Gold: `#f4c95d`.
-- Risk rose: `#e23b5d`.
-- Borders: `rgba(8, 32, 55, 0.12)`.
+
+- Canvas: `#f5fbff`, `#ffffff`, `#eaf6fb`.
+- Deep ink: `#061431`; secondary ink: `#526579`; soft ink: `#7c91a7`.
+- Glass: `rgba(255, 255, 255, 0.78)` and `rgba(255, 255, 255, 0.92)`.
+- Primary: `#173f8f`; accent: `#18c7e8`; soft accent: `#d9f8ff`.
+- Success: `#00a67e`; warning: `#f4c95d`; risk: `#e23b5d`.
+- Borders: `rgba(7, 20, 49, 0.12)`.
 
 Shape:
-- Cards and panels: 8px radius for repeated cards, 14-18px for larger glass panels.
-- Buttons: pill primary actions, fixed 36-44px icon/utility controls.
-- Avoid cards inside cards. Page sections are full-width white/glass bands or unframed constrained layouts.
+
+- Cards: 8px radius for repeated cards.
+- Larger panels: 14px to 18px radius.
+- Buttons: pill primary actions; compact controls stay fixed height.
+- Avoid cards inside cards unless the nested element is an individual repeated item.
 
 Motion:
-- Page entries: 250-400ms ease-out, opacity plus translateY 10-18px.
-- Grid stagger: 30-50ms per related item, lead with the primary CTA or title.
-- Hover: 120-180ms transform and shadow only.
-- Ambient orbit/scan motion is allowed for hero and product visuals; all motion must obey `prefers-reduced-motion`.
+
+- Page entry: 250ms to 360ms ease-out.
+- Hover: 120ms to 180ms transform and shadow.
+- Encounter scene motion remains unchanged.
+- Respect `prefers-reduced-motion`.
 
 ## Component Patterns
-- `Wordmark`: iconic liquid-glass V formed from a helix/orbit stroke and a single signal dot. It must work at favicon, app icon, top-nav, and hero sizes.
-- `TopBar`: compact frosted navigation with the wordmark, breadcrumb, status dot, and one module label. No personal profile metaphors.
-- `btn-plush`, `chip`, `plush`, `plush-lg`, `glass-panel`: legacy class names remapped to bright glass for compatibility.
-- `ClinicalOrbitVisual`: procedural holographic sphere used as the brand/product visual. It can show patient, AI attending, rubric, and compute nodes without external assets.
-- Training surfaces: operational and scan-friendly. Use clean case cards, specialty chips, vital tiles, fixed-format controls, and readable chart surfaces.
+
+- `Wordmark`: use `/fizer_logo.png` in top bars and hero contexts.
+- Favicon/app mark: use `/fizer_favicon.png`.
+- `TopBar`: compact frosted navigation with Fizer identity, breadcrumb, encounter status, and avatar mark.
+- `fizer-button`: primary and quiet actions for all new flow screens.
+- `fizer-panel`: white/glass operational surfaces.
+- `fizer-panel-dark`: navy control surfaces for priority actions.
+- `fizer-chart-avatar`: initials/status identity stamp for patient cards. Do not use the old low-poly patient faces.
+- `fizer-exam`: Fizer-styled examination overlay while preserving the existing clinical tab logic.
+- `fizer-hero-stage`: interactive splash hero scene built from CSS layers, pointer-reactive room perspective, diagnostic orbits, and Fizer status strips. It replaces the old static preview card without adding heavyweight generated assets.
 
 ## Copy Rules
-- Always include training-only safety posture on public surfaces: "synthetic cases" and "not clinical advice."
-- Future AI doctors, robotics, data collection, and decentralized compute must be framed as consent-first R&D roadmap, not current clinical capability.
-- Keep marketing copy short. Use visuals, metrics, and product-state labels instead of large internal explanations.
-- Avoid internal-only phrasing, unverifiable clinical claims, and "AI slop" language in product copy.
+
+- Use "Fizer" for the product name.
+- Use "3D clinic" for the room/encounter.
+- Keep "synthetic" patient framing where public-facing.
+- Do not show raw backend, LiveKit, token, or JSON errors in the UI.
+- Do not expose internal agent names in the main learner flow.
+- Keep action labels short and workflow-specific.
 
 ## QA Rules
-- Verify desktop and mobile widths before claiming visual completion.
-- Check that text never clips inside buttons, chips, cards, or nav.
-- Ensure the first viewport on launch shows the product and hints at the next section.
-- Keep 3D/canvas visuals stable and nonblank; support reduced motion.
 
-## Current Encounter Focus
-
-Phase48 is a seated animated patient sample gate. Preserve the accepted HUD, app flow, room, and Phase46 identity/avatar mapping. Do not return to the rejected Phase45 computer/room pass.
-
-The next visual work is one high-quality seated animated Mpho Molefe (`im-001`) sample in the actual `/encounter` route. The sample must strictly match female gender, loosely match adult age band and patient description where possible, and broadly fit South African representation/ethnicity cues only where the asset source supports it. The patient must sit naturally on a visible chair with adult scale, legs/feet resolved, and real idle/listening/speaking motion.
+- Verify homepage, control room, chart browser, brief, encounter, and examination overlay at desktop width.
+- Check mobile width for the home and chart/control screens.
+- Confirm `Start Simulation` skips the old module picker.
+- Confirm the 3D clinic scene remains stable and nonblank.
+- Confirm Fizer logo and favicon load from public assets.
+- Build, test, verify, then push only after user approval. Ghost approved the 2026-05-18 Fizer redesign push to `main`.

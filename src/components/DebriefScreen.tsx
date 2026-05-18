@@ -563,7 +563,7 @@ export function DebriefScreen() {
 
   return (
     <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
-      <TopBar here={5} steps={['Polyclinic', 'GP', 'Case', 'Brief', 'Encounter', 'Debrief']} />
+      <TopBar here={5} steps={['Fizer', '3D Clinic', 'Charts', 'Brief', 'Encounter', 'Debrief']} />
 
       <div style={{ padding: '28px 36px 60px', maxWidth: 1080, margin: '0 auto' }}>
         {!c || !patient ? (
@@ -601,9 +601,9 @@ export function DebriefScreen() {
             type="button"
             className="btn-plush ghost"
             style={{ flex: 1 }}
-            onClick={() => store.setScreen('mode')}
+            onClick={() => store.setScreen('gpRoom')}
           >
-            {'\u2190 Back to polyclinic'}
+            {'\u2190 Back to 3D clinic'}
           </button>
           <button
             type="button"

@@ -103,7 +103,7 @@ function useClinicalMonitorTexture(patientName: string, complaint: string, age: 
 
     ctx.fillStyle = '#9eedff';
     ctx.font = '700 42px Inter, Arial';
-    ctx.fillText('VIRTION POLYCLINIC', 50, 62);
+    ctx.fillText('FIZER 3D CLINIC', 50, 62);
     ctx.font = '700 32px Inter, Arial';
     ctx.fillText('Patient Overview', 330, 124);
     ctx.font = '700 40px Inter, Arial';
@@ -167,7 +167,7 @@ function useVitalsTexture(bp: string, hr: number, spo2: number, temp: number) {
     ctx.fillRect(0, 0, 900, 520);
     ctx.fillStyle = '#9eedff';
     ctx.font = '800 36px Inter, Arial';
-    ctx.fillText('Virtion Polyclinic', 34, 56);
+    ctx.fillText('Fizer 3D Clinic', 34, 56);
     ctx.strokeStyle = 'rgba(89, 230, 255, 0.45)';
     ctx.lineWidth = 3;
     ctx.strokeRect(22, 22, 856, 476);
@@ -675,7 +675,7 @@ function Papers({ position }: { position: [number, number, number] }) {
         </mesh>
       ))}
       <Text position={[0.12, 0.05, 0.29]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.06} color="#19485a" anchorX="center">
-        VIRTION
+        FIZER
       </Text>
     </group>
   );

@@ -107,7 +107,7 @@ export function buildLocalFallbackDebrief(req: DebriefRequest, note = 'Premium A
     criteria: scored.map(({ weight: _weight, ...criterion }) => criterion),
     safety_breach: null,
     highlights: [
-      'Virtion preserved the debrief flow through a local deterministic rubric fallback.',
+      'Fizer preserved the debrief flow through a local deterministic rubric fallback.',
       'Recorded encounter actions were converted into structured domain scores.',
     ],
     improvements: improvements.length ? improvements : ['Rerun the case with premium AI feedback enabled for richer narrative coaching.'],

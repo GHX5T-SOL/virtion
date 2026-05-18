@@ -1,20 +1,28 @@
-# Virtion Web MVP Agent Notes
+# Fizer Web MVP Agent Notes
 
 Status date: 2026-05-18
 
 ## Current Target
 
 ```text
-PHASE51_NetlifyLiveVoiceAndDeployVerificationGate
+PHASE52_FizerRedesignAndDeployGate
 ```
 
 Main route:
 
 ```text
-http://127.0.0.1:5173/encounter
+http://127.0.0.1:5173/
 ```
 
 ## Current Truth
+
+Fizer rebrand and product-flow redesign is active:
+
+1. `/` shows the Fizer launch screen with one `Start Simulation` action.
+2. Start Simulation skips the old module picker and opens the `gpRoom` control room.
+3. The main learner flow says `3D clinic`, not visible `Polyclinic`.
+4. Home, control room, chart browser, brief, and examination overlay use the Fizer redesign system in `src/styles/global.css`.
+5. Fizer public assets live at `public/fizer_logo.png` and `public/fizer_favicon.png`.
 
 Phase46 is implemented locally:
 
@@ -39,13 +47,13 @@ Do not depend on live Ready Player Me avatar generation for future assets; use e
 
 - Do not push unless explicitly approved. The 2026-05-18 push to `main` is approved after tests pass.
 - Do not commit unless explicitly asked. The 2026-05-18 commit for the approved push is allowed after tests pass.
-- Preserve `/encounter`, `E`, `T`, Examine, backend, and fallback voice.
+- Preserve `/`, `/encounter`, `E`, `T`, Examine, backend, and fallback voice.
 - Do not expose raw voice/token errors in hero UI.
 - Local LiveKit missing is not the current blocker.
 - Do not spend Meshy credits without explicit approval.
 - Do not use procedurally generated filler assets.
 - Do not use low-quality generated or procedural characters.
-- Do not change room composition or HUD except for tiny overlap fixes needed by the patient avatar.
+- Do not change the 3D clinic room composition unless the user explicitly requests it.
 - Record source, license, path, size, and optimization notes for imported assets.
 - Prove one high-quality seated animated sample before bulk imports or generation.
 - Preserve the accepted first sample: Mpho Molefe (`im-001`), 34-year-old female, first accepted patient, current resolver `phase49-mpho-mixamo-sitting-talking`.
@@ -59,6 +67,11 @@ Do not depend on live Ready Player Me avatar generation for future assets; use e
 src/data/patientIdentities.ts
 src/data/cases.ts
 src/data/medicalSuiteModelRegistry.ts
+src/components/SplashScreen.tsx
+src/components/GPRoomScreen.tsx
+src/components/CaseLibraryScreen.tsx
+src/components/BriefScreen.tsx
+src/components/ExamineOverlay.tsx
 src/components/three/ZoroV43PolyclinicScene.tsx
 src/components/EncounterScreen.tsx
 scripts/verify/patient-identities.ts

@@ -9,12 +9,28 @@
   },
   "assets": [
     {
+      "id": "fizer-logo",
+      "role": "brand",
+      "path": "/fizer_logo.png",
+      "source": "/Users/mx/3D Clinic/fizer_logo.png",
+      "license": "User-supplied local brand asset",
+      "notes": "Phase52 Fizer rebrand wordmark. Used on the splash page and navigation surfaces."
+    },
+    {
+      "id": "fizer-favicon",
+      "role": "brand",
+      "path": "/fizer_favicon.png",
+      "source": "/Users/mx/3D Clinic/fizer_favicon.png",
+      "license": "User-supplied local brand asset",
+      "notes": "Phase52 Fizer rebrand mark. Used as browser favicon and small in-UI app mark."
+    },
+    {
       "id": "zoro-v43-room",
       "role": "environment",
       "path": "/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb",
       "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
       "license": "Zoro handoff / local prototype, provenance pending public release clearance",
-      "notes": "Phase51 optimized runtime room. Derived from the Phase40 donor room, reduced from about 191 MB to about 15.5 MB with glTF Transform quantization, WebP texture compression, texture resize, prune, weld, and simplification. Required v43 anchor node names were retained."
+      "notes": "Phase51 optimized runtime room. Derived from the Phase40 donor room, reduced from about 191 MB to about 3.6 MB with glTF Transform quantization, WebP texture compression, texture resize, meshopt compression, prune, weld, and simplification. Loaded through Drei useGLTF so the MeshoptDecoder is available. Required v43 anchor node names were retained."
     },
     {
       "id": "zoro-v43-visual-upgrade-v11",
@@ -22,7 +38,7 @@
       "path": "/assets/medical-suite/environment/v43/visual-upgrade-v11/",
       "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
       "license": "Mixed Zoro handoff assets; source package includes Poly Haven/public-domain notes where applicable",
-      "notes": "HDRI, textures, xray/backdrop support files used by the v43 adapter."
+      "notes": "Textures, xray/backdrop support files, and retained HDRI from the v43 adapter. The HDRI is no longer loaded in the /encounter first-render path because it delayed the live scene behind a black loading screen."
     },
     {
       "id": "zoro-patient-primary-animated",

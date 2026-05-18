@@ -1,4 +1,4 @@
-import { Fragment, useId, type CSSProperties, type ReactNode } from 'react';
+import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { store } from '../game/store';
 
 // ─── PATIENT FACE ───────────────────────────────────────────
@@ -283,9 +283,11 @@ export function Doodle({ kind, size = 50, color, style }: DoodleProps) {
 import type { Screen } from '../game/types';
 
 const LABEL_TO_SCREEN: Record<string, Screen> = {
-  Polyclinic: 'mode',
+  Fizer: 'splash',
+  '3D Clinic': 'gpRoom',
   GP: 'gpRoom',
   Case: 'library',
+  Charts: 'library',
   Brief: 'brief',
   Encounter: 'encounter',
   Wrap: 'endConfirm',
@@ -340,7 +342,7 @@ interface TopBarProps {
 
 export function TopBar({
   here = 0,
-  steps = ['Polyclinic'],
+  steps = ['3D Clinic'],
   showProfile = true,
 }: TopBarProps) {
   const label = steps[here] ?? steps[steps.length - 1] ?? 'Training';
@@ -368,7 +370,7 @@ export function TopBar({
         title="Back to start"
         style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}
       >
-        <Wordmark size={28} />
+        <Wordmark size={34} />
       </span>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>
         <div className="topbar-crumbs">
@@ -378,7 +380,7 @@ export function TopBar({
       {showProfile ? (
         <div
           className="topbar-status"
-          title="Virtion platform status"
+          title="Fizer simulation status"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -420,7 +422,7 @@ export function TopBar({
               color: 'var(--peach-deep)',
             }}
           >
-            V
+            <img src="/fizer_favicon.png" alt="" style={{ width: 22, height: 22, objectFit: 'contain' }} />
           </div>
         </div>
       ) : (
@@ -437,65 +439,28 @@ interface WordmarkProps {
 }
 
 export function Wordmark({ size = 36, dark = false }: WordmarkProps) {
-  const gradientId = useId().replace(/:/g, '');
-  const color = dark ? '#ffffff' : '#071525';
   return (
     <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: size * 0.28,
-        fontFamily: 'Sora, Inter, system-ui, sans-serif',
-        fontWeight: 900,
-        fontSize: size,
-        color,
+        gap: size * 0.22,
         letterSpacing: 0,
         lineHeight: 1,
       }}
     >
-      <svg
-        width={size * 1.02}
-        height={size * 1.02}
-        viewBox="0 0 64 64"
-        role="img"
-        aria-label="Virtion mark"
-        style={{ flexShrink: 0, filter: dark ? 'none' : 'drop-shadow(0 0 18px rgba(0,199,255,0.24))' }}
-      >
-        <defs>
-          <linearGradient id={`${gradientId}-mark`} x1="10" y1="7" x2="54" y2="58" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#00C7FF" />
-            <stop offset="0.58" stopColor="#00A67E" />
-            <stop offset="1" stopColor="#2E6BFF" />
-          </linearGradient>
-          <radialGradient id={`${gradientId}-glass`} cx="50%" cy="34%" r="70%">
-            <stop stopColor="#FFFFFF" stopOpacity="0.9" />
-            <stop offset="0.42" stopColor="#FFFFFF" stopOpacity="0.18" />
-            <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <circle cx="32" cy="32" r="29" fill="rgba(255,255,255,0.62)" stroke="rgba(8,32,55,0.10)" />
-        <circle cx="32" cy="32" r="27" fill={`url(#${gradientId}-glass)`} />
-        <path
-          d="M13 13 L29.5 51 C30.4 53.2 33.6 53.2 34.5 51 L51 13"
-          fill="none"
-          stroke={`url(#${gradientId}-mark)`}
-          strokeWidth="6.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M16 42 C27 53 45 49 52 35 C58 23 51 12 39 10"
-          fill="none"
-          stroke="rgba(255,255,255,0.82)"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-        />
-        <circle cx="45" cy="15" r="4.2" fill="#00A67E" />
-        <circle cx="45" cy="15" r="8" fill="none" stroke="rgba(0,166,126,0.18)" strokeWidth="2" />
-      </svg>
-      <span>
-        Vir<span style={{ color: 'var(--peach-deep)' }}>tion</span>
-      </span>
+      <img
+        src="/fizer_logo.png"
+        alt={dark ? 'Fizer' : 'Fizer home'}
+        style={{
+          width: size * 8.2,
+          maxWidth: 'min(54vw, 360px)',
+          height: size * 2.1,
+          objectFit: 'contain',
+          objectPosition: 'left center',
+          filter: dark ? 'drop-shadow(0 18px 34px rgba(0,0,0,0.35))' : 'drop-shadow(0 12px 26px rgba(16, 43, 104, 0.12))',
+        }}
+      />
     </div>
   );
 }
@@ -526,7 +491,7 @@ export function ClinicalOrbitVisual({ compact = false }: { compact?: boolean }) 
       <div className="clinical-orbit__ring ring-c" />
       <div className="clinical-orbit__core">
         <Wordmark size={compact ? 38 : 54} />
-        <div>synthetic clinic</div>
+        <div>3D clinic</div>
       </div>
       {nodes.map((node, i) => (
         <div

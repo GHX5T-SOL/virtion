@@ -79,7 +79,7 @@ function Legend({ color, label }: { color: string; label: string }) {
 export function HistoryScreen() {
   return (
     <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
-      <TopBar here={1} steps={['Virtion', 'History']} />
+      <TopBar here={1} steps={['Fizer', 'History']} />
       <div style={{ padding: '28px 36px' }}>
         <div
           style={{

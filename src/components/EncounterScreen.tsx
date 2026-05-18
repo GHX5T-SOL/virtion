@@ -130,7 +130,7 @@ function Loader() {
           letterSpacing: '0.05em',
         }}
       >
-        Loading polyclinic…
+        Loading 3D clinic…
       </div>
     </Html>
   );
@@ -408,7 +408,7 @@ function SceneFallback({
         <div className="chip mint">2D continuity mode</div>
         <h2 style={{ fontSize: 42, lineHeight: 1.05, margin: '18px 0 10px' }}>Consultation room degraded gracefully.</h2>
         <p style={{ margin: 0, color: 'var(--ink-2)', fontWeight: 650, lineHeight: 1.6 }}>
-          This browser context could not create a WebGL scene. Virtion preserved the patient encounter with the chart, voice/text tools, and dispatch workflow still available for {patientName}.
+          This browser context could not create a WebGL scene. Fizer preserved the patient encounter with the chart, voice/text tools, and dispatch workflow still available for {patientName}.
         </p>
         <button type="button" className="btn-plush primary" style={{ marginTop: 24 }} onClick={onExamine}>
           Open clinical workspace
@@ -615,7 +615,7 @@ export function EncounterScreen() {
 
   return (
     <div className="screen virtion-shell" style={{ position: 'relative' }}>
-      <TopBar here={4} steps={['Polyclinic', 'GP', 'Case', 'Brief', 'Encounter']} />
+      <TopBar here={4} steps={['Fizer', '3D Clinic', 'Charts', 'Brief', 'Encounter']} />
 
       <div
         style={{

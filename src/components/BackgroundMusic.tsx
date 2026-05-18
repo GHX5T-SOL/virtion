@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useScreen } from '../game/store';
 
-const MUTED_KEY = 'virtion:music-muted';
+const MUTED_KEY = 'fizer:music-muted';
 
 function readMuted(): boolean {
   try {

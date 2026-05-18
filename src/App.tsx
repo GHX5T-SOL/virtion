@@ -12,8 +12,6 @@ import { EncounterScreen } from './components/EncounterScreen';
 import { EndConfirmScreen } from './components/EndConfirmScreen';
 import { DebriefScreen } from './components/DebriefScreen';
 import { HistoryScreen } from './components/HistoryScreen';
-import { AgenticRoundsScreen } from './components/AgenticRoundsScreen';
-import { AgentTopologyScreen } from './components/AgentTopologyScreen';
 import { BackgroundMusic } from './components/BackgroundMusic';
 
 export default function App() {
@@ -28,16 +26,22 @@ export default function App() {
     applyIntensity(tweaks.intensity);
   }, [tweaks.intensity]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, left: 0 });
+    requestAnimationFrame(() => {
+      document.querySelectorAll<HTMLElement>('.screen').forEach((el) => {
+        el.scrollTop = 0;
+      });
+    });
+  }, [screen]);
+
   // Minimal path-based routes so local QA can deep-link without clicking
   // through onboarding every time. The normal app flow remains unchanged.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const path = window.location.pathname.replace(/\/+$/, '');
-    if (path === '/agentic-rounds') {
-      store.setScreen('agenticRounds');
-    } else if (path === '/agent-topology') {
-      store.setScreen('agentTopology');
-    } else if (path === '/encounter' || path === '/demo/encounter') {
+    if (path === '/encounter' || path === '/demo/encounter') {
       store.acceptNextPatient('im-001');
     }
   }, []);
@@ -55,8 +59,6 @@ export default function App() {
       {screen === 'endConfirm' && <EndConfirmScreen />}
       {screen === 'debrief' && <DebriefScreen />}
       {screen === 'history' && <HistoryScreen />}
-      {screen === 'agenticRounds' && <AgenticRoundsScreen />}
-      {screen === 'agentTopology' && <AgentTopologyScreen />}
       <BackgroundMusic />
     </div>
   );

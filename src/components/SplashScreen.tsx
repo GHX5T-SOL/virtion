@@ -1,18 +1,99 @@
-import { useEffect } from 'react';
-import { ClinicalOrbitVisual, Wordmark } from './primitives';
+import { useEffect, useRef } from 'react';
+import { Wordmark } from './primitives';
 import { store } from '../game/store';
 
 const SIGNALS = [
-  ['Synthetic patients', 'training today'],
-  ['AI attending', 'structured debriefs'],
-  ['No PHI demo', 'not clinical advice'],
+  ['3D clinic', 'doctor POV'],
+  ['Synthetic patients', 'safe practice'],
+  ['Structured debrief', 'after every case'],
 ];
 
-const ROADMAP = [
-  '3D clinical spaces',
-  'AR / VR training grounds',
-  'Consent-first R&D compute',
-];
+function ClinicPreview() {
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const el = stageRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    el.style.setProperty('--mx', x.toFixed(3));
+    el.style.setProperty('--my', y.toFixed(3));
+    el.style.setProperty('--rx', `${((0.5 - y) * 9).toFixed(2)}deg`);
+    el.style.setProperty('--ry', `${((x - 0.5) * 12).toFixed(2)}deg`);
+  };
+
+  const resetPointer = () => {
+    const el = stageRef.current;
+    if (!el) return;
+    el.style.setProperty('--mx', '0.52');
+    el.style.setProperty('--my', '0.44');
+    el.style.setProperty('--rx', '0deg');
+    el.style.setProperty('--ry', '0deg');
+  };
+
+  return (
+    <div
+      ref={stageRef}
+      className="fizer-hero-stage"
+      role="img"
+      aria-label="Interactive Fizer 3D clinic training preview"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetPointer}
+    >
+      <div className="fizer-hero-aurora" aria-hidden />
+      <div className="fizer-hero-scanline" aria-hidden />
+
+      <div className="fizer-hero-chrome">
+        <div className="fizer-kicker">Live training loop</div>
+        <div className="fizer-hero-ready">READY</div>
+      </div>
+
+      <div className="fizer-hero-room" aria-hidden>
+        <div className="fizer-hero-wall" />
+        <div className="fizer-hero-floor" />
+        <div className="fizer-hero-bed" />
+        <div className="fizer-hero-desk" />
+        <div className="fizer-hero-monitor">
+          <img src="/fizer_favicon.png" alt="" />
+          <span>3D CLINIC</span>
+        </div>
+        <div className="fizer-hero-patient">
+          <span className="fizer-hero-head" />
+          <span className="fizer-hero-body" />
+          <span className="fizer-hero-leg one" />
+          <span className="fizer-hero-leg two" />
+        </div>
+        <div className="fizer-hero-doctor" />
+      </div>
+
+      <div className="fizer-hero-orbit one" aria-hidden />
+      <div className="fizer-hero-orbit two" aria-hidden />
+      <div className="fizer-hero-pulse" aria-hidden />
+
+      <div className="fizer-hero-chart">
+        <div>
+          <span className="fizer-hero-dot" />
+          <strong>Synthetic patient</strong>
+        </div>
+        <p>History, examination, investigations, diagnosis, treatment.</p>
+      </div>
+
+      <div className="fizer-hero-signals">
+        {SIGNALS.map(([title, label]) => (
+          <div key={title}>
+            <strong>{title}</strong>
+            <span>{label}</span>
+          </div>
+        ))}
+        <div>
+          <strong>No PHI</strong>
+          <span>demo cases only</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function SplashScreen() {
   useEffect(() => {
@@ -27,92 +108,56 @@ export function SplashScreen() {
   }, []);
 
   return (
-    <div className="screen virtion-shell" style={{ overflowY: 'auto' }}>
+    <div className="screen fizer-page" style={{ overflowY: 'auto' }}>
       <header
-        className="splash-header"
+        className="fizer-shell"
         style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 20,
+          minHeight: 82,
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
+          justifyContent: 'space-between',
           gap: 18,
-          padding: '16px clamp(18px, 4vw, 48px)',
-          background: 'rgba(255,255,255,0.70)',
-          backdropFilter: 'blur(24px) saturate(1.3)',
-          borderBottom: '1px solid var(--line)',
+          padding: '18px 0',
         }}
       >
-        <Wordmark size={32} />
-        <nav className="splash-nav" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <span className="chip mint splash-nav-chip">BioMed AI education</span>
-          <button type="button" className="btn-plush ghost splash-platform" onClick={() => store.setScreen('agentTopology')}>
-            Platform
-          </button>
-          <button type="button" className="btn-plush primary" onClick={() => store.beginFromSplash()}>
-            Start
-          </button>
-        </nav>
+        <Wordmark size={38} />
+        <div className="fizer-kicker">3D clinical simulation</div>
       </header>
 
-      <main className="splash-main" style={{ width: 'calc(100vw - 48px)', maxWidth: 1180, margin: '0 auto', padding: 'clamp(32px, 7vw, 72px) 0 34px' }}>
+      <main className="fizer-shell" style={{ padding: 'clamp(26px, 6vw, 70px) 0 46px' }}>
         <section
-          className="splash-hero-grid"
+          className="fizer-hero-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 390px), 1fr))',
-            gap: 'clamp(24px, 5vw, 54px)',
+            gridTemplateColumns: 'minmax(0, 0.95fr) minmax(320px, 0.8fr)',
+            gap: 'clamp(24px, 5vw, 64px)',
             alignItems: 'center',
-            minHeight: 'min(760px, calc(100vh - 128px))',
+            minHeight: 'calc(100vh - 180px)',
           }}
         >
-          <div className="popin" style={{ maxWidth: 620 }}>
-            <div className="chip sky">training simulator · synthetic cases · not clinical advice</div>
-            <h1 style={{ fontSize: 'clamp(42px, 7vw, 72px)', lineHeight: 0.96, marginTop: 18 }}>
-              Medical training, played live.
+          <div className="popin" style={{ maxWidth: 670 }}>
+            <div style={{ marginBottom: 18 }}>
+              <Wordmark size={56} />
+            </div>
+            <h1 style={{ fontSize: 'clamp(46px, 7vw, 84px)', lineHeight: 0.94, letterSpacing: 0 }}>
+              Practice patient encounters in a 3D clinic.
             </h1>
-            <p style={{ margin: '22px 0 0', color: 'var(--ink-2)', fontSize: 'var(--type-copy-lg)', lineHeight: 1.58, fontWeight: 650 }}>
-              Virtion lets students practice the real consultation loop with synthetic patients, investigations, treatment choices, and AI attending feedback.
+            <p style={{ margin: '24px 0 0', color: 'var(--ink-2)', fontSize: 'clamp(17px, 2vw, 21px)', lineHeight: 1.58, fontWeight: 650, maxWidth: 620 }}>
+              Fizer puts learners into synthetic consultations: accept a patient, examine, order investigations, diagnose, prescribe, and finish with a structured debrief.
             </p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 30 }}>
-              <button type="button" className="btn-plush primary" style={{ fontSize: 17, padding: '15px 26px' }} onClick={() => store.beginFromSplash()}>
-                Start simulation
+            <div style={{ marginTop: 34 }}>
+              <button
+                type="button"
+                className="fizer-button fizer-button--primary"
+                style={{ minHeight: 54, padding: '14px 24px', fontSize: 16 }}
+                onClick={() => store.beginFromSplash()}
+              >
+                Start Simulation
               </button>
-              <button type="button" className="btn-plush ghost" style={{ fontSize: 17, padding: '15px 26px' }} onClick={() => store.setScreen('agentTopology')}>
-                See the platform
-              </button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: 10, marginTop: 32 }}>
-              {SIGNALS.map(([big, label], i) => (
-                <div key={big} className="glass-panel popin" style={{ padding: 14, animationDelay: `${0.12 + i * 0.045}s` }}>
-                  <div style={{ fontFamily: 'Sora', fontWeight: 850, fontSize: 18 }}>{big}</div>
-                  <div style={{ marginTop: 4, color: 'var(--ink-soft)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
-                </div>
-              ))}
             </div>
           </div>
 
-          <div className="popin" style={{ animationDelay: '0.08s' }}>
-            <ClinicalOrbitVisual />
-          </div>
-        </section>
-
-        <section
-          className="glass-panel"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
-            gap: 1,
-            overflow: 'hidden',
-          }}
-        >
-          {ROADMAP.map((item, i) => (
-            <div key={item} style={{ padding: '18px 20px', background: i === 1 ? 'rgba(255,255,255,0.46)' : 'rgba(255,255,255,0.30)' }}>
-              <div className={`chip ${i === 0 ? 'mint' : i === 1 ? 'peach' : 'butter'}`}>roadmap {i + 1}</div>
-              <div style={{ marginTop: 10, fontFamily: 'Sora', fontSize: 20, fontWeight: 850 }}>{item}</div>
-            </div>
-          ))}
+          <ClinicPreview />
         </section>
       </main>
     </div>
