@@ -12,7 +12,6 @@ import { EncounterScreen } from './components/EncounterScreen';
 import { EndConfirmScreen } from './components/EndConfirmScreen';
 import { DebriefScreen } from './components/DebriefScreen';
 import { HistoryScreen } from './components/HistoryScreen';
-import { BackgroundMusic } from './components/BackgroundMusic';
 
 export default function App() {
   const screen = useScreen();
@@ -59,7 +58,6 @@ export default function App() {
       {screen === 'endConfirm' && <EndConfirmScreen />}
       {screen === 'debrief' && <DebriefScreen />}
       {screen === 'history' && <HistoryScreen />}
-      <BackgroundMusic />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { Wordmark } from './primitives';
 import { store } from '../game/store';
 
 const SIGNALS = [
@@ -202,22 +201,7 @@ export function SplashScreen() {
 
   return (
     <div className="screen fizer-page" style={{ overflowY: 'auto' }}>
-      <header
-        className="fizer-shell"
-        style={{
-          minHeight: 82,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 18,
-          padding: '18px 0',
-        }}
-      >
-        <Wordmark size={54} />
-        <div className="fizer-kicker">3D clinical simulation</div>
-      </header>
-
-      <main className="fizer-shell" style={{ padding: 'clamp(26px, 6vw, 70px) 0 46px' }}>
+      <main className="fizer-shell" style={{ padding: 'clamp(18px, 4vw, 46px) 0 46px' }}>
         <section
           className="fizer-hero-grid"
           style={{
@@ -225,13 +209,10 @@ export function SplashScreen() {
             gridTemplateColumns: 'minmax(0, 0.95fr) minmax(320px, 0.8fr)',
             gap: 'clamp(24px, 5vw, 64px)',
             alignItems: 'center',
-            minHeight: 'calc(100vh - 180px)',
+            minHeight: 'calc(100vh - 110px)',
           }}
         >
           <div className="popin" style={{ maxWidth: 670 }}>
-            <div style={{ marginBottom: 18 }}>
-              <Wordmark size={92} />
-            </div>
             <h1 style={{ fontSize: 'clamp(46px, 7vw, 84px)', lineHeight: 0.94, letterSpacing: 0 }}>
               Practice patient encounters in a 3D clinic.
             </h1>

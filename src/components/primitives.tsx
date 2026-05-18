@@ -353,13 +353,13 @@ export function TopBar({
         justifyContent: 'space-between',
         gap: 18,
         padding: '12px clamp(14px, 3vw, 32px)',
-        borderBottom: '1px solid rgba(7, 20, 49, 0.08)',
-        background: 'linear-gradient(90deg, rgba(255,255,255,0.94), rgba(245,251,255,0.86))',
-        backdropFilter: 'blur(24px) saturate(1.35)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.22)',
+        background: 'linear-gradient(90deg, rgba(255,255,255,0.34), rgba(245,251,255,0.14))',
+        backdropFilter: 'blur(18px) saturate(1.28)',
         position: 'sticky',
         top: 0,
         zIndex: 60,
-        boxShadow: '0 18px 46px rgba(6,20,49,0.08)',
+        boxShadow: 'none',
       }}
     >
       <span

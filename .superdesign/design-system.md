@@ -72,7 +72,8 @@ Motion:
 - `fizer-exam`: Fizer-styled examination overlay while preserving the existing clinical tab logic.
 - `fizer-hero-stage`: interactive splash hero scene built from CSS layers, pointer-reactive room perspective, diagnostic orbits, and Fizer status strips. It replaces the old static preview card without adding heavyweight generated assets.
 - `fizer-company`, `fizer-platform-card`, `fizer-network-panel`, and `fizer-roadmap-card`: homepage sections for the professional startup story, university education use case, future discipline expansion, and consent-first biomedical compute roadmap.
-- Header treatment: all learner screens use the Fizer wordmark lockup, navy/cyan breadcrumb pill, dark encounter status pill, and icon-only ambient-audio control. Do not restore the old yellow active breadcrumb or text `ON/OFF` audio chip.
+- Header treatment: learner screens use a transparent/frosted Fizer top bar that blends into the page or 3D scene backdrop, with the Fizer wordmark lockup, navy/cyan breadcrumb pill, and dark encounter status pill. Do not restore the old yellow active breadcrumb or any ambient-audio/background-music control. The homepage intentionally omits a repeated logo/header block so the headline sits higher.
+- Examination overlay: the modal must render above the sticky header and fixed shell controls, keep the tab row visible at 1440x900, and constrain internal scrolling to the side rail/content panes rather than clipping the top of the dialog.
 
 ## Copy Rules
 

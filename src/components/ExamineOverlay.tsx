@@ -56,6 +56,9 @@ export function ExamineOverlay({ onClose, onDispatch }: Props) {
   return (
     <div
       className="fizer-exam-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Examination workspace for ${c.name}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -117,7 +120,7 @@ export function ExamineOverlay({ onClose, onDispatch }: Props) {
             })}
           </div>
 
-          <div style={{ padding: 18, overflowY: 'auto', flex: 1 }}>
+          <div style={{ padding: 18, overflowY: 'auto', flex: 1, minHeight: 0 }}>
             {tab === 'history' && <HistoryTab patient={patient} />}
             {tab === 'chat' && <ChatTab patientName={c.name} />}
             {tab === 'tests' && <TestsTab patient={patient} />}
