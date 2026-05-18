@@ -7,17 +7,17 @@ This is a local prototype manifest, not commercial-license clearance.
 ## Runtime Payload
 
 ```text
-547M public/assets
+395M public/assets
 574M source-assets
 ```
 
-The runtime payload is too large for production web deployment, but acceptable for local MVP review.
+The runtime payload is still large, but Phase51 removed the unused 182 MB public room GLB and switched `/encounter` to a 30 MB optimized room GLB.
 
 ## Active Runtime Assets
 
 | Asset | Path | Use |
 | --- | --- | --- |
-| Zoro v43 room | `public/assets/medical-suite/environment/v43/modern_office_clinic_art_target_v43.glb` | Default `/encounter` room |
+| Zoro v43 room optimized | `public/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb` | Default `/encounter` room |
 | v43 support assets | `public/assets/medical-suite/environment/v43/visual-upgrade-v11/` | HDRI/textures/backplates |
 | Phase34 patient | `public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.glb` | Legacy/fallback patient |
 | Zoro patient candidates | `public/assets/medical-suite/patients/zoro/` | Registered candidates/fallbacks |
@@ -305,7 +305,7 @@ Meshy spend requires explicit cost approval before generation. The rejected Phas
 ## Current Large Asset Risk
 
 ```text
-182M public/assets/medical-suite/environment/v43/modern_office_clinic_art_target_v43.glb
+30M public/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb
 18M public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.glb
 17M public/assets/medical-suite/patients/phase34-patient/patient-unity-clean.fbx
 14M public/assets/medical-suite/props/stethoscope/stethoscope-unity-clean.glb

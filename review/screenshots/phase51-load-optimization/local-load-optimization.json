@@ -1,0 +1,123 @@
+{
+  "polyclinicLoadedMs": 3389,
+  "patientLoadedMs": 3389,
+  "text": "Virtion\nPolyclinic\n›\nGP\n›\nCase\n›\nBrief\n›\nEncounter\nENCOUNTER\nV\nM\nMutshidzi Baloyi\n58 years | F | I'm thirsty all the time and urinating con\nFallback\nVoice offline - use Chat in Examine.\nPress\nE\nto Examine\nEnd consultation →\nVoice Input\nDoctor mic ready\nREADY\nPatient: Listening / fallback-safe\nDrag room to look\nE\nexamine\nT\nvoice\nOFF",
+  "events": [
+    {
+      "t": 577,
+      "event": "request",
+      "type": "fetch",
+      "url": "/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb"
+    },
+    {
+      "t": 578,
+      "event": "request",
+      "type": "fetch",
+      "url": "/assets/medical-suite/environment/v43/visual-upgrade-v11/hdr/garden_nook_2k.hdr"
+    },
+    {
+      "t": 603,
+      "event": "response",
+      "type": "fetch",
+      "status": 200,
+      "url": "/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb",
+      "len": "31543380",
+      "ctype": "model/gltf-binary"
+    },
+    {
+      "t": 603,
+      "event": "response",
+      "type": "fetch",
+      "status": 200,
+      "url": "/assets/medical-suite/environment/v43/visual-upgrade-v11/hdr/garden_nook_2k.hdr",
+      "len": "7279910",
+      "ctype": ""
+    },
+    {
+      "t": 3810,
+      "event": "request",
+      "type": "fetch",
+      "url": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb"
+    },
+    {
+      "t": 3865,
+      "event": "response",
+      "type": "fetch",
+      "status": 200,
+      "url": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb",
+      "len": "7749624",
+      "ctype": "model/gltf-binary"
+    },
+    {
+      "t": 5620,
+      "event": "request",
+      "type": "fetch",
+      "url": "/voice/token"
+    },
+    {
+      "t": 6442,
+      "event": "response",
+      "type": "fetch",
+      "status": 500,
+      "url": "/voice/token",
+      "len": "74",
+      "ctype": "application/json"
+    }
+  ],
+  "perf": [
+    {
+      "name": "/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb",
+      "initiatorType": "fetch",
+      "duration": 2921,
+      "transferSize": 31543680,
+      "encodedBodySize": 31543380,
+      "decodedBodySize": 31543380
+    },
+    {
+      "name": "/assets/medical-suite/environment/v43/visual-upgrade-v11/hdr/garden_nook_2k.hdr",
+      "initiatorType": "fetch",
+      "duration": 2569,
+      "transferSize": 7280210,
+      "encodedBodySize": 7279910,
+      "decodedBodySize": 7279910
+    },
+    {
+      "name": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb",
+      "initiatorType": "fetch",
+      "duration": 2642,
+      "transferSize": 7749924,
+      "encodedBodySize": 7749624,
+      "decodedBodySize": 7749624
+    },
+    {
+      "name": "/voice/token",
+      "initiatorType": "fetch",
+      "duration": 77,
+      "transferSize": 374,
+      "encodedBodySize": 74,
+      "decodedBodySize": 74
+    }
+  ],
+  "logs": [
+    {
+      "t": 2967,
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "t": 2967,
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "t": 6443,
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "t": 6461,
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    }
+  ]
+}

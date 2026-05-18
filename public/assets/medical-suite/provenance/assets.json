@@ -11,10 +11,10 @@
     {
       "id": "zoro-v43-room",
       "role": "environment",
-      "path": "/assets/medical-suite/environment/v43/modern_office_clinic_art_target_v43.glb",
+      "path": "/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb",
       "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
       "license": "Zoro handoff / local prototype, provenance pending public release clearance",
-      "notes": "Phase40 donor room. About 191 MB in the handoff, 250 nodes, 152 meshes, 72 materials, 50 images, no skins, one room animation. Runtime local only; too heavy for production web without optimization."
+      "notes": "Phase51 optimized runtime room. Derived from the Phase40 donor room, reduced from about 191 MB to about 31.5 MB with glTF Transform quantization, WebP texture compression, texture resize, prune, weld, and conservative simplification. Required v43 anchor node names were retained."
     },
     {
       "id": "zoro-v43-visual-upgrade-v11",

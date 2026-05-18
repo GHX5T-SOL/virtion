@@ -1,0 +1,50 @@
+{
+  "elapsedMs": 10054,
+  "text": "Virtion\nPolyclinic\n›\nGP\n›\nCase\n›\nBrief\n›\nEncounter\nENCOUNTER\nV\nM\nMutshidzi Baloyi\n58 years | F | I'm thirsty all the time and urinating con\nFallback\nVoice offline - use Chat in Examine.\nPress\nE\nto Examine\nEnd consultation →\nVoice Input\nDoctor mic ready\nREADY\nPatient: Listening / fallback-safe\nDrag room to look\nE\nexamine\nT\nvoice\nOFF",
+  "resources": [
+    {
+      "t": 317,
+      "status": 200,
+      "url": "/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb",
+      "len": "31543380"
+    },
+    {
+      "t": 317,
+      "status": 200,
+      "url": "/assets/medical-suite/environment/v43/visual-upgrade-v11/hdr/garden_nook_2k.hdr",
+      "len": "7279910"
+    },
+    {
+      "t": 1540,
+      "status": 200,
+      "url": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb",
+      "len": "7749624"
+    }
+  ],
+  "perf": [
+    {
+      "name": "/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb",
+      "duration": 564,
+      "transferSize": 31543680,
+      "encodedBodySize": 31543380
+    },
+    {
+      "name": "/assets/medical-suite/environment/v43/visual-upgrade-v11/hdr/garden_nook_2k.hdr",
+      "duration": 381,
+      "transferSize": 7280210,
+      "encodedBodySize": 7279910
+    },
+    {
+      "name": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb",
+      "duration": 739,
+      "transferSize": 7749924,
+      "encodedBodySize": 7749624
+    },
+    {
+      "name": "/voice/token",
+      "duration": 55,
+      "transferSize": 374,
+      "encodedBodySize": 74
+    }
+  ]
+}

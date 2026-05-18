@@ -16,14 +16,12 @@ import {
   findMedicalSuitePatientModelById,
   getRpmAnimationClipSet,
   LOCAL_RPM_PATIENT_MODELS,
-  MPHO_MIXAMO_PATIENT_MODEL,
-  MIXAMO_SEATED_PATIENT_MODELS,
   pickMedicalSuitePatientModel,
   RPM_PATIENT_ANIMATION_CLIPS,
   type RpmAnimationClipSet,
 } from '../../data/medicalSuiteModelRegistry';
 
-const OFFICE_SHELL_GLB = '/assets/medical-suite/environment/v43/modern_office_clinic_art_target_v43.glb';
+const OFFICE_SHELL_GLB = '/assets/medical-suite/environment/v43/optimized/modern_office_clinic_art_target_v43-fast.glb';
 const OFFICE_HDRI = '/assets/medical-suite/environment/v43/visual-upgrade-v11/hdr/garden_nook_2k.hdr';
 const OFFICE_ROOT_SCALE = 2.5;
 const CAMERA_SEATED_EYE_HEIGHT = 1.52;
@@ -862,22 +860,16 @@ let rpmWarmupScheduled = false;
 function scheduleRpmPatientAssetWarmup() {
   if (rpmWarmupScheduled || typeof window === 'undefined') return;
   rpmWarmupScheduled = true;
-  const animationPaths = Object.values(RPM_PATIENT_ANIMATION_CLIPS).flatMap((set) => [
-    set.idle,
-    set.listening,
-    set.speaking,
-  ]);
+  const animationPaths = Object.values(RPM_PATIENT_ANIMATION_CLIPS).flatMap((set) => [set.idle, set.listening, set.speaking]);
   window.setTimeout(() => {
     animationPaths.forEach((path) => useGLTF.preload(path));
-    MIXAMO_SEATED_PATIENT_MODELS.forEach((model, index) => {
-      window.setTimeout(() => useGLTF.preload(model.path), 120 * index);
-    });
-    LOCAL_RPM_PATIENT_MODELS
+    const fallbackModels = LOCAL_RPM_PATIENT_MODELS
       .filter((model) => model.id !== 'rpm-local-female-1')
-      .forEach((model, index) => {
-      window.setTimeout(() => useGLTF.preload(model.path), 180 * index);
+      .slice(0, 2);
+    fallbackModels.forEach((model, index) => {
+      window.setTimeout(() => useGLTF.preload(model.path), 900 * (index + 1));
     });
-  }, 1800);
+  }, 12000);
 }
 
 export function ZoroV43PolyclinicScene({
@@ -957,15 +949,5 @@ export function ZoroV43PolyclinicScene({
   );
 }
 
-useGLTF.preload(pickMedicalSuitePatientModel('im-001', 'F').path);
-useGLTF.preload(MPHO_MIXAMO_PATIENT_MODEL.path);
-for (const model of MIXAMO_SEATED_PATIENT_MODELS) {
-  useGLTF.preload(model.path);
-}
-for (const animationSet of Object.values(RPM_PATIENT_ANIMATION_CLIPS)) {
-  useGLTF.preload(animationSet.idle);
-  useGLTF.preload(animationSet.listening);
-  useGLTF.preload(animationSet.speaking);
-}
 useLoader.preload(GLTFLoader, OFFICE_SHELL_GLB);
 useLoader.preload(RGBELoader, OFFICE_HDRI);
