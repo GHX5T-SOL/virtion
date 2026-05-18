@@ -62,17 +62,18 @@ Motion:
 
 ## Component Patterns
 
-- `Wordmark`: use `/fizer_logo.png` in top bars and hero contexts.
-- Favicon/app mark: use `/fizer_favicon.png`.
+- `Wordmark`: use `/fizer_favicon.png` as the icon mark beside the FIZER text in top bars.
+- Full brand/hero mark: use `/fizer_logo.png`, exported from the user-confirmed DNA-pulse F reference with a transparent background.
+- Favicon/app mark: use `/fizer_favicon.png`, exported from the same confirmed transparent mark.
 - `TopBar`: compact frosted navigation with Fizer identity, breadcrumb, encounter status, and avatar mark.
 - `fizer-button`: primary and quiet actions for all new flow screens.
 - `fizer-panel`: white/glass operational surfaces.
 - `fizer-panel-dark`: navy control surfaces for priority actions.
 - `fizer-chart-avatar`: initials/status identity stamp for patient cards. Do not use the old low-poly patient faces.
 - `fizer-exam`: Fizer-styled examination overlay while preserving the existing clinical tab logic.
-- `fizer-hero-stage`: interactive splash hero scene built from CSS layers, pointer-reactive room perspective, diagnostic orbits, and Fizer status strips. It replaces the old static preview card without adding heavyweight generated assets.
 - `fizer-company`, `fizer-platform-card`, `fizer-network-panel`, and `fizer-roadmap-card`: homepage sections for the professional startup story, university education use case, future discipline expansion, and consent-first biomedical compute roadmap.
-- Header treatment: learner screens use a transparent/frosted Fizer top bar that blends into the page or 3D scene backdrop, with the Fizer wordmark lockup, navy/cyan breadcrumb pill, and dark encounter status pill. Do not restore the old yellow active breadcrumb or any ambient-audio/background-music control. The homepage intentionally omits a repeated logo/header block so the headline sits higher.
+- Homepage hero: use a medium Fizer wordmark in a transparent top-left splash header, keep the headline, description, and single `Start Simulation` action left-aligned, and place the confirmed Fizer DNA-pulse mark on the right as a lightweight CSS 3D-style spinning/orbiting loop. Do not restore the previous CSS clinic preview visual, right-side logo stage, or bottom expansion-chip strip.
+- Header treatment: learner screens use a transparent/frosted Fizer top bar that blends into the page or 3D scene backdrop, with the Fizer wordmark lockup, navy/cyan breadcrumb pill, and dark encounter status pill. Do not restore the old yellow active breadcrumb or any ambient-audio/background-music control. The homepage intentionally omits a repeated header block so the hero stays focused.
 - Examination overlay: the modal must render above the sticky header and fixed shell controls, keep the tab row visible at 1440x900, and constrain internal scrolling to the side rail/content panes rather than clipping the top of the dialog.
 
 ## Copy Rules

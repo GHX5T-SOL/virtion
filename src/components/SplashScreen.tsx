@@ -1,11 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { store } from '../game/store';
-
-const SIGNALS = [
-  ['3D clinic', 'doctor POV'],
-  ['Synthetic patients', 'safe practice'],
-  ['Structured debrief', 'after every case'],
-];
+import { Wordmark } from './primitives';
 
 const PLATFORM_PILLARS = [
   {
@@ -48,95 +43,6 @@ const ROADMAP = [
   },
 ];
 
-const EXPANSIONS = ['Medicine', 'Dentistry', 'Veterinary', 'Emergency', 'Nursing', 'Allied health', 'Biotech R&D', 'Decision training'];
-
-function ClinicPreview() {
-  const stageRef = useRef<HTMLDivElement>(null);
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const el = stageRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-    el.style.setProperty('--mx', x.toFixed(3));
-    el.style.setProperty('--my', y.toFixed(3));
-    el.style.setProperty('--rx', `${((0.5 - y) * 9).toFixed(2)}deg`);
-    el.style.setProperty('--ry', `${((x - 0.5) * 12).toFixed(2)}deg`);
-  };
-
-  const resetPointer = () => {
-    const el = stageRef.current;
-    if (!el) return;
-    el.style.setProperty('--mx', '0.52');
-    el.style.setProperty('--my', '0.44');
-    el.style.setProperty('--rx', '0deg');
-    el.style.setProperty('--ry', '0deg');
-  };
-
-  return (
-    <div
-      ref={stageRef}
-      className="fizer-hero-stage"
-      role="img"
-      aria-label="Interactive Fizer 3D clinic training preview"
-      onPointerMove={handlePointerMove}
-      onPointerLeave={resetPointer}
-    >
-      <div className="fizer-hero-aurora" aria-hidden />
-      <div className="fizer-hero-scanline" aria-hidden />
-
-      <div className="fizer-hero-chrome">
-        <div className="fizer-kicker">Live training loop</div>
-        <div className="fizer-hero-ready">READY</div>
-      </div>
-
-      <div className="fizer-hero-room" aria-hidden>
-        <div className="fizer-hero-wall" />
-        <div className="fizer-hero-floor" />
-        <div className="fizer-hero-bed" />
-        <div className="fizer-hero-desk" />
-        <div className="fizer-hero-monitor">
-          <img src="/fizer_favicon.png" alt="" />
-          <span>3D CLINIC</span>
-        </div>
-        <div className="fizer-hero-patient">
-          <span className="fizer-hero-head" />
-          <span className="fizer-hero-body" />
-          <span className="fizer-hero-leg one" />
-          <span className="fizer-hero-leg two" />
-        </div>
-        <div className="fizer-hero-doctor" />
-      </div>
-
-      <div className="fizer-hero-orbit one" aria-hidden />
-      <div className="fizer-hero-orbit two" aria-hidden />
-      <div className="fizer-hero-pulse" aria-hidden />
-
-      <div className="fizer-hero-chart">
-        <div>
-          <span className="fizer-hero-dot" />
-          <strong>Synthetic patient</strong>
-        </div>
-        <p>History, examination, investigations, diagnosis, treatment.</p>
-      </div>
-
-      <div className="fizer-hero-signals">
-        {SIGNALS.map(([title, label]) => (
-          <div key={title}>
-            <strong>{title}</strong>
-            <span>{label}</span>
-          </div>
-        ))}
-        <div>
-          <strong>No PHI</strong>
-          <span>demo cases only</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function CompanyStory() {
   return (
     <section className="fizer-company" aria-label="Fizer company roadmap">
@@ -177,12 +83,6 @@ function CompanyStory() {
           </article>
         ))}
       </div>
-
-      <div className="fizer-expansion-strip" aria-label="Expansion opportunities">
-        {EXPANSIONS.map((item) => (
-          <span key={item} className="fizer-expansion-chip">{item}</span>
-        ))}
-      </div>
     </section>
   );
 }
@@ -201,18 +101,22 @@ export function SplashScreen() {
 
   return (
     <div className="screen fizer-page" style={{ overflowY: 'auto' }}>
+      <header className="fizer-shell fizer-splash-header">
+        <Wordmark size={58} />
+      </header>
+
       <main className="fizer-shell" style={{ padding: 'clamp(18px, 4vw, 46px) 0 46px' }}>
         <section
-          className="fizer-hero-grid"
+          className="fizer-hero-grid fizer-hero-grid--dna"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 0.95fr) minmax(320px, 0.8fr)',
-            gap: 'clamp(24px, 5vw, 64px)',
+            gridTemplateColumns: 'minmax(0, 0.92fr) minmax(320px, 0.82fr)',
+            gap: 'clamp(22px, 5vw, 64px)',
             alignItems: 'center',
-            minHeight: 'calc(100vh - 110px)',
+            minHeight: 'calc(100vh - 180px)',
           }}
         >
-          <div className="popin" style={{ maxWidth: 670 }}>
+          <div className="fizer-home-copy popin" style={{ maxWidth: 670 }}>
             <h1 style={{ fontSize: 'clamp(46px, 7vw, 84px)', lineHeight: 0.94, letterSpacing: 0 }}>
               Practice patient encounters in a 3D clinic.
             </h1>
@@ -231,7 +135,17 @@ export function SplashScreen() {
             </div>
           </div>
 
-          <ClinicPreview />
+          <div className="fizer-dna-hero-art popin" aria-hidden="true">
+            <div className="fizer-dna-orbit-system">
+              <span className="fizer-dna-ring ring-a" />
+              <span className="fizer-dna-ring ring-b" />
+              <span className="fizer-dna-ring ring-c" />
+              <img className="fizer-dna-core" src="/fizer_logo.png" alt="" />
+              {Array.from({ length: 12 }, (_, index) => (
+                <span key={index} className={`fizer-dna-particle p${index + 1}`} />
+              ))}
+            </div>
+          </div>
         </section>
 
         <CompanyStory />
