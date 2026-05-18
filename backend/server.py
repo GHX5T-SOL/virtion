@@ -94,7 +94,7 @@ DEFAULT_VOICE_LLM_ORDER = [
     "anthropic",
     "text_fallback",
 ]
-DEFAULT_VOICE_TTS_ORDER = ["elevenlabs", "cartesia", "openai", "text_fallback"]
+DEFAULT_VOICE_TTS_ORDER = ["cartesia", "elevenlabs", "openai", "text_fallback"]
 
 # Per-IP rate limit caps even authenticated abuse. SSE streams count as one
 # request, so 120/min leaves plenty of headroom for legitimate use.
