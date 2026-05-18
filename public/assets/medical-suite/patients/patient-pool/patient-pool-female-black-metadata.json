@@ -1,0 +1,92 @@
+{
+  "phase": "PHASE50_PatientPoolMixamo",
+  "id": "patient-pool-female-black",
+  "gender": "F",
+  "race": "black",
+  "source": "/Users/mx/3D Clinic/patient_pool/female_black.fbx",
+  "output": "/Users/mx/3D Clinic/virtion-web-production-mvp/public/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb",
+  "sourceFileSizeBytes": 59709264,
+  "outputFileSizeBytes": 7749624,
+  "objects": {
+    "armatures": [
+      {
+        "name": "Armature",
+        "boneCount": 65,
+        "animation": "patient-pool-female-black-sitting-talking"
+      }
+    ],
+    "meshes": [
+      {
+        "name": "Ch26_Body",
+        "materials": [
+          "Ch26_body"
+        ]
+      },
+      {
+        "name": "Ch26_Eyelashes",
+        "materials": [
+          "Ch26_hair"
+        ]
+      },
+      {
+        "name": "Ch26__Pants",
+        "materials": [
+          "Ch26_body"
+        ]
+      },
+      {
+        "name": "Ch26_Shirt",
+        "materials": [
+          "Ch26_body"
+        ]
+      },
+      {
+        "name": "Ch26_Hair",
+        "materials": [
+          "Ch26_hair"
+        ]
+      },
+      {
+        "name": "Ch26_Heels",
+        "materials": [
+          "Ch26_body"
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "patient-pool-female-black-sitting-talking",
+      "frameRange": [
+        1.0,
+        1350.0
+      ],
+      "fcurves": 0
+    }
+  ],
+  "bounds": {
+    "meshCount": 6,
+    "min": [
+      -0.33164674043655396,
+      1.1733895540237427,
+      -39.99612808227539
+    ],
+    "max": [
+      0.13399460911750793,
+      2.0155816078186035,
+      -38.685462951660156
+    ],
+    "size": [
+      0.4656413495540619,
+      0.8421920537948608,
+      1.3106651306152344
+    ]
+  },
+  "optimization": "gltf-transform resize --width 1024 --height 1024",
+  "notes": [
+    "User-supplied Mixamo FBX patient-pool asset.",
+    "Already rigged with a seated talking Mixamo animation.",
+    "Converted offline with Blender for web runtime GLB loading.",
+    "No procedural avatar generation or retargeting was used."
+  ]
+}

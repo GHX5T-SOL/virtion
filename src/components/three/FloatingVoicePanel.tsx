@@ -14,6 +14,7 @@ interface Props {
   headOffset?: [number, number, number];
   patient: ActivePatient;
   onClose: () => void;
+  onStatusChange?: (status: ConversationStatus) => void;
 }
 
 export function FloatingVoicePanel({
@@ -21,6 +22,7 @@ export function FloatingVoicePanel({
   bedRotationY = 0,
   headOffset,
   patient,
+  onStatusChange,
 }: Props) {
   const [status, setStatus] = useState<ConversationStatus>('uninitialized');
   const [subtitle, setSubtitle] = useState<SubtitleEvent>({ who: 'patient', text: '…' });
@@ -28,6 +30,9 @@ export function FloatingVoicePanel({
   const [voiceReady, setVoiceReady] = useState(false);
   const [voiceStarting, setVoiceStarting] = useState(false);
   const [progress, setProgress] = useState('');
+  const onStatusChangeRef = useRef(onStatusChange);
+
+  onStatusChangeRef.current = onStatusChange;
 
   // Stable listener object — built ONCE per mount.
   const listenersRef = useRef<{
@@ -38,7 +43,10 @@ export function FloatingVoicePanel({
   } | null>(null);
   if (listenersRef.current === null) {
     listenersRef.current = {
-      onStatus: (s) => setStatus(s),
+      onStatus: (s) => {
+        setStatus(s);
+        onStatusChangeRef.current?.(s);
+      },
       onProgress: (m) => setProgress(m),
       // Only the patient's voice goes into the speech bubble above their
       // head — the doctor's transcript stays in the chat panel.
@@ -74,6 +82,7 @@ export function FloatingVoicePanel({
     if (current !== 'uninitialized') {
       setVoiceReady(current !== 'error');
       setStatus(current);
+      onStatusChangeRef.current?.(current);
     } else {
       setVoiceStarting(true);
       conv
@@ -88,16 +97,16 @@ export function FloatingVoicePanel({
 
   const firstName = patient.case.name.split(' ')[0];
   const statusLabel =
-    error || status === 'error' ? 'TEXT FALLBACK' :
-    status === 'listening' ? 'LISTENING…' :
-    status === 'thinking' ? 'THINKING…' :
-    status === 'speaking' ? `${firstName.toUpperCase()} SPEAKING` :
-    status === 'loading' ? 'CONNECTING…' :
+    error || status === 'error' ? 'Fallback' :
+    status === 'listening' ? 'Listening' :
+    status === 'thinking' ? 'Thinking' :
+    status === 'speaking' ? 'Speaking' :
+    status === 'loading' ? 'Connecting' :
     voiceReady ? 'LIVE' :
-    voiceStarting ? 'CONNECTING…' : 'OFFLINE';
+    voiceStarting ? 'Connecting' : 'Offline';
 
   const idleHint =
-    error || status === 'error' ? 'Voice unavailable. Open the clinical workspace and use Chat.' :
+    error || status === 'error' ? 'Voice offline - use Chat in Examine.' :
     status === 'speaking' ? `${firstName} is speaking…` :
     status === 'thinking' ? `${firstName} is thinking…` :
     status === 'listening' ? 'Listening — go ahead.' :
@@ -107,53 +116,92 @@ export function FloatingVoicePanel({
 
   const live = voiceReady && (status === 'listening' || status === 'speaking' || status === 'thinking' || status === 'ready');
   const statusColor =
-    error || status === 'error' ? 'var(--butter-deep)' :
-    status === 'speaking' ? 'var(--peach-deep)' :
-    status === 'listening' ? 'var(--mint-deep)' :
-    status === 'thinking' ? 'var(--butter-deep)' :
-    live ? 'var(--mint-deep)' : 'var(--ink-soft)';
+    error || status === 'error' ? '#ffd166' :
+    status === 'speaking' ? '#6ee7ff' :
+    status === 'listening' ? '#7dffbf' :
+    status === 'thinking' ? '#ffd166' :
+    live ? '#7dffbf' : '#99b8c8';
 
   const [ox, oy, oz] = headOffset ?? [-0.88, 1.0, 0];
   const cos = Math.cos(bedRotationY);
   const sin = Math.sin(bedRotationY);
   const mouthX = bedPosition[0] + ox * cos + oz * sin;
-  const mouthY = oy;
+  const mouthY = bedPosition[1] + oy;
   const mouthZ = bedPosition[2] - ox * sin + oz * cos;
+  const complaint = patient.case.chiefComplaint || patient.case.arrivalBlurb || 'Chest pain';
+  const complaintLabel =
+    complaint.length > 42
+      ? complaint
+          .replace(/^I('|’)ve been /i, '')
+          .replace(/^I am /i, '')
+          .replace(/^I feel /i, '')
+          .replace(/\.$/, '')
+          .slice(0, 42)
+      : complaint;
 
   return (
     <Html
       position={[mouthX, mouthY, mouthZ]}
-      zIndexRange={[100, 0]}
-      style={{ pointerEvents: 'auto', userSelect: 'none', transform: 'translate(-50%, -110%)' }}
+      zIndexRange={[24, 0]}
+      style={{ pointerEvents: 'auto', userSelect: 'none', transform: 'translate(-50%, -104%)' }}
     >
       <div
         style={{
           position: 'relative',
-          minWidth: 240,
-          maxWidth: 320,
-          background: 'rgba(255,255,255,0.88)',
-          border: '1px solid var(--line)',
-          borderRadius: 'var(--r-md)',
-          boxShadow: 'var(--plush-sm)',
-          padding: '10px 14px 12px',
+          width: 230,
+          background: 'linear-gradient(135deg, rgba(8, 29, 45, 0.58), rgba(16, 58, 75, 0.34))',
+          border: '1px solid rgba(111, 235, 255, 0.55)',
+          borderRadius: 14,
+          boxShadow: '0 0 24px rgba(74, 231, 255, 0.26), inset 0 1px 0 rgba(255,255,255,0.20)',
+          padding: '11px 13px 12px',
           fontFamily: 'Inter, system-ui, sans-serif',
-          color: 'var(--ink)',
+          color: '#f3fdff',
+          backdropFilter: 'blur(14px) saturate(1.25)',
+          textShadow: '0 1px 10px rgba(0, 0, 0, 0.28)',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 5,
+            border: '1px solid rgba(122, 239, 255, 0.18)',
+            borderRadius: 11,
+            pointerEvents: 'none',
+          }}
+        />
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: 8,
-            marginBottom: 6,
+            marginBottom: 7,
           }}
         >
-          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: 0 }}>
-            {patient.case.name}
-            <span style={{ fontSize: 11, color: 'var(--ink-soft)', marginLeft: 6, fontWeight: 700 }}>
-              {patient.case.age}{patient.case.gender}
-            </span>
+          <div style={{ display: 'grid', gap: 2, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span
+                style={{
+                  width: 18,
+                  height: 18,
+                  borderRadius: 5,
+                  display: 'inline-grid',
+                  placeItems: 'center',
+                  border: '1px solid rgba(207, 250, 255, 0.44)',
+                  background: 'rgba(218, 250, 255, 0.16)',
+                  fontSize: 11,
+                  fontWeight: 900,
+                }}
+              >
+                {firstName[0]}
+              </span>
+              <span style={{ fontSize: 17, fontWeight: 850, letterSpacing: 0, lineHeight: 1 }}>
+                {patient.case.name}
+              </span>
+            </div>
+            <div style={{ fontSize: 12, color: '#c8eff8', fontWeight: 700 }}>
+              {patient.case.age} years  |  {patient.case.gender}  |  {complaintLabel}
+            </div>
           </div>
           <div
             style={{
@@ -161,15 +209,15 @@ export function FloatingVoicePanel({
               alignItems: 'center',
               gap: 5,
               fontSize: 10,
-              letterSpacing: '0.12em',
+              letterSpacing: 0,
               color: statusColor,
-              textTransform: 'uppercase',
-              fontWeight: 900,
+              textTransform: 'none',
+              fontWeight: 850,
               whiteSpace: 'nowrap',
-              padding: '3px 8px',
-              borderRadius: 'var(--r-pill)',
-              background: 'rgba(255,255,255,0.70)',
-              border: '1px solid var(--line)',
+              padding: '4px 8px',
+              borderRadius: 999,
+              background: 'rgba(4, 18, 29, 0.30)',
+              border: '1px solid rgba(135, 239, 255, 0.26)',
             }}
           >
             <span
@@ -186,59 +234,67 @@ export function FloatingVoicePanel({
           </div>
         </div>
 
-        <div style={{ fontStyle: 'italic', fontSize: 13, lineHeight: 1.4, color: 'var(--ink)', fontWeight: 600 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '18px 1fr',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 2,
+            padding: '8px 9px',
+            borderRadius: 10,
+            background: 'rgba(4, 18, 29, 0.20)',
+            border: '1px solid rgba(135, 239, 255, 0.14)',
+            fontStyle: 'italic',
+            fontSize: 12,
+            lineHeight: 1.35,
+            color: '#f3fdff',
+            fontWeight: 650,
+          }}
+        >
+          <span
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: 4,
+              display: 'inline-block',
+              background: 'linear-gradient(180deg, rgba(119,246,255,0.82), rgba(82,199,255,0.34))',
+              boxShadow: '0 0 14px rgba(111, 235, 255, 0.38)',
+            }}
+          />
           {subtitle.text && subtitle.text !== '…' ? (
             <span>&ldquo;{subtitle.text}&rdquo;</span>
           ) : (
-            <span style={{ color: 'var(--ink-soft)', fontStyle: 'normal', fontSize: 12, fontWeight: 700 }}>
+            <span style={{ color: '#c8eff8', fontStyle: 'normal', fontSize: 12, fontWeight: 750 }}>
               {idleHint}
             </span>
           )}
         </div>
 
-        {error && (
-          <div
-            style={{
-              marginTop: 8,
-              padding: '6px 10px',
-              background: 'rgba(255,209,102,0.14)',
-              border: '1px solid rgba(255,209,102,0.32)',
-              borderRadius: 10,
-              boxShadow: 'none',
-              fontSize: 11,
-              fontWeight: 800,
-              color: 'var(--ink)',
-            }}
-          >
-            {error} · text chat remains available
-          </div>
-        )}
-
-        {/* Speech-bubble tail — outline + fill stack matches the cozy SpeechBubble. */}
         <div
           style={{
             position: 'absolute',
             left: '50%',
-            bottom: -12,
+            bottom: -10,
             transform: 'translateX(-50%)',
             width: 0,
             height: 0,
-            borderLeft: '12px solid transparent',
-            borderRight: '12px solid transparent',
-            borderTop: '12px solid var(--line)',
+            borderLeft: '10px solid transparent',
+            borderRight: '10px solid transparent',
+            borderTop: '10px solid rgba(111, 235, 255, 0.45)',
           }}
         />
         <div
           style={{
             position: 'absolute',
             left: '50%',
-            bottom: -8,
+            bottom: -7,
             transform: 'translateX(-50%)',
             width: 0,
             height: 0,
-            borderLeft: '9px solid transparent',
-            borderRight: '9px solid transparent',
-            borderTop: '9px solid rgba(255,255,255,0.88)',
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderTop: '8px solid rgba(14, 47, 65, 0.72)',
           }}
         />
       </div>

@@ -1,0 +1,34 @@
+{
+  "asset": "patient",
+  "source": "/Users/mx/3D Clinic/meshy_output/phase2-pbr-hero-pass/refined/patient/patient-pbr.glb",
+  "output_glb": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/patient/patient-unity-clean.glb",
+  "output_fbx": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/patient/patient-unity-clean.fbx",
+  "before": {
+    "mesh_object_count": 1,
+    "vertex_count": 446533,
+    "polygon_count": 757634,
+    "material_count": 1
+  },
+  "after": {
+    "mesh_object_count": 1,
+    "vertex_count": 169439,
+    "polygon_count": 219999,
+    "material_count": 1
+  },
+  "origin": {
+    "origin_shift": [
+      0.0004936307668685913,
+      -0.0001287311315536499,
+      1.7763568394002505e-15
+    ]
+  },
+  "decimation": {
+    "applied": true,
+    "target_polygons": 220000,
+    "ratio": 0.29037767576428725
+  },
+  "output_sizes_bytes": {
+    "glb": 18564556,
+    "fbx": 18112588
+  }
+}

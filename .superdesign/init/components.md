@@ -1,52 +1,29 @@
 # Components
 
-Framework: React 18 + TypeScript + Vite. Component library: custom React components and inline styles. CSS approach: global CSS tokens in `src/styles/global.css`.
+Status date: 2026-05-14
 
-## Shared UI Primitives
+## Current Default Encounter Scene
 
-### `src/components/primitives.tsx`
-Reusable UI primitives: patient face SVGs, icon/doodle helpers, breadcrumb, top bar, wordmark, speech bubble, and legacy utility wrappers.
+- `src/components/EncounterScreen.tsx`: owns the Canvas, app flow, DOM HUD, global `E`, global `T`, Examine overlay, voice fallback, and end-consultation.
+- `src/components/three/ZoroV43PolyclinicScene.tsx`: default `/encounter` scene using Zoro's v43 donor GLB plus Ghost's HUD/interaction integration.
+- `src/components/three/FloatingVoicePanel.tsx`: in-scene voice/status panel and conversation-status bridge.
+- `src/components/DockedVoicePanel.tsx`: DOM voice status surface.
+- `src/components/ExamineOverlay.tsx`: clinical workstation opened by `E`.
+- `src/data/medicalSuiteModelRegistry.ts`: local GLB registry for patient and prop candidates.
 
-```tsx
-export function TopBar({ here = 0, steps = ['Polyclinic'], showProfile = true }: TopBarProps) {
-  // Shared top navigation rendered across app screens.
-}
+## Legacy Fallback
 
-export function Wordmark({ size = 36, dark = false }: WordmarkProps) {
-  // Brand mark and wordmark. Must render Virtion only.
-}
+- `src/components/three/Polyclinic.tsx`: legacy Phase38/39 scene available with `/encounter?scene=legacy`.
+- `src/components/three/Player.tsx`: legacy movement/pointer-lock controller; v43 uses fixed drag-look instead.
 
-export function PatientFace(...) {
-  // Legacy SVG/initials patient avatar primitive used in case cards and briefs.
-}
+## Design Notes
 
-export function Doodle(...) {
-  // Legacy decorative SVG primitive. Avoid in new public surfaces.
-}
-```
+Phase48 visual work should target one seated animated Mpho Molefe (`im-001`) sample inside `ZoroV43PolyclinicScene.tsx` first. Do not mount standalone donor Canvas/components or move app flow ownership out of `EncounterScreen`.
 
-Full source file to pass as context during design work: `src/components/primitives.tsx`.
+Current component focus:
 
-## Main Screen Components
-
-- `src/components/SplashScreen.tsx`: launch screen and first user gesture.
-- `src/components/OnboardingScreen.tsx`: three-step product/safety onboarding.
-- `src/components/HomeScreen.tsx`: public/product home and training hub.
-- `src/components/ModeSelectScreen.tsx`: training mode selector.
-- `src/components/GPRoomScreen.tsx`: polyclinic queue entry.
-- `src/components/CaseLibraryScreen.tsx`: grouped case picker.
-- `src/components/BriefScreen.tsx`: doorway brief before entering 3D encounter.
-- `src/components/EncounterScreen.tsx`: 3D canvas shell and HUD.
-- `src/components/ExamineOverlay.tsx`: modal clinical workstation for history, chat, tests, results, diagnosis, Rx.
-- `src/components/DockedVoicePanel.tsx`: compact voice transcript/status card.
-- `src/components/DebriefScreen.tsx`: AI/degraded debrief rendering.
-- `src/components/HistoryScreen.tsx`: training history.
-- `src/components/AgenticRoundsScreen.tsx`: product architecture flow.
-- `src/components/AgentTopologyScreen.tsx`: agent topology visualization.
-
-## 3D Components
-
-- `src/components/three/Polyclinic.tsx`: primary R3F scene and procedural room assets.
-- `src/components/three/StylizedCharacter.tsx`: procedural character model.
-- `src/components/three/FloatingVoicePanel.tsx`: in-scene voice panel.
-- `src/components/three/Player.tsx`: movement/camera controller.
+- preserve active patient case flow into `ZoroPatientActor`;
+- preserve `case.id + case.gender` avatar mapping;
+- stop relying on standing clips plus manual lower-body posing as the final visual path;
+- source/author one real seated idle/listening/speaking sample first;
+- preserve HUD and room components unless avatar clipping forces a tiny adjustment.

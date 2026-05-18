@@ -1,0 +1,34 @@
+{
+  "asset": "desk-clutter",
+  "source": "/Users/mx/3D Clinic/meshy_output/phase2-pbr-hero-pass/refined/desk-clutter/desk-clutter-pbr.glb",
+  "output_glb": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/desk-clutter/desk-clutter-unity-clean.glb",
+  "output_fbx": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/desk-clutter/desk-clutter-unity-clean.fbx",
+  "before": {
+    "mesh_object_count": 1,
+    "vertex_count": 220934,
+    "polygon_count": 246284,
+    "material_count": 1
+  },
+  "after": {
+    "mesh_object_count": 1,
+    "vertex_count": 142923,
+    "polygon_count": 100000,
+    "material_count": 1
+  },
+  "origin": {
+    "origin_shift": [
+      0.0006217807531356812,
+      -0.00044414401054382324,
+      -3.552713678800501e-15
+    ]
+  },
+  "decimation": {
+    "applied": true,
+    "target_polygons": 100000,
+    "ratio": 0.4060353088304559
+  },
+  "output_sizes_bytes": {
+    "glb": 14990992,
+    "fbx": 12105916
+  }
+}

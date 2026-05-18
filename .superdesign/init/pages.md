@@ -1,70 +1,37 @@
 # Pages
 
-## `/` Launch / Home Flow
-Entry: `src/App.tsx`
-Dependencies:
-- `src/components/SplashScreen.tsx`
-  - `src/components/primitives.tsx`
-  - `src/game/store.ts`
-- `src/components/OnboardingScreen.tsx`
-  - `src/components/primitives.tsx`
-  - `src/game/store.ts`
-- `src/components/HomeScreen.tsx`
-  - `src/components/primitives.tsx`
-  - `src/game/store.ts`
-  - `src/data/evalHistory.ts`
-- `src/styles/global.css`
-- `.superdesign/design-system.md`
+Status date: 2026-05-14
 
-## Training Selection Flow
-Entry: `src/App.tsx`
-Dependencies:
-- `src/components/ModeSelectScreen.tsx`
-  - `src/components/primitives.tsx`
-  - `src/game/store.ts`
-- `src/components/GPRoomScreen.tsx`
-  - `src/components/primitives.tsx`
-  - `src/data/cases.ts`
-  - `src/game/clinic.ts`
-  - `src/game/store.ts`
-- `src/components/CaseLibraryScreen.tsx`
-  - `src/components/primitives.tsx`
-  - `src/data/cases.ts`
-  - `src/game/clinic.ts`
-  - `src/game/store.ts`
+## `/encounter`
 
-## 3D Encounter
-Entry: `src/components/EncounterScreen.tsx`
-Dependencies:
-- `src/components/three/Polyclinic.tsx`
-  - `src/components/three/Player.tsx`
-  - `src/components/three/FloatingVoicePanel.tsx`
-  - `src/components/three/StylizedCharacter.tsx`
-  - `src/components/three/interactions.ts`
-- `src/components/ExamineOverlay.tsx`
-- `src/components/DockedVoicePanel.tsx`
-- `src/game/store.ts`
-- `src/game/types.ts`
-- `src/voice/conversation.ts`
-- `src/styles/global.css`
+This is the current acceptance page.
 
-## Debrief
-Entry: `src/components/DebriefScreen.tsx`
-Dependencies:
-- `src/agents/useAttendingDebrief.ts`
-- `src/agents/debriefRequest.ts`
-- `src/agents/customTools.ts`
-- `src/data/guidelines.ts`
-- `src/data/evalHistory.ts`
-- `src/game/store.ts`
-- `src/styles/global.css`
+Dependency tree for Phase48 visual work:
 
-## Architecture Pages
-Entry: `src/App.tsx`
-Dependencies:
-- `src/components/AgenticRoundsScreen.tsx`
-- `src/components/AgentTopologyScreen.tsx`
-- `src/components/primitives.tsx`
-- `src/data/guidelines.ts`
-- `src/data/polyclinicPatients.ts`
-- `src/data/patients.ts`
+```text
+src/App.tsx
+src/components/EncounterScreen.tsx
+src/components/three/ZoroV43PolyclinicScene.tsx
+src/components/three/FloatingVoicePanel.tsx
+src/components/DockedVoicePanel.tsx
+src/components/ExamineOverlay.tsx
+src/data/medicalSuiteModelRegistry.ts
+src/game/store.ts
+src/voice/conversation.ts
+src/styles/global.css
+.superdesign/design-system.md
+```
+
+## `/encounter?scene=legacy`
+
+Fallback/comparison page. It uses `src/components/three/Polyclinic.tsx` and should stay available unless a future task explicitly retires it.
+
+## `/review/index.html`
+
+Static screenshot gallery and evidence page.
+
+## Acceptance View
+
+Use normal 1440x900 seated doctor POV. Close-ups support but do not replace the main frame.
+
+The accepted view must show one high-quality seated animated Mpho Molefe (`im-001`) sample in the existing room, with visible chair contact, adult scale, resolved legs/feet, and real idle/listening/speaking motion. The sample should strictly match female gender and loosely match adult age band / patient description where the source asset supports it.

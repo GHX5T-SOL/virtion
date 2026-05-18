@@ -8,6 +8,7 @@ import {
   DOCTOR_CHAIR_POS,
   PATIENT_CHAIR_POS,
 } from './three/Polyclinic';
+import { ZoroV43PolyclinicScene } from './three/ZoroV43PolyclinicScene';
 import { Player } from './three/Player';
 import { useActiveInteractable, interactionBus } from './three/interactions';
 import {
@@ -19,9 +20,23 @@ import {
   getExistingConversation,
   disposePatientConversation,
 } from '../voice/conversationStore';
+import type { ConversationStatus } from '../voice/conversation';
 import { TopBar } from './primitives';
 import { ExamineOverlay } from './ExamineOverlay';
 import { DockedVoicePanel } from './DockedVoicePanel';
+import { getCase } from '../data/cases';
+
+function readEncounterCaseParam(): string | null {
+  if (typeof window === 'undefined') return null;
+  const caseId = new URLSearchParams(window.location.search).get('case');
+  if (!caseId) return null;
+  try {
+    getCase(caseId);
+    return caseId;
+  } catch {
+    return null;
+  }
+}
 
 /** Adaptive FOV: keeps the horizontal FOV near 82° regardless of viewport
  *  aspect, plus a hold-Z (or scroll wheel) "lean in" zoom. */
@@ -168,6 +183,174 @@ function Kbd({ children }: { children: React.ReactNode }) {
   );
 }
 
+function VoiceInputHud({
+  voiceActive,
+  pointerLocked,
+  lookMode = 'pointer-lock',
+}: {
+  voiceActive: boolean;
+  pointerLocked: boolean;
+  lookMode?: 'pointer-lock' | 'drag';
+}) {
+  const statusLabel = voiceActive ? 'Doctor mic ready' : 'Voice muted';
+  const patientStatus = voiceActive ? 'Patient: Listening / fallback-safe' : 'Patient: Text fallback ready';
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 18,
+        left: 18,
+        zIndex: 6,
+        width: 268,
+        padding: '13px 14px 12px',
+        borderRadius: 12,
+        border: '1px solid rgba(101, 232, 255, 0.42)',
+        background: 'linear-gradient(135deg, rgba(8, 29, 45, 0.68), rgba(20, 62, 82, 0.38))',
+        boxShadow: '0 0 34px rgba(0, 199, 255, 0.18), inset 0 1px 0 rgba(255,255,255,0.16)',
+        backdropFilter: 'blur(18px) saturate(1.25)',
+        color: '#f4fdff',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        pointerEvents: 'none',
+        textShadow: '0 1px 10px rgba(0, 0, 0, 0.28)',
+      }}
+    >
+      <div style={{ position: 'absolute', inset: 5, border: '1px solid rgba(137, 239, 255, 0.14)', borderRadius: 9 }} />
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 850, color: '#aeefff', marginBottom: 5 }}>
+            Voice Input
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 750 }}>
+            <span
+              className={voiceActive ? 'breathe' : undefined}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: voiceActive ? '#7dffbf' : '#9fb4c4',
+                boxShadow: voiceActive ? '0 0 13px rgba(125, 255, 191, 0.72)' : 'none',
+              }}
+            />
+            {statusLabel}
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 850,
+            color: voiceActive ? '#7dffbf' : '#c8d8e2',
+            border: '1px solid rgba(137, 239, 255, 0.22)',
+            borderRadius: 999,
+            padding: '4px 8px',
+            background: 'rgba(4, 18, 29, 0.28)',
+          }}
+        >
+          READY
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: 'relative',
+          height: 38,
+          margin: '11px 0 9px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          borderRadius: 8,
+          background: 'rgba(4, 18, 29, 0.22)',
+          border: '1px solid rgba(137, 239, 255, 0.12)',
+          padding: '5px 8px',
+          overflow: 'hidden',
+        }}
+      >
+        {Array.from({ length: 32 }).map((_, i) => (
+          <span
+            key={`voice-wave-${i}`}
+            style={{
+              display: 'block',
+              width: 2,
+              height: voiceActive ? 8 + Math.abs(Math.sin(i * 0.73)) * 24 : 8 + Math.abs(Math.sin(i * 0.46)) * 10,
+              borderRadius: 999,
+              background: voiceActive ? 'rgba(190, 249, 255, 0.86)' : 'rgba(190, 249, 255, 0.36)',
+              boxShadow: voiceActive ? '0 0 8px rgba(111, 235, 255, 0.35)' : 'none',
+            }}
+          />
+        ))}
+      </div>
+
+      <div style={{ position: 'relative', display: 'grid', gap: 6, fontSize: 10.5, fontWeight: 720, color: '#cceff7' }}>
+        <div>{patientStatus}</div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', color: '#b4d9e5', flexWrap: 'wrap' }}>
+          {pointerLocked ? (
+            <>
+              <Kbd>E</Kbd> examine <Kbd>T</Kbd> mute <Kbd>Esc</Kbd> release
+            </>
+          ) : lookMode === 'drag' ? (
+            <>
+              Drag room to look <Kbd>E</Kbd> examine <Kbd>T</Kbd> voice
+            </>
+          ) : (
+            <>
+              Click room to look <Kbd>E</Kbd> examine <Kbd>T</Kbd> voice
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExamineCallout({ compact = false }: { compact?: boolean }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: compact ? 'clamp(14px, 2.4vh, 24px)' : 'clamp(34px, 5vh, 58px)',
+        left: compact ? 'calc(50% + min(19vw, 310px))' : '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 5,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
+        minWidth: compact ? 178 : 204,
+        padding: compact ? '6px 12px' : '7px 14px',
+        borderRadius: 10,
+        border: '1px solid rgba(111, 235, 255, 0.42)',
+        background: 'linear-gradient(135deg, rgba(8, 29, 45, 0.50), rgba(33, 83, 102, 0.32))',
+        boxShadow: '0 0 28px rgba(0, 199, 255, 0.20), inset 0 1px 0 rgba(255,255,255,0.18)',
+        backdropFilter: 'blur(14px) saturate(1.25)',
+        color: '#f6fdff',
+        fontSize: compact ? 15 : 17,
+        fontWeight: 750,
+        pointerEvents: 'none',
+        textShadow: '0 1px 12px rgba(0, 0, 0, 0.34)',
+      }}
+    >
+      <span>Press</span>
+      <span
+        style={{
+          display: 'inline-grid',
+          placeItems: 'center',
+          width: compact ? 25 : 29,
+          height: compact ? 22 : 24,
+          borderRadius: 6,
+          background: 'rgba(247, 253, 255, 0.92)',
+          color: '#213949',
+          fontSize: compact ? 14 : 16,
+          fontFamily: 'ui-monospace, monospace',
+          fontWeight: 900,
+          textShadow: 'none',
+        }}
+      >
+        E
+      </span>
+      <span>to Examine</span>
+    </div>
+  );
+}
+
 function canCreateWebGLContext(): boolean {
   if (typeof document === 'undefined') return true;
   try {
@@ -243,14 +426,36 @@ export function EncounterScreen() {
   // calls `getOrCreatePatientConversation()` which kicks off LiveKit
   // connection + mic. We never gate behind a "Begin consultation" button.
   const [voiceActive, setVoiceActive] = useState(true);
+  const [conversationStatus, setConversationStatus] = useState<ConversationStatus>('uninitialized');
   const [pointerLocked, setPointerLocked] = useState(false);
   const [examineOpen, setExamineOpen] = useState(false);
   const [webglAvailable] = useState(canCreateWebGLContext);
+  const [sceneMode] = useState<'zoro' | 'legacy'>(() => {
+    if (typeof window === 'undefined') return 'zoro';
+    return new URLSearchParams(window.location.search).get('scene') === 'legacy' ? 'legacy' : 'zoro';
+  });
+
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      (!import.meta.env.DEV && !['localhost', '127.0.0.1'].includes(window.location.hostname))
+    ) {
+      return undefined;
+    }
+    const debugWindow = window as unknown as {
+      __setEncounterConversationStatus?: (status: ConversationStatus) => void;
+    };
+    debugWindow.__setEncounterConversationStatus = setConversationStatus;
+    return () => {
+      delete debugWindow.__setEncounterConversationStatus;
+    };
+  }, []);
 
   // If the user navigated straight here without a patient set, drop the
   // current selectedCaseId in. Without this the scene shows an empty room.
   useEffect(() => {
-    if (!patient) store.loadPolyclinicPatient(state.selectedCaseId);
+    const targetCaseId = readEncounterCaseParam() ?? state.selectedCaseId;
+    if (!patient || patient.case.id !== targetCaseId) store.loadPolyclinicPatient(targetCaseId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -406,6 +611,7 @@ export function EncounterScreen() {
     () => [PATIENT_CHAIR_POS[0], 1.3, PATIENT_CHAIR_POS[2]],
     [],
   );
+  const usingZoroScene = sceneMode === 'zoro';
 
   return (
     <div className="screen virtion-shell" style={{ position: 'relative' }}>
@@ -428,23 +634,36 @@ export function EncounterScreen() {
               shadows
               camera={{ position: playerSpawn, fov: 55 }}
               style={{ background: 'linear-gradient(#edf8ff, #dfeaf5)' }}
+              dpr={usingZoroScene ? [1, 1.5] : undefined}
+              gl={usingZoroScene ? { antialias: true, alpha: false, powerPreference: 'high-performance' } : undefined}
             >
-              <AdaptiveCameraFov />
+              {!usingZoroScene && <AdaptiveCameraFov />}
               <Suspense fallback={<Loader />}>
-                <Polyclinic
-                  voiceActive={voiceActive && !examineOpen}
-                  onCloseVoice={() => setVoiceActive(false)}
-                />
-                <Player
-                  spawn={playerSpawn}
-                  colliders={POLYCLINIC_COLLIDERS}
-                  onInteract={handleInteract}
-                  onTalk={handleTalk}
-                  height={SEATED_HEIGHT}
-                  locked
-                  lookAt={doctorLookAt}
-                  enableLook={!examineOpen}
-                />
+                {usingZoroScene ? (
+                  <ZoroV43PolyclinicScene
+                    voiceActive={voiceActive && !examineOpen}
+                    onCloseVoice={() => setVoiceActive(false)}
+                    conversationStatus={conversationStatus}
+                    onVoiceStatusChange={setConversationStatus}
+                  />
+                ) : (
+                  <>
+                    <Polyclinic
+                      voiceActive={voiceActive && !examineOpen}
+                      onCloseVoice={() => setVoiceActive(false)}
+                    />
+                    <Player
+                      spawn={playerSpawn}
+                      colliders={POLYCLINIC_COLLIDERS}
+                      onInteract={handleInteract}
+                      onTalk={handleTalk}
+                      height={SEATED_HEIGHT}
+                      locked
+                      lookAt={doctorLookAt}
+                      enableLook={!examineOpen}
+                    />
+                  </>
+                )}
               </Suspense>
             </Canvas>
           </SceneErrorBoundary>
@@ -452,7 +671,8 @@ export function EncounterScreen() {
           <SceneFallback patientName={patient?.case.name ?? 'the patient'} onExamine={openExamine} />
         )}
 
-        {pointerLocked && <Crosshair />}
+        {pointerLocked && !usingZoroScene && <Crosshair />}
+        <ExamineCallout compact={usingZoroScene} />
 
         {/* Action buttons — always visible, bottom-right */}
         <div
@@ -478,41 +698,7 @@ export function EncounterScreen() {
           </button>
         </div>
 
-        {/* Hint chip — non-blocking. Adapts to whether mouse-look is engaged. */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 18,
-            left: 18,
-            zIndex: 6,
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-            background: 'rgba(255,255,255,0.82)',
-            border: '1px solid var(--line)',
-            borderRadius: 'var(--r-pill)',
-            padding: '6px 14px',
-            boxShadow: 'var(--plush-tiny)',
-            fontSize: 12,
-            fontWeight: 700,
-            color: 'var(--ink-2)',
-            pointerEvents: 'none',
-          }}
-        >
-          {pointerLocked ? (
-            <>
-              Just talk - voice is live · <Kbd>E</Kbd> examine · <Kbd>T</Kbd> mute · <Kbd>Esc</Kbd> release
-            </>
-          ) : (
-            <>
-              <span
-                className={voiceActive ? 'dot breathe' : 'dot'}
-                style={{ background: voiceActive ? 'var(--peach-deep)' : 'var(--ink-soft)' }}
-              />
-              {voiceActive ? 'Voice live' : 'Voice muted'} · click the room to look around · <Kbd>E</Kbd> examine · <Kbd>T</Kbd> mute
-            </>
-          )}
-        </div>
+        <VoiceInputHud voiceActive={voiceActive} pointerLocked={pointerLocked} lookMode={usingZoroScene ? 'drag' : 'pointer-lock'} />
       </div>
 
       {examineOpen && patient && (

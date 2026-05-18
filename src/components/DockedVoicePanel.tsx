@@ -102,7 +102,7 @@ export function DockedVoicePanel({ patientName, patientLabel }: Props) {
     <div
       style={{
         position: 'fixed',
-        top: 18,
+        top: 96,
         right: 18,
         zIndex: 60,
         width: 260,

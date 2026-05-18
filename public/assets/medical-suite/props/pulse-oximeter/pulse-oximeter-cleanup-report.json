@@ -1,0 +1,34 @@
+{
+  "asset": "pulse-oximeter",
+  "source": "/Users/mx/3D Clinic/meshy_output/phase2-pbr-hero-pass/refined/pulse-oximeter/pulse-oximeter-pbr.glb",
+  "output_glb": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/pulse-oximeter/pulse-oximeter-unity-clean.glb",
+  "output_fbx": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/pulse-oximeter/pulse-oximeter-unity-clean.fbx",
+  "before": {
+    "mesh_object_count": 1,
+    "vertex_count": 263813,
+    "polygon_count": 277049,
+    "material_count": 1
+  },
+  "after": {
+    "mesh_object_count": 1,
+    "vertex_count": 140358,
+    "polygon_count": 80000,
+    "material_count": 1
+  },
+  "origin": {
+    "origin_shift": [
+      4.957523196935654e-05,
+      -3.359653055667877e-05,
+      -2.220446049250313e-16
+    ]
+  },
+  "decimation": {
+    "applied": true,
+    "target_polygons": 80000,
+    "ratio": 0.2887575843984277
+  },
+  "output_sizes_bytes": {
+    "glb": 12396104,
+    "fbx": 10888636
+  }
+}

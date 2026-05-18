@@ -1,15 +1,19 @@
 # Theme
 
-## Global CSS
-Primary theme file: `src/styles/global.css`.
+Status date: 2026-05-14
 
-Required design direction:
-- Dark high-tech clinical OS.
-- Glass panels, subtle grid/radial backgrounds, cyan/teal medical accents.
-- Legacy class names (`plush`, `btn-plush`, `chip`) remain but are visually remapped away from the old toy/cartoon style.
+Visual target: luxury private high-tech doctor office / polyclinic matching `/Users/mx/3D Clinic/reference_Image.jpeg` in composition and feel.
 
-## Important Tokens
-See `.superdesign/design-system.md` for the target tokens. The implementation should keep CSS custom properties stable because many components use inline styles such as `var(--cream)`, `var(--line)`, `var(--mint)`, `var(--peach)`, and `var(--plush-sm)`.
+## Direction
 
-## Other Theme Files
-`src/styles/palettes.ts` mutates CSS variables based on the in-app tweak state. It should map the legacy palette names to the new Virtion high-tech palette instead of restoring the old color families.
+- warm clinical whites and glass;
+- restrained cyan holographic HUD;
+- believable grounded medical context;
+- front-facing patient overview monitor;
+- right-side vitals/anatomy/equipment wall;
+- patient centered and close enough for consultation;
+- soft contact shadows, monitor glow, and premium material variation.
+
+Avoid generic blue sci-fi dashboard styling, flat beige rooms, and sparse empty floor compositions.
+
+Phase48 theme details: believable Mpho Molefe consultation patient first. The sample should be high-quality, rigged, seated, naturally animated, and visually compatible with the premium clinic room. Strictly match female gender and loosely match adult age band / patient description / broad South African representation where the asset supports it. Avoid procedural characters, rigid statues, random outfits, and overclaimed ethnicity matching.

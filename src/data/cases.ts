@@ -3,6 +3,7 @@ import type { PatientCase } from '../game/types';
 import type { ClinicId } from '../game/clinic';
 import { CLINIC_LABELS } from '../game/clinic';
 import { POLYCLINIC_CASES, POLYCLINIC_DIAGNOSIS_LABELS } from './polyclinicPatients';
+import { buildPatientIdentityLedger, type PatientIdentity } from './patientIdentities';
 
 /** Compact patient face descriptor for the case library. Derived deterministically
  *  from the underlying `PatientCase` so the same patient always renders the
@@ -93,9 +94,10 @@ function tagsFor(p: PatientCase, clinic: ClinicId): string[] {
 }
 
 function toCase(p: PatientCase, clinic: ClinicId): Case {
+  const identity = PATIENT_IDENTITY_MAP.get(p.id);
   return {
     id: p.id,
-    name: p.name,
+    name: identity?.displayName ?? p.name,
     age: p.age,
     sex: p.gender,
     complaint: p.chiefComplaint,
@@ -112,18 +114,28 @@ function toCase(p: PatientCase, clinic: ClinicId): Case {
 // ── Build the library deterministically from POLYCLINIC_CASES ────────
 
 const BY_ID = new Map<string, { p: PatientCase; clinic: ClinicId }>();
-const ALL_CASES_RAW: Case[] = [];
 
 for (const [clinic, list] of Object.entries(POLYCLINIC_CASES) as Array<[ClinicId, PatientCase[]]>) {
   if (clinic === 'all-specialties') continue; // skip the synthetic mixed bucket
   for (const p of list) {
     if (BY_ID.has(p.id)) continue;
     BY_ID.set(p.id, { p, clinic });
-    ALL_CASES_RAW.push(toCase(p, clinic));
   }
 }
 
+export const PATIENT_IDENTITY_MAP: Map<string, PatientIdentity> = buildPatientIdentityLedger(
+  Array.from(BY_ID.values()).map(({ p }) => ({ id: p.id, gender: p.gender })),
+);
+
+const ALL_CASES_RAW: Case[] = Array.from(BY_ID.values()).map(({ p, clinic }) => toCase(p, clinic));
+
 export const CASES: Case[] = ALL_CASES_RAW;
+
+export const PATIENT_IDENTITIES: PatientIdentity[] = Array.from(PATIENT_IDENTITY_MAP.values());
+
+export function getPatientIdentity(id: string): PatientIdentity | undefined {
+  return PATIENT_IDENTITY_MAP.get(id);
+}
 
 /** All distinct condition labels in the catalogue, plus a couple of fixed
  *  filter chips ('All', 'Red-flag only'). */
@@ -151,7 +163,10 @@ export function getCase(id: string): Case {
  *  diagnosis options, test results, etc.) — used by the encounter /
  *  brief / debrief screens that need more than the compact face. */
 export function getPatientCase(id: string): PatientCase | undefined {
-  return BY_ID.get(id)?.p;
+  const row = BY_ID.get(id);
+  if (!row) return undefined;
+  const identity = PATIENT_IDENTITY_MAP.get(id);
+  return identity ? { ...row.p, name: identity.displayName } : row.p;
 }
 
 /** Which clinic does this case belong to? */

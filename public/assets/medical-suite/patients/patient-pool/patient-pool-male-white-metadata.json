@@ -1,0 +1,110 @@
+{
+  "phase": "PHASE50_PatientPoolMixamo",
+  "id": "patient-pool-male-white",
+  "gender": "M",
+  "race": "white",
+  "source": "/Users/mx/3D Clinic/patient_pool/male_white.fbx",
+  "output": "/Users/mx/3D Clinic/virtion-web-production-mvp/public/assets/medical-suite/patients/patient-pool/patient-pool-male-white.glb",
+  "sourceFileSizeBytes": 58140096,
+  "outputFileSizeBytes": 9328380,
+  "objects": {
+    "armatures": [
+      {
+        "name": "Armature",
+        "boneCount": 65,
+        "animation": "patient-pool-male-white-sitting-talking"
+      }
+    ],
+    "meshes": [
+      {
+        "name": "Ch33_Belt",
+        "materials": [
+          "Ch33_body"
+        ]
+      },
+      {
+        "name": "Ch33_Eyelashes",
+        "materials": [
+          "Ch33_hair"
+        ]
+      },
+      {
+        "name": "Ch33_Hair",
+        "materials": [
+          "Ch33_hair"
+        ]
+      },
+      {
+        "name": "Ch33_Shoes",
+        "materials": [
+          "Ch33_body"
+        ]
+      },
+      {
+        "name": "Ch33_Shirt",
+        "materials": [
+          "Ch33_body"
+        ]
+      },
+      {
+        "name": "Ch33_Tie",
+        "materials": [
+          "Ch33_body"
+        ]
+      },
+      {
+        "name": "Ch33_Suit",
+        "materials": [
+          "Ch33_body"
+        ]
+      },
+      {
+        "name": "Ch33_Pants",
+        "materials": [
+          "Ch33_body"
+        ]
+      },
+      {
+        "name": "Ch33_Body",
+        "materials": [
+          "Ch33_body"
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "patient-pool-male-white-sitting-talking",
+      "frameRange": [
+        1.0,
+        1350.0
+      ],
+      "fcurves": 0
+    }
+  ],
+  "bounds": {
+    "meshCount": 9,
+    "min": [
+      -0.42279940843582153,
+      1.7774101495742798,
+      -38.90501022338867
+    ],
+    "max": [
+      0.1089252233505249,
+      2.7718729972839355,
+      -37.59054946899414
+    ],
+    "size": [
+      0.5317246317863464,
+      0.9944628477096558,
+      1.3144607543945312
+    ]
+  },
+  "optimization": "gltf-transform resize --width 1024 --height 1024",
+  "notes": [
+    "User-supplied Mixamo FBX patient-pool asset.",
+    "Already rigged with a seated talking Mixamo animation.",
+    "Converted offline with Blender for web runtime GLB loading.",
+    "No procedural avatar generation or retargeting was used."
+  ]
+}

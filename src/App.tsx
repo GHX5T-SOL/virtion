@@ -28,8 +28,8 @@ export default function App() {
     applyIntensity(tweaks.intensity);
   }, [tweaks.intensity]);
 
-  // Minimal path-based route: /agentic-rounds boots straight into the
-  // architecture page so the demo can deep-link to it.
+  // Minimal path-based routes so local QA can deep-link without clicking
+  // through onboarding every time. The normal app flow remains unchanged.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const path = window.location.pathname.replace(/\/+$/, '');
@@ -37,6 +37,8 @@ export default function App() {
       store.setScreen('agenticRounds');
     } else if (path === '/agent-topology') {
       store.setScreen('agentTopology');
+    } else if (path === '/encounter' || path === '/demo/encounter') {
+      store.acceptNextPatient('im-001');
     }
   }, []);
 

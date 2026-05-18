@@ -1,43 +1,25 @@
 # Layouts
 
-The app does not use file-system routing or a formal layout component. `src/App.tsx` is the shell and switches screens from the global `Store`.
+Status date: 2026-05-14
 
-## `src/App.tsx`
+The active experience is a full-screen web game encounter, not a landing page.
 
-```tsx
-import { useEffect } from 'react';
-import { store, useScreen, useTweaks } from './game/store';
-import { applyIntensity, applyPalette } from './styles/palettes';
-import { SplashScreen } from './components/SplashScreen';
-import { OnboardingScreen } from './components/OnboardingScreen';
-import { HomeScreen } from './components/HomeScreen';
-import { ModeSelectScreen } from './components/ModeSelectScreen';
-import { GPRoomScreen } from './components/GPRoomScreen';
-import { CaseLibraryScreen } from './components/CaseLibraryScreen';
-import { BriefScreen } from './components/BriefScreen';
-import { EncounterScreen } from './components/EncounterScreen';
-import { EndConfirmScreen } from './components/EndConfirmScreen';
-import { DebriefScreen } from './components/DebriefScreen';
-import { HistoryScreen } from './components/HistoryScreen';
-import { AgenticRoundsScreen } from './components/AgenticRoundsScreen';
-import { AgentTopologyScreen } from './components/AgentTopologyScreen';
-import { BackgroundMusic } from './components/BackgroundMusic';
+## Encounter Layout
 
-export default function App() {
-  const screen = useScreen();
-  const tweaks = useTweaks();
-  useEffect(() => { applyPalette(tweaks.palette); }, [tweaks.palette]);
-  useEffect(() => { applyIntensity(tweaks.intensity); }, [tweaks.intensity]);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const path = window.location.pathname.replace(/\/+$/, '');
-    if (path === '/agentic-rounds') store.setScreen('agenticRounds');
-    else if (path === '/agent-topology') store.setScreen('agentTopology');
-  }, []);
-  return <div className="app">{/* active screen + BackgroundMusic */}</div>;
-}
-```
+- Top app navigation must remain unobstructed.
+- Main Canvas fills the clinical view.
+- Bottom-left voice HUD stays readable.
+- Compact lower-third `Press E` prompt must not block the patient face, torso, lap, or key props.
+- Patient/status HUD should sit near the patient or side of frame, not collide with top nav.
+- In-scene monitor/vitals panels should support the fiction instead of covering the scene.
 
-## Shared Navigation
+Do not add cards-inside-cards or marketing sections to the encounter.
 
-`src/components/primitives.tsx` exports `TopBar`, `Breadcrumb`, and `Wordmark`. These are the cross-screen layout elements and should be passed as context for any page design.
+## Phase48 Layout Target
+
+- Mpho Molefe (`im-001`) sits naturally on a visible consultation chair.
+- Avatar scale reads like a normal adult relative to desk, bed, room, and HUD.
+- Legs/feet are resolved enough to prove contact and are not cut off by chair/camera.
+- Idle/listening/speaking motion reads alive, not rigid.
+- Avatar strictly matches female gender and loosely matches adult age band / Mpho's patient description where available assets support it.
+- Accepted HUD stays unchanged unless the new seated asset creates clear overlap.

@@ -1,0 +1,63 @@
+{
+  "phase": "PHASE50_PatientPoolMixamo",
+  "id": "patient-pool-male-black",
+  "gender": "M",
+  "race": "black",
+  "source": "/Users/mx/3D Clinic/patient_pool/male_black.fbx",
+  "output": "/Users/mx/3D Clinic/virtion-web-production-mvp/public/assets/medical-suite/patients/patient-pool/patient-pool-male-black.glb",
+  "sourceFileSizeBytes": 48833264,
+  "outputFileSizeBytes": 6049972,
+  "objects": {
+    "armatures": [
+      {
+        "name": "Armature",
+        "boneCount": 65,
+        "animation": "patient-pool-male-black-sitting-talking"
+      }
+    ],
+    "meshes": [
+      {
+        "name": "Ch12",
+        "materials": [
+          "Ch12_body",
+          "Ch12_hair"
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "patient-pool-male-black-sitting-talking",
+      "frameRange": [
+        1.0,
+        1350.0
+      ],
+      "fcurves": 0
+    }
+  ],
+  "bounds": {
+    "meshCount": 1,
+    "min": [
+      -0.3875657916069031,
+      2.1573855876922607,
+      -37.483314514160156
+    ],
+    "max": [
+      0.13025645911693573,
+      3.122180700302124,
+      -36.17305374145508
+    ],
+    "size": [
+      0.5178222507238388,
+      0.9647951126098633,
+      1.3102607727050781
+    ]
+  },
+  "optimization": "gltf-transform resize --width 1024 --height 1024",
+  "notes": [
+    "User-supplied Mixamo FBX patient-pool asset.",
+    "Already rigged with a seated talking Mixamo animation.",
+    "Converted offline with Blender for web runtime GLB loading.",
+    "No procedural avatar generation or retargeting was used."
+  ]
+}

@@ -1,27 +1,19 @@
 # Routes
 
-Virtion is a Vite SPA. Routes are mostly internal store screens rather than URL routes.
+Status date: 2026-05-14
 
-## URL Paths
-- `/`: loads `src/App.tsx`, then starts at `screen='splash'`.
-- `/agentic-rounds`: `App` switches to `agenticRounds`.
-- `/agent-topology`: `App` switches to `agentTopology`.
-- `/agent/*`: proxied to the backend by Vite in development and Vercel middleware in production.
-- `/voice/*`: proxied to the backend by Vite in development and Vercel middleware in production.
+Virtion is a Vite SPA. Routes are mostly internal store screens, but these URL paths matter for the current work.
 
-## Internal Screens
-- `splash` -> `src/components/SplashScreen.tsx`
-- `onboarding` -> `src/components/OnboardingScreen.tsx`
-- `home` -> `src/components/HomeScreen.tsx`
-- `mode` -> `src/components/ModeSelectScreen.tsx`
-- `gpRoom` -> `src/components/GPRoomScreen.tsx`
-- `library` -> `src/components/CaseLibraryScreen.tsx`
-- `brief` -> `src/components/BriefScreen.tsx`
-- `encounter` -> `src/components/EncounterScreen.tsx`
-- `endConfirm` -> `src/components/EndConfirmScreen.tsx`
-- `debrief` -> `src/components/DebriefScreen.tsx`
-- `history` -> `src/components/HistoryScreen.tsx`
-- `agenticRounds` -> `src/components/AgenticRoundsScreen.tsx`
-- `agentTopology` -> `src/components/AgentTopologyScreen.tsx`
+## Active URLs
 
-Router source of truth: `src/App.tsx` and `src/game/store.ts`.
+- `/encounter`: default Zoro v43 scene in the real Virtion encounter shell.
+- `/encounter?scene=legacy`: legacy scene fallback/comparison.
+- `/review/index.html`: local evidence gallery.
+- `/agent/*`: proxied to backend by Vite/dev middleware.
+- `/voice/*`: proxied to backend by Vite/dev middleware.
+
+## Internal Screen
+
+`encounter` is rendered by `src/components/EncounterScreen.tsx`. It must remain the owner of app flow, HUD, keyboard handlers, Examine, voice fallback, and end-consultation.
+
+Phase48 avatar sample evidence should be saved under `review/screenshots/phase48-seated-animated-asset-sample/`.

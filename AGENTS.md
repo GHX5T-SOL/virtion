@@ -1,92 +1,83 @@
-# Virtion — Codex project notes
+# Virtion Web MVP Agent Notes
 
-Browser-based ER + polyclinic clinical training simulator. Doctor-POV game: new patients arrive at triage, you diagnose, order tests, treat, disposition. Voice conversations with the patient run real-time over LiveKit with provider fallbacks: Deepgram/OpenAI STT, Cerebras/Vercel AI Gateway/OpenAI/OpenRouter/Gemini/Anthropic dialog, and ElevenLabs/Cartesia/OpenAI TTS. Polyclinic is a second flow — one outpatient at a time, tests resolve instantly.
+Status date: 2026-05-18
 
-## Tech stack
+## Current Target
 
-- **Frontend:** React 18 + TypeScript + Vite, Three.js via `@react-three/fiber` and `@react-three/drei`.
-- **Voice (transport):** LiveKit Cloud (WebRTC). Browser publishes mic, subscribes to remote audio. `livekit-client` in the browser; the worker lives in `backend/voice_agent.py`.
-- **Voice (backend worker):** `livekit-agents` Python framework with Deepgram/OpenAI STT, Cerebras/Vercel AI Gateway/OpenAI/OpenRouter/Gemini/Anthropic LLM, ElevenLabs/Cartesia/OpenAI TTS, and Silero VAD. Runs in its own venv (`backend/.venv-voice`).
-- **Backend HTTP:** FastAPI at `http://127.0.0.1:8787` — Managed Agents proxy + local-dev `/voice/token` mint. Netlify/Vercel edge middleware can also mint LiveKit rooms/tokens directly for production resilience.
-- **LLM (attending grading):** Anthropic SDK server-side. Patient voice defaults to OpenAI `gpt-4o-mini` with provider fallbacks inside the LiveKit agent; the virtion-attending Managed Agent (Opus 4.7) lives in `backend/server.py`.
-- **State:** single `Store` class with `useSyncExternalStore` (see `src/game/store.ts`). No Redux/Zustand — don't add one.
+```text
+PHASE51_NetlifyLiveVoiceAndDeployVerificationGate
+```
 
-## Key files (what to read first)
+Main route:
 
-- `src/game/store.ts` — single source of truth for all game state (ER beds, polyclinic, notifications, archive).
-- `src/game/types.ts` — `PatientCase`, `ActivePatient`, `GameState`.
-- `src/data/patients.ts` / `polyclinicPatients.ts` / `tests.ts` / `treatments.ts` / `medications.ts` — pure data files.
-- `src/components/three/Polyclinic.tsx` — polyclinic 3D scene, currently active area of work.
-- `src/voice/conversation.ts` — `Conversation` class, LiveKit-backed real-time session (mic, remote audio, transcription events, lip-sync analyser tap).
-- `src/voice/conversationStore.ts` — per-bed conversation cache; T-toggle and patient-leaves dispose explicitly.
-- `src/voice/patientPersona.ts` — system prompt builder. Adult vs pediatric (parent speaks for child).
-- `src/voice/Codex.ts` — Anthropic SDK wrapper with prompt caching, used only by the text-chat path now.
-- `src/agents/managedAgent.ts` / `customTools.ts` / `eventStreamRenderer.tsx` — Codex Managed Agents integration (the attending physician). See `.Codex/skills/virtion-managed-agent-setup.md`.
-- `backend/server.py` — FastAPI: Managed Agents proxy under `/agent/*` + `/voice/token`.
-- `backend/voice_agent.py` — LiveKit Agents worker. Reads room metadata for persona + voice ID and wires provider-fallback STT → LLM → TTS.
-- `middleware.ts` / `netlify/edge-functions/backend-proxy.js` — production edge token mint + backend proxy.
-- `spec.md` — hackathon submission plan, canonical source for Managed Agents scope.
+```text
+http://127.0.0.1:5173/encounter
+```
 
-## Commands
+## Current Truth
 
-- `npm run dev` — Vite dev server.
-- `npm run build` — tsc + vite build.
-- `npm run preview` — preview production build.
-- `npm run verify` — deterministic invariant checks on `src/data/*` (see `.Codex/skills/virtion-verify-simulation.md`). Run after every data/type/store edit.
-- Backend (FastAPI): `backend/.venv/bin/python backend/server.py` — listens on 8787, hosts Managed Agents proxy + local `/voice/token`.
-- Voice worker: `backend/.venv-voice/bin/python backend/voice_agent.py dev` — separate process, registers with LiveKit Cloud and dispatches into rooms created by `/voice/token`. Both processes must be up for voice to work.
+Phase46 is implemented locally:
 
-### Running node-binary wrappers on this machine
+1. South African display names flow through cases, HUD, monitor texture, voice persona, and debrief.
+2. `ZoroPatientActor` uses active `patient.case` instead of a hard-coded patient.
+3. Gender-correct Ready Player Me avatars resolve by `case.id + case.gender`.
+4. Runtime avatar assets live in `public/assets/medical-suite/patients/rpm-local/`.
+5. RPM animation clips live in `public/assets/medical-suite/animations/rpm/`.
+6. Visual proof lives in `review/screenshots/phase46-patient-avatar-assignment/`.
 
-Group policy on BrynQ dev machines blocks `.exe` wrappers under `node_modules/.bin/` — this hits `tsx.exe`, `vite.exe`, `tsc.exe`, `npx`, and anything else that gets compiled to a shim executable. Symptom: `This program is blocked by group policy`.
+Current limitation: Phase47 restored the donor chair, raised avatar scale, improved `im-001` loading in final proof, and moved `Press E`, but user visual review rejected the result. Treat the generic RPM assets as identity placeholders unless a real seated animation path is proven for those cases.
 
-Workarounds baked into the repo:
-- `npm run dev` → `node node_modules/vite/bin/vite.js`
-- `npm run build` → `node node_modules/typescript/bin/tsc && node node_modules/vite/bin/vite.js build`
-- `npm run verify` → `node scripts/verify/run-all.ts` (Node 22+ runs `.ts` natively via type-stripping)
+Phase48 asset-source result: Quaternius Universal Animation Library Standard was downloaded under `source-assets/phase48-candidate-quaternius-universal-animation-library/`. It is CC0 and includes seated idle/talking clips, but direct runtime retargeting onto `rpm-local-female-3` failed visually and was removed from the active runtime path. Do not reintroduce that direct-retarget code; use offline retarget/bake in Blender, Unity, or Unreal before integration.
 
-When adding a new script that would normally invoke a binary wrapper, use the same `node node_modules/<pkg>/bin/<entry>.js` pattern. Do not add `tsx` as a devDependency.
+Phase49 result: the user-supplied Mixamo FBX `patient_avatars/Sitting_Talking_female.fbx` is converted to `public/assets/medical-suite/patients/phase49-mpho-mixamo/mpho-mixamo-sitting-talking.glb` and registered as `phase49-mpho-mixamo-sitting-talking` for Mpho Molefe (`im-001`).
 
-## How to work in this repo
+Phase50 result: eight user-supplied Mixamo FBXs from `/Users/mx/3D Clinic/patient_pool` are converted to `public/assets/medical-suite/patients/patient-pool/`, registered as `PATIENT_POOL_MIXAMO_MODELS`, and mapped by strict gender plus broad `avatarRace`.
 
-- **Keep changes minimal.** Bug fix = bug fix. Don't refactor adjacent code "while you're there."
-- **Data files are data.** If you're adding a new case/test/medication, edit the data file — don't plumb new shape through the store unless the game mechanic genuinely changed.
-- **Three.js scene edits:** the polyclinic and ER rooms have fixed floor/wall dimensions. New meshes must respect the floor plane and not overlap existing furniture — verify by running the dev server and rotating the camera, not by eyeballing numbers.
-- **No new state libraries.** The `Store` class handles everything. If you need derived state, compute it in a selector or in the component.
-- **Voice runs over the network now.** Browser doesn't load STT/TTS models — speech providers are upstream services reached via the LiveKit room. There's nothing to preload on the frontend.
-- **Prompt caching is on** in `src/voice/Codex.ts`. When you add a new Codex call, set `cache_control: { type: 'ephemeral' }` on the system prompt.
+Do not depend on live Ready Player Me avatar generation for future assets; use existing local GLBs or source better licensed alternatives with provenance.
 
-## Model routing
+## Hard Rules
 
-| Call | Model | Why |
-|---|---|---|
-| Patient voice persona (in the LiveKit agent) | Cerebras/Vercel AI Gateway default path, then OpenAI/OpenRouter/Gemini/Anthropic/deterministic | Fast replies even when one provider is unavailable |
-| Real-time speech stack | Deepgram → OpenAI STT, Cerebras → Vercel AI Gateway → OpenAI → OpenRouter → Gemini → Anthropic LLM, ElevenLabs → Cartesia → OpenAI TTS | Working voice first, then resilient fallbacks |
-| `virtion-attending` Managed Agent (clinical grading) | **Opus 4.7** | Clinical reasoning, precision matters |
-| Demo video narration generation | Opus 4.7 | One-off, polish matters |
+- Do not push unless explicitly approved. The 2026-05-18 push to `main` is approved after tests pass.
+- Do not commit unless explicitly asked. The 2026-05-18 commit for the approved push is allowed after tests pass.
+- Preserve `/encounter`, `E`, `T`, Examine, backend, and fallback voice.
+- Do not expose raw voice/token errors in hero UI.
+- Local LiveKit missing is not the current blocker.
+- Do not spend Meshy credits without explicit approval.
+- Do not use procedurally generated filler assets.
+- Do not use low-quality generated or procedural characters.
+- Do not change room composition or HUD except for tiny overlap fixes needed by the patient avatar.
+- Record source, license, path, size, and optimization notes for imported assets.
+- Prove one high-quality seated animated sample before bulk imports or generation.
+- Preserve the accepted first sample: Mpho Molefe (`im-001`), 34-year-old female, first accepted patient, current resolver `phase49-mpho-mixamo-sitting-talking`.
+- Preserve the Phase50 pool unless a higher-quality reviewed source replaces it.
+- Match Mpho's avatar to patient description as far as the asset pool supports it: strict female gender, loose adult age band, broad representation/ethnicity fit without stereotyping.
+- If a baked sample is integrated, bypass the current manual `applyRpmClinicPose()` route for Mpho so old forced rotations do not fight the new animation.
 
-When you add a new Codex-backed feature, decide which bucket it falls in.
+## Key Files
 
-## API keys
+```text
+src/data/patientIdentities.ts
+src/data/cases.ts
+src/data/medicalSuiteModelRegistry.ts
+src/components/three/ZoroV43PolyclinicScene.tsx
+src/components/EncounterScreen.tsx
+scripts/verify/patient-identities.ts
+scripts/assets/import-patient-pool-fbx.py
+scripts/visual/phase50-patient-pool-review.mjs
+ASSET_MANIFEST.md
+RUNBOOK_LOCAL.md
+../docs/VISUAL_REVIEW_PHASE47_AVATARS.md
+../docs/VISUAL_REVIEW_PHASE49_MPHO_MIXAMO.md
+../docs/VISUAL_REVIEW_PHASE50_PATIENT_POOL.md
+../docs/PATIENT_AVATAR_PIPELINE.md
+../docs/PATIENT_IDENTITY_MAPPING.md
+```
 
-All keys server-side only, in `backend/.env.local`. The browser never sees them.
+## Verification
 
-- `ANTHROPIC_API_KEY` — used by the FastAPI server (Managed Agents + `/agent/patient/stream` for the text-chat path) AND by the LiveKit voice worker (Haiku patient persona).
-- `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` — used by FastAPI and edge middleware to mint room JWTs, and by the worker to register.
-- `DEEPGRAM_API_KEY` / `OPENAI_API_KEY` — voice worker STT fallback lane.
-- `CARTESIA_API_KEY` / `ELEVEN_API_KEY` or `ELEVENLABS_API_KEY` / `OPENAI_API_KEY` — voice worker TTS fallback lane.
-
-Vite proxies `/agent/*` and `/voice/*` to `127.0.0.1:8787` in dev. When you add a new Codex-backed feature, route it through the backend the same way — never reintroduce a `VITE_*` Anthropic key.
-
-## Out of scope
-
-- Multi-agent handoffs (Anthropic's feature is still in research preview).
-- Outcomes / self-verifying rubrics (wait-list only).
-- A persistent user account system — the simulator is single-player, single-shift.
-- Any medical claim of clinical accuracy. Cases are plausible but synthetic.
-
-## Don't
-
-- Don't create specialist sub-agents (`triage-expert`, `pharmacology-expert`, …). Use skills in `.Codex/skills/` and let Codex compose them.
-- Don't write long rigid bullet lists of rules here — Opus 4.7 follows them literally and over-triggers. Encode hard rules as hooks or lint instead.
-- Don't commit `.env.local`, voice sample clips over 1 MB, or anything under `node_modules/`, `backend/.venv/`, `dist/`.
+```bash
+npm run verify
+npm test -- --run
+npm run build
+python3 -m py_compile backend/server.py backend/voice_agent.py backend/model_router.py
+```

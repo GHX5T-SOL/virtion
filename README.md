@@ -1,227 +1,69 @@
-# Virtion
+# Virtion Web Production MVP
 
-Browser-based ER + polyclinic clinical training simulator. You play the doctor: patients arrive at triage, you talk to them in real time, order tests, treat, disposition, then receive an attending-style debrief.
+Local playable clinical training slice for the 3D Clinic project.
 
-> Training simulator only. Cases are plausible but synthetic — no clinical claims or medical advice.
+## Main Route
 
----
+```text
+http://127.0.0.1:5173/encounter
+```
 
-## About
+The current default scene uses Zoro's v43 room donor asset inside Ghost's Virtion encounter flow.
 
-Virtion is a voice-first AI patient simulator for medical students and newly graduated doctors. You take the history, order labs, read imaging, diagnose, and prescribe while talking to AI patients in real time. After each session, an attending grader marks communication, history-taking, and clinical reasoning, citing published guidelines (NICE, ESC, AHA, GINA, GOLD) from a curated registry so the grading cannot fabricate sources.
+## Current Product Focus
 
-The product vision extends beyond the browser simulator: mobile and desktop training apps, AR/VR clinical spaces, consent-first research data tooling, and an opt-in compute network for future biomedical simulation workloads. See [docs/platform-roadmap.md](docs/platform-roadmap.md).
+Room and HUD are acceptable for now. Phase46 completed patient-specific name/avatar assignment. Phase47 proved that standing RPM clips plus manual seated bone posing are not enough. Phase48 proved that direct runtime retargeting from Quaternius to the RPM skeleton is also not enough. Phase49 accepted a high-quality seated animated Mpho Molefe (`im-001`) sample. Phase50 extends that approach with eight user-supplied Mixamo seated/talking patient-pool assets:
 
+1. preserve female cases rendering female avatars and male cases rendering male avatars;
+2. use broad `avatarRace` mapping for black, white, indian, and asian pool assets;
+3. keep patients human-scale relative to the desk and room;
+4. seat patients naturally on the visible consultation chair;
+5. preserve continuous real seated/talking motion from embedded Mixamo animations;
+6. keep RPM avatars as fallbacks only.
 
-
-## What's inside
-
-| Layer | Tech |
-|---|---|
-| Frontend | React 18 + TypeScript + Vite, Three.js (`@react-three/fiber`, `@react-three/drei`) |
-| Voice transport | LiveKit Cloud (WebRTC) via `livekit-client` |
-| Voice worker | Python `livekit-agents` — Deepgram/OpenAI STT → Cerebras/Vercel/OpenAI/OpenRouter/Gemini/Anthropic patient dialogue → ElevenLabs/Cartesia/OpenAI TTS |
-| HTTP backend | FastAPI on `127.0.0.1:8787` — Managed Agents proxy + LiveKit JWT mint |
-| Attending grader | Claude **Opus 4.7** as a Managed Agent (`virtion-attending`) with direct-model and deterministic fallbacks |
-| Model fallback router | Cerebras, Vercel AI Gateway, OpenAI, OpenRouter, Gemini, Anthropic, then local deterministic rubric fallback |
-| State | Single `Store` class with `useSyncExternalStore` (no Redux/Zustand) |
-
-Two flows:
-- **ER** — multiple beds, real-time voice with each patient, tests resolve over simulated minutes.
-- **Polyclinic** — one outpatient at a time, tests resolve instantly.
-
----
-
-## Prerequisites
-
-- **Node.js 22+** (TS files are run natively via type-stripping)
-- **Python 3.11+**
-- A modern browser with mic permission (Chrome/Edge recommended for WebRTC)
-
----
-
-## API keys you'll need
-
-All keys are server-side only — the browser never sees them. Get one of each:
-
-| Service | What it does | Where to get it | Free tier? |
-|---|---|---|---|
-| **Anthropic** | Primary attending grader (Opus 4.7) and patient voice persona (Haiku 4.5) | https://console.anthropic.com → API Keys | Pay-as-you-go, no free tier |
-| **OpenAI / OpenRouter / Vercel AI Gateway / Gemini / Cerebras** | Optional direct-model fallbacks for triage, patient text, and debrief degradation | Provider consoles | Varies |
-| **LiveKit Cloud** | Real-time WebRTC transport between browser ↔ voice worker | https://cloud.livekit.io → create project → Settings → Keys (gives `URL`, `API Key`, `API Secret`) | Yes — generous free tier |
-| **Deepgram** | Streaming speech-to-text inside the voice worker | https://console.deepgram.com → API Keys | Yes — $200 free credit |
-| **ElevenLabs / Cartesia / OpenAI TTS** | Streaming text-to-speech inside the voice worker, in fallback order | Provider consoles | Varies |
-
----
-
-## Setup
-
-### 1. Frontend
+## Local Run
 
 ```bash
-npm ci
+npm run verify
+npm test -- --run
+npm run build
+python3 -m py_compile backend/server.py backend/voice_agent.py backend/model_router.py
+backend/.venv/bin/python backend/server.py
+npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-### 2. Backend (two separate venvs)
+Backend health:
 
-The FastAPI server and the LiveKit voice worker have very different dependency trees, so they each get their own venv.
-
-```bash
-cd backend
-
-# FastAPI server — small (FastAPI + Anthropic + livekit-api)
-python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt
-
-# Voice worker — larger (livekit-agents + speech/LLM provider plugins)
-python -m venv .venv-voice
-.venv-voice/Scripts/python -m pip install -r voice_agent_requirements.txt
+```text
+http://127.0.0.1:8787/health
 ```
 
-> On macOS/Linux replace `.venv/Scripts/python` with `.venv/bin/python`.
+## Runtime Notes
 
-### 3. Configure secrets
+- Local LiveKit secrets are not the current blocker. Production Netlify has the relevant env keys.
+- Keep local fallback voice clean and do not show raw token/backend errors in the hero UI.
+- Do not print secrets or env values.
+- Do not push or commit unless Ghost explicitly asks. Ghost approved the 2026-05-18 push to `main` after tests pass.
+- Do not use procedurally generated filler assets.
+- Do not depend on live Ready Player Me avatar generation for future avatars.
+- Do not reintroduce the rejected direct Quaternius runtime retarget.
+- Current avatar planning details are in `../docs/PATIENT_AVATAR_PIPELINE.md` and `../docs/VISUAL_REVIEW_PHASE50_PATIENT_POOL.md`.
+- Phase47 partial evidence is under `review/screenshots/phase47-seated-avatar-scale-chair/`, but it is rejected.
+- Phase48 rejected direct-retarget evidence is under `review/screenshots/phase48-seated-animated-asset-sample/`.
+- Phase49 prep/control evidence is under `review/screenshots/phase49-prep-review/`.
+- Phase49 accepted Mpho evidence is under `review/screenshots/phase49-mpho-mixamo-sample/`.
+- Phase50 accepted pool evidence is under `review/screenshots/phase50-patient-pool/`.
+- After the approved push, verify Netlify deploy status, large/LFS asset delivery, and production LiveKit voice.
 
-```bash
-cp backend/.env.example backend/.env.local
+## Main Files
+
+```text
+src/components/three/ZoroV43PolyclinicScene.tsx
+src/components/EncounterScreen.tsx
+src/components/three/FloatingVoicePanel.tsx
+src/components/DockedVoicePanel.tsx
+src/components/ExamineOverlay.tsx
+src/data/medicalSuiteModelRegistry.ts
+ASSET_MANIFEST.md
+RUNBOOK_LOCAL.md
 ```
-
-Fill in `backend/.env.local`:
-
-```env
-ANTHROPIC_API_KEY=sk-ant-...
-LIVEKIT_URL=wss://your-project.livekit.cloud
-LIVEKIT_API_KEY=APIxxxx
-LIVEKIT_API_SECRET=...
-DEEPGRAM_API_KEY=...
-CARTESIA_API_KEY=...
-ELEVEN_API_KEY=...
-
-# Leave these blank on first run — see "Bootstrap the Managed Agent" below
-VIRTION_AGENT_ID=
-VIRTION_ENV_ID=
-
-# Optional direct-model and speech fallback lanes
-OPENAI_API_KEY=
-VERCEL_AI_GATEWAY_API_KEY=
-OPENROUTER_API_KEY=
-GEMINI_API_KEY=
-CEREBRAS_API_KEY=
-MODEL_ROUTER_ORDER=cerebras,vercel-ai-gateway,openai,openrouter,gemini,anthropic
-VOICE_STT_ORDER=deepgram,openai
-VOICE_LLM_ORDER=cerebras,vercel-ai-gateway,openai,openrouter,gemini,anthropic
-VOICE_TTS_ORDER=elevenlabs,cartesia,openai
-```
-
-### 4. Bootstrap the Managed Agent (one-time)
-
-Start the FastAPI server, then create the persistent attending agent:
-
-```bash
-backend/.venv/Scripts/python backend/server.py
-# In another terminal:
-curl -X POST http://127.0.0.1:8787/agent/bootstrap
-```
-
-The response contains an `agent_id` and `environment_id`. Paste them back into `backend/.env.local` as `VIRTION_AGENT_ID` / `VIRTION_ENV_ID` and **restart the server**. Subsequent runs are no-ops.
-
----
-
-## Run (three terminals)
-
-```bash
-# Terminal 1 — frontend
-npm run dev
-# Vite serves http://localhost:5173
-
-# Terminal 2 — FastAPI backend
-backend/.venv/Scripts/python backend/server.py
-# Listens on http://127.0.0.1:8787 (proxied by Vite at /agent/* and /voice/*)
-
-# Terminal 3 — LiveKit voice worker
-backend/.venv-voice/Scripts/python backend/voice_agent.py dev
-# Logs "registered worker" once connected to LiveKit Cloud
-```
-
-All three must be up for premium voice. If voice setup fails, the encounter degrades to text patient roleplay. If premium model providers fail, the app returns structured degraded outputs instead of blanking.
-
-Open http://localhost:5173 and grant microphone permission when prompted.
-
----
-
-## Useful scripts
-
-```bash
-npm run build      # tsc + vite build
-npm run preview    # preview production build
-npm run verify     # deterministic invariants over src/data/* — run after editing cases/tests/treatments
-npm run test       # custom-tools + loop-commands tests
-```
-
----
-
-## Project layout
-
-```
-src/
-  game/               # Store, types, single source of truth
-  data/               # Patients, tests, treatments, medications, guidelines (pure data)
-  components/         # React UI
-  components/three/   # Three.js scenes (ER room, polyclinic)
-  voice/              # LiveKit conversation + persona builders
-  agents/             # Managed Agent client + custom-tool UI renderer
-backend/
-  server.py           # FastAPI: Managed Agents proxy + /voice/token
-  voice_agent.py      # LiveKit Agents worker with STT/LLM/TTS fallbacks
-.claude/skills/       # Authoring skills (patient generator, rubric author, guideline curator, ...)
-scripts/verify/       # Deterministic data-integrity checks
-```
-
----
-
-## Model routing
-
-| Call | Model | Why |
-|---|---|---|
-| Patient voice persona | Cerebras/Vercel AI Gateway default path, with OpenAI/OpenRouter/Gemini/Anthropic and deterministic fallbacks | Fast in-character replies even when one provider is out of credits |
-| Real-time speech stack | Deepgram → OpenAI STT, Cerebras → Vercel AI Gateway → OpenAI → OpenRouter → Gemini → Anthropic LLM, ElevenLabs → Cartesia → OpenAI TTS | Working providers first, then deeper fallbacks |
-| Patient text / triage fallback | Cerebras → Vercel AI Gateway → OpenAI → OpenRouter → Gemini → Anthropic → deterministic | Keeps the simulator responsive when one provider fails |
-| `virtion-attending` grading | **Opus 4.7** Managed Agent → direct debrief fallback → deterministic rubric | Clinical reasoning first, graceful degradation last |
-
-## Netlify fallback host
-
-`netlify.toml` publishes the Vite build from `dist`, keeps SPA navigation on `/index.html`, and runs an Edge Function proxy for `/voice/*`, `/agent/*`, and `/health`. Set these Netlify environment variables server-side only:
-
-```env
-VIRTION_BACKEND_URL=https://your-backend-host
-BACKEND_SHARED_SECRET=the-same-secret-as-the-backend
-```
-
-Use the **exact** public URL from Railway (**Settings → Networking / Generate domain**), for example `https://virtion-backend-production.up.railway.app`, with **no trailing slash**.
-
-If `https://virtion.netlify.app/health` returns `"backend_error":"unreachable"` or `"backend_proxy_configured":true` together with degraded upstream, `VIRTION_BACKEND_URL` in Netlify does not match your live Railway hostname — update it and **trigger a Netlify redeploy**.
-
-The Edge Function injects the shared secret so the browser can call same-origin `/voice/token` on `https://virtion.netlify.app` without exposing backend credentials.
-
-## Render production backend
-
-`render.yaml` creates the two always-on production processes Virtion needs:
-
-- `virtion-backend` — FastAPI web service for `/agent/*`, `/health`, and backend `/voice/token`.
-- `virtion-voice-worker` — persistent LiveKit Agents worker that listens for `virtion-voice` dispatches and speaks to patients.
-
-Use Render's Blueprint flow from the repo root. Fill every `sync: false` secret directly in Render, then copy the backend service URL into Netlify/Vercel as `VIRTION_BACKEND_URL`. The frontend can stay on Netlify and Vercel; the realtime patient worker must run as this long-lived Render worker.
-
----
-
-## Notes
-
-- **Group policy on Windows:** scripts call `node node_modules/<pkg>/bin/<entry>.js` instead of the `.bin` shims because some corporate machines block `.exe` wrappers under `node_modules/`. Keep this pattern when adding new scripts.
-- **Prompt caching is on** in the patient-persona path — set `cache_control: { type: 'ephemeral' }` on system prompts when you add new Claude calls.
-- **Out of scope:** multi-agent handoffs, persistent user accounts, anything claiming clinical accuracy.
-
----
-
-## License
-
-Private

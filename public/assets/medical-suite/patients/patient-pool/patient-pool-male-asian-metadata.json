@@ -1,0 +1,98 @@
+{
+  "phase": "PHASE50_PatientPoolMixamo",
+  "id": "patient-pool-male-asian",
+  "gender": "M",
+  "race": "asian",
+  "source": "/Users/mx/3D Clinic/patient_pool/male_asian.fbx",
+  "output": "/Users/mx/3D Clinic/virtion-web-production-mvp/public/assets/medical-suite/patients/patient-pool/patient-pool-male-asian.glb",
+  "sourceFileSizeBytes": 57431584,
+  "outputFileSizeBytes": 7797672,
+  "objects": {
+    "armatures": [
+      {
+        "name": "Armature",
+        "boneCount": 65,
+        "animation": "patient-pool-male-asian-sitting-talking"
+      }
+    ],
+    "meshes": [
+      {
+        "name": "Ch31_Body",
+        "materials": [
+          "Ch31_body"
+        ]
+      },
+      {
+        "name": "Ch31_Sweater",
+        "materials": [
+          "Ch31_body"
+        ]
+      },
+      {
+        "name": "Ch31_Collar",
+        "materials": [
+          "Ch31_body"
+        ]
+      },
+      {
+        "name": "Ch31_Pants",
+        "materials": [
+          "Ch31_body"
+        ]
+      },
+      {
+        "name": "Ch31_Eyelashes",
+        "materials": [
+          "Ch31_hair"
+        ]
+      },
+      {
+        "name": "Ch31_Hair",
+        "materials": [
+          "Ch31_hair"
+        ]
+      },
+      {
+        "name": "Ch31_Shoes",
+        "materials": [
+          "Ch31_body"
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "patient-pool-male-asian-sitting-talking",
+      "frameRange": [
+        1.0,
+        1350.0
+      ],
+      "fcurves": 0
+    }
+  ],
+  "bounds": {
+    "meshCount": 7,
+    "min": [
+      -0.23997560143470764,
+      2.351102113723755,
+      -36.32855987548828
+    ],
+    "max": [
+      0.2752928137779236,
+      3.345222234725952,
+      -34.993316650390625
+    ],
+    "size": [
+      0.5152684152126312,
+      0.9941201210021973,
+      1.3352432250976562
+    ]
+  },
+  "optimization": "gltf-transform resize --width 1024 --height 1024",
+  "notes": [
+    "User-supplied Mixamo FBX patient-pool asset.",
+    "Already rigged with a seated talking Mixamo animation.",
+    "Converted offline with Blender for web runtime GLB loading.",
+    "No procedural avatar generation or retargeting was used."
+  ]
+}

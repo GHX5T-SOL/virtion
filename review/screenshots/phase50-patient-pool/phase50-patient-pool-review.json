@@ -1,0 +1,602 @@
+{
+  "phase": "PHASE50_PatientPoolMixamo",
+  "baseUrl": "http://127.0.0.1:5173",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "receipts": [
+    {
+      "avatarId": "phase49-mpho-mixamo-sitting-talking",
+      "caseId": "im-001",
+      "displayName": "Mpho Molefe",
+      "gender": "F",
+      "southAfricanGroup": "black-african",
+      "culturalNamePool": "sotho-tswana-pedi",
+      "avatarRace": "black",
+      "expectedPath": "/assets/medical-suite/patients/phase49-mpho-mixamo/mpho-mixamo-sitting-talking.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "phase49-mpho-mixamo-sitting-talking-im-001-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=im-001"
+    },
+    {
+      "avatarId": "patient-pool-female-black",
+      "caseId": "im-004",
+      "displayName": "Mutshidzi Baloyi",
+      "gender": "F",
+      "southAfricanGroup": "black-african",
+      "culturalNamePool": "venda-tsonga",
+      "avatarRace": "black",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-female-black-im-004-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=im-004"
+    },
+    {
+      "avatarId": "patient-pool-male-black",
+      "caseId": "im-003",
+      "displayName": "Katlego Molepo",
+      "gender": "M",
+      "southAfricanGroup": "black-african",
+      "culturalNamePool": "sotho-tswana-pedi",
+      "avatarRace": "black",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-male-black.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-male-black-im-003-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=im-003"
+    },
+    {
+      "avatarId": "patient-pool-female-white",
+      "caseId": "card-002",
+      "displayName": "Hanli Van Wyk",
+      "gender": "F",
+      "southAfricanGroup": "coloured",
+      "culturalNamePool": "afrikaans",
+      "avatarRace": "white",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-female-white.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-female-white-card-002-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=card-002"
+    },
+    {
+      "avatarId": "patient-pool-male-white",
+      "caseId": "im-002",
+      "displayName": "Jacques Van Wyk",
+      "gender": "M",
+      "southAfricanGroup": "white",
+      "culturalNamePool": "afrikaans",
+      "avatarRace": "white",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-male-white.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-male-white-im-002-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=im-002"
+    },
+    {
+      "avatarId": "patient-pool-female-indian",
+      "caseId": "gi-003",
+      "displayName": "Shanti Moola",
+      "gender": "F",
+      "southAfricanGroup": "indian-asian",
+      "culturalNamePool": "indian-sa",
+      "avatarRace": "indian",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-female-indian.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-female-indian-gi-003-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=gi-003"
+    },
+    {
+      "avatarId": "patient-pool-male-indian",
+      "caseId": "card-009",
+      "displayName": "Noah Samuels",
+      "gender": "M",
+      "southAfricanGroup": "other",
+      "culturalNamePool": "mixed-sa",
+      "avatarRace": "indian",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-male-indian.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-male-indian-card-009-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=card-009"
+    },
+    {
+      "avatarId": "patient-pool-female-asian",
+      "caseId": "endo-007",
+      "displayName": "Fatima Singh",
+      "gender": "F",
+      "southAfricanGroup": "indian-asian",
+      "culturalNamePool": "indian-sa",
+      "avatarRace": "asian",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-female-asian.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-female-asian-endo-007-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=endo-007"
+    },
+    {
+      "avatarId": "patient-pool-male-asian",
+      "caseId": "nsg-007",
+      "displayName": "Sameer Singh",
+      "gender": "M",
+      "southAfricanGroup": "indian-asian",
+      "culturalNamePool": "indian-sa",
+      "avatarRace": "asian",
+      "expectedPath": "/assets/medical-suite/patients/patient-pool/patient-pool-male-asian.glb",
+      "expectedAssetLoaded": true,
+      "screenshot": "patient-pool-male-asian-nsg-007-1440x900.png",
+      "url": "http://127.0.0.1:5173/encounter?case=nsg-007"
+    }
+  ],
+  "consoleMessages": [
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "THREE.GLTFLoader: Couldn't load texture blob:http://127.0.0.1:5173/296233d8-3494-457e-a932-1f4336628747"
+    },
+    {
+      "type": "error",
+      "text": "THREE.GLTFLoader: Couldn't load texture blob:http://127.0.0.1:5173/ebd1f401-bcf8-46a1-8534-91de096be7d7"
+    },
+    {
+      "type": "error",
+      "text": "THREE.GLTFLoader: Couldn't load texture blob:http://127.0.0.1:5173/e3aac262-4dc0-4655-a311-0c8963cefd43"
+    },
+    {
+      "type": "error",
+      "text": "THREE.GLTFLoader: Couldn't load texture blob:http://127.0.0.1:5173/81d44be0-bc0b-49d6-a581-700c9b4d456d"
+    },
+    {
+      "type": "error",
+      "text": "THREE.GLTFLoader: Couldn't load texture blob:http://127.0.0.1:5173/313463cd-4111-4469-8e87-7db56edf6039"
+    },
+    {
+      "type": "error",
+      "text": "THREE.GLTFLoader: Couldn't load texture blob:http://127.0.0.1:5173/35846db0-b888-4421-aefb-bfd13d64e59d"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    },
+    {
+      "type": "warning",
+      "text": "Conversation voice fallback: Error: /voice/token 500: {\"detail\":\"LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET not configured\"}\n    at fetchVoiceToken (http://127.0.0.1:5173/src/voice/conversation.ts:26:20)\n    at async Conversation.init (http://127.0.0.1:5173/src/voice/conversation.ts:252:19)"
+    }
+  ],
+  "pageErrors": [],
+  "health": {
+    "ok": true,
+    "voice": {
+      "transport": "livekit",
+      "livekit_configured": false,
+      "deepgram_configured": false,
+      "cartesia_configured": false,
+      "elevenlabs_configured": true,
+      "openai_voice_configured": true,
+      "fallback_order": {
+        "stt": [
+          "deepgram",
+          "openai",
+          "text_fallback"
+        ],
+        "llm": [
+          "cerebras",
+          "vercel-ai-gateway",
+          "openai",
+          "openrouter",
+          "gemini",
+          "anthropic",
+          "text_fallback"
+        ],
+        "tts": [
+          "elevenlabs",
+          "cartesia",
+          "openai",
+          "text_fallback"
+        ]
+      }
+    },
+    "model_router": {
+      "patient": [
+        {
+          "provider": "cerebras",
+          "model": "llama-3.1-8b",
+          "configured": true,
+          "api_key_env": "CEREBRAS_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "vercel-ai-gateway",
+          "model": "openai/gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "VERCEL_AI_GATEWAY_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "openai",
+          "model": "gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "OPENAI_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "openrouter",
+          "model": "openai/gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "OPENROUTER_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-2.0-flash-lite",
+          "configured": true,
+          "api_key_env": "GEMINI_API_KEY",
+          "kind": "gemini"
+        },
+        {
+          "provider": "anthropic",
+          "model": "claude-haiku-4-5",
+          "configured": true,
+          "api_key_env": "ANTHROPIC_API_KEY",
+          "kind": "anthropic"
+        }
+      ],
+      "triage": [
+        {
+          "provider": "cerebras",
+          "model": "llama-3.3-70b",
+          "configured": true,
+          "api_key_env": "CEREBRAS_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "vercel-ai-gateway",
+          "model": "openai/gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "VERCEL_AI_GATEWAY_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "openai",
+          "model": "gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "OPENAI_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "openrouter",
+          "model": "openai/gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "OPENROUTER_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-2.0-flash-lite",
+          "configured": true,
+          "api_key_env": "GEMINI_API_KEY",
+          "kind": "gemini"
+        },
+        {
+          "provider": "anthropic",
+          "model": "claude-opus-4-7",
+          "configured": true,
+          "api_key_env": "ANTHROPIC_API_KEY",
+          "kind": "anthropic"
+        }
+      ],
+      "debrief": [
+        {
+          "provider": "cerebras",
+          "model": "llama-3.3-70b",
+          "configured": true,
+          "api_key_env": "CEREBRAS_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "vercel-ai-gateway",
+          "model": "openai/gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "VERCEL_AI_GATEWAY_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "openai",
+          "model": "gpt-4o-mini",
+          "configured": true,
+          "api_key_env": "OPENAI_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "openrouter",
+          "model": "anthropic/claude-3.5-sonnet",
+          "configured": true,
+          "api_key_env": "OPENROUTER_API_KEY",
+          "kind": "openai"
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-2.0-flash",
+          "configured": true,
+          "api_key_env": "GEMINI_API_KEY",
+          "kind": "gemini"
+        },
+        {
+          "provider": "anthropic",
+          "model": "claude-opus-4-7",
+          "configured": true,
+          "api_key_env": "ANTHROPIC_API_KEY",
+          "kind": "anthropic"
+        }
+      ],
+      "local_deterministic_fallback": true
+    },
+    "agent": {
+      "anthropic_sdk_installed": true,
+      "api_key_configured": true,
+      "bootstrapped": false,
+      "agent_id": null,
+      "environment_id": null,
+      "model": "claude-opus-4-7"
+    }
+  }
+}

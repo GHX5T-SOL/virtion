@@ -1,0 +1,35 @@
+{
+  "asset": "stethoscope",
+  "source": "/Users/mx/3D Clinic/meshy_output/phase2-pbr-hero-pass/refined/stethoscope/stethoscope-pbr.glb",
+  "output_glb": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/stethoscope/stethoscope-unity-clean.glb",
+  "output_fbx": "/Users/mx/3D Clinic/lookdev/phase2-pbr-hero-pass/stethoscope/stethoscope-unity-clean.fbx",
+  "before": {
+    "mesh_object_count": 1,
+    "vertex_count": 66362,
+    "polygon_count": 35558,
+    "material_count": 1
+  },
+  "after": {
+    "mesh_object_count": 1,
+    "vertex_count": 66362,
+    "polygon_count": 35558,
+    "material_count": 1
+  },
+  "origin": {
+    "origin_shift": [
+      0.00015066936612129211,
+      -0.00011855363845825195,
+      -0.0
+    ]
+  },
+  "decimation": {
+    "applied": false,
+    "reason": "under target",
+    "target_polygons": 50000,
+    "ratio": 1.0
+  },
+  "output_sizes_bytes": {
+    "glb": 14543840,
+    "fbx": 10820684
+  }
+}

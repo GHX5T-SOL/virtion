@@ -1,5 +1,7 @@
 # Virtion Design System
 
+Status date: 2026-05-14
+
 ## Product Context
 Virtion is a premium BioMed and AI education company. The product today is a training-only clinical simulator for medical students: synthetic patients, a doctor-POV consultation loop, live voice or text interaction, orders and treatment decisions, and an AI attending debrief. The platform roadmap includes AR/VR training grounds, mobile and desktop clients, consent-first learning datasets, and opt-in decentralized compute for biomedical research.
 
@@ -61,3 +63,9 @@ Motion:
 - Check that text never clips inside buttons, chips, cards, or nav.
 - Ensure the first viewport on launch shows the product and hints at the next section.
 - Keep 3D/canvas visuals stable and nonblank; support reduced motion.
+
+## Current Encounter Focus
+
+Phase48 is a seated animated patient sample gate. Preserve the accepted HUD, app flow, room, and Phase46 identity/avatar mapping. Do not return to the rejected Phase45 computer/room pass.
+
+The next visual work is one high-quality seated animated Mpho Molefe (`im-001`) sample in the actual `/encounter` route. The sample must strictly match female gender, loosely match adult age band and patient description where possible, and broadly fit South African representation/ethnicity cues only where the asset source supports it. The patient must sit naturally on a visible chair with adult scale, legs/feet resolved, and real idle/listening/speaking motion.

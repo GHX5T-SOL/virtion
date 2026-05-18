@@ -1,0 +1,383 @@
+{
+  "phase": "PHASE50_PatientPoolMixamo",
+  "sourceDir": "/Users/mx/3D Clinic/patient_pool",
+  "outputDir": "/Users/mx/3D Clinic/virtion-web-production-mvp/public/assets/medical-suite/patients/patient-pool",
+  "assets": [
+    {
+      "id": "patient-pool-female-asian",
+      "gender": "F",
+      "race": "asian",
+      "source": "/Users/mx/3D Clinic/patient_pool/female_asian.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-female-asian.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-female-asian-metadata.json",
+      "sourceFileSizeBytes": 50273200,
+      "outputFileSizeBytes": 7387956,
+      "actions": [
+        {
+          "name": "patient-pool-female-asian-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-female-asian-sitting-talking"
+        }
+      ],
+      "meshCount": 7,
+      "bounds": {
+        "meshCount": 7,
+        "min": [
+          -0.046145305037498474,
+          0.21032992005348206,
+          -37.03437042236328
+        ],
+        "max": [
+          0.432094007730484,
+          1.103921890258789,
+          -35.72041320800781
+        ],
+        "size": [
+          0.4782393127679825,
+          0.893591970205307,
+          1.3139572143554688
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    },
+    {
+      "id": "patient-pool-female-black",
+      "gender": "F",
+      "race": "black",
+      "source": "/Users/mx/3D Clinic/patient_pool/female_black.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-female-black-metadata.json",
+      "sourceFileSizeBytes": 59709264,
+      "outputFileSizeBytes": 7749624,
+      "actions": [
+        {
+          "name": "patient-pool-female-black-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-female-black-sitting-talking"
+        }
+      ],
+      "meshCount": 6,
+      "bounds": {
+        "meshCount": 6,
+        "min": [
+          -0.33164674043655396,
+          1.1733895540237427,
+          -39.99612808227539
+        ],
+        "max": [
+          0.13399460911750793,
+          2.0155816078186035,
+          -38.685462951660156
+        ],
+        "size": [
+          0.4656413495540619,
+          0.8421920537948608,
+          1.3106651306152344
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    },
+    {
+      "id": "patient-pool-female-indian",
+      "gender": "F",
+      "race": "indian",
+      "source": "/Users/mx/3D Clinic/patient_pool/female_indian.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-female-indian.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-female-indian-metadata.json",
+      "sourceFileSizeBytes": 60194256,
+      "outputFileSizeBytes": 9206572,
+      "actions": [
+        {
+          "name": "patient-pool-female-indian-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-female-indian-sitting-talking"
+        }
+      ],
+      "meshCount": 7,
+      "bounds": {
+        "meshCount": 7,
+        "min": [
+          -0.1566755473613739,
+          1.0462443828582764,
+          -38.62885284423828
+        ],
+        "max": [
+          0.29433780908584595,
+          1.9221950769424438,
+          -37.325477600097656
+        ],
+        "size": [
+          0.45101335644721985,
+          0.8759506940841675,
+          1.303375244140625
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    },
+    {
+      "id": "patient-pool-female-white",
+      "gender": "F",
+      "race": "white",
+      "source": "/Users/mx/3D Clinic/patient_pool/female_white.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-female-white.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-female-white-metadata.json",
+      "sourceFileSizeBytes": 56606768,
+      "outputFileSizeBytes": 8954924,
+      "actions": [
+        {
+          "name": "patient-pool-female-white-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-female-white-sitting-talking"
+        }
+      ],
+      "meshCount": 6,
+      "bounds": {
+        "meshCount": 6,
+        "min": [
+          0.19236738979816437,
+          -0.8843305110931396,
+          -35.8310546875
+        ],
+        "max": [
+          0.6661989688873291,
+          0.011526226997375488,
+          -34.498756408691406
+        ],
+        "size": [
+          0.47383157908916473,
+          0.8958567380905151,
+          1.3322982788085938
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    },
+    {
+      "id": "patient-pool-male-asian",
+      "gender": "M",
+      "race": "asian",
+      "source": "/Users/mx/3D Clinic/patient_pool/male_asian.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-male-asian.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-male-asian-metadata.json",
+      "sourceFileSizeBytes": 57431584,
+      "outputFileSizeBytes": 7797672,
+      "actions": [
+        {
+          "name": "patient-pool-male-asian-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-male-asian-sitting-talking"
+        }
+      ],
+      "meshCount": 7,
+      "bounds": {
+        "meshCount": 7,
+        "min": [
+          -0.23997560143470764,
+          2.351102113723755,
+          -36.32855987548828
+        ],
+        "max": [
+          0.2752928137779236,
+          3.345222234725952,
+          -34.993316650390625
+        ],
+        "size": [
+          0.5152684152126312,
+          0.9941201210021973,
+          1.3352432250976562
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    },
+    {
+      "id": "patient-pool-male-black",
+      "gender": "M",
+      "race": "black",
+      "source": "/Users/mx/3D Clinic/patient_pool/male_black.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-male-black.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-male-black-metadata.json",
+      "sourceFileSizeBytes": 48833264,
+      "outputFileSizeBytes": 6049972,
+      "actions": [
+        {
+          "name": "patient-pool-male-black-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-male-black-sitting-talking"
+        }
+      ],
+      "meshCount": 1,
+      "bounds": {
+        "meshCount": 1,
+        "min": [
+          -0.3875657916069031,
+          2.1573855876922607,
+          -37.483314514160156
+        ],
+        "max": [
+          0.13025645911693573,
+          3.122180700302124,
+          -36.17305374145508
+        ],
+        "size": [
+          0.5178222507238388,
+          0.9647951126098633,
+          1.3102607727050781
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    },
+    {
+      "id": "patient-pool-male-indian",
+      "gender": "M",
+      "race": "indian",
+      "source": "/Users/mx/3D Clinic/patient_pool/male_indian.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-male-indian.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-male-indian-metadata.json",
+      "sourceFileSizeBytes": 90777872,
+      "outputFileSizeBytes": 12066496,
+      "actions": [
+        {
+          "name": "patient-pool-male-indian-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-male-indian-sitting-talking"
+        }
+      ],
+      "meshCount": 7,
+      "bounds": {
+        "meshCount": 7,
+        "min": [
+          0.13066241145133972,
+          -0.2541675567626953,
+          -37.53048324584961
+        ],
+        "max": [
+          0.6659858226776123,
+          0.7240808010101318,
+          -36.194129943847656
+        ],
+        "size": [
+          0.5353234112262726,
+          0.9782483577728271,
+          1.3363533020019531
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    },
+    {
+      "id": "patient-pool-male-white",
+      "gender": "M",
+      "race": "white",
+      "source": "/Users/mx/3D Clinic/patient_pool/male_white.fbx",
+      "path": "/assets/medical-suite/patients/patient-pool/patient-pool-male-white.glb",
+      "metadata": "/assets/medical-suite/patients/patient-pool/patient-pool-male-white-metadata.json",
+      "sourceFileSizeBytes": 58140096,
+      "outputFileSizeBytes": 9328380,
+      "actions": [
+        {
+          "name": "patient-pool-male-white-sitting-talking",
+          "frameRange": [
+            1.0,
+            1350.0
+          ],
+          "fcurves": 0
+        }
+      ],
+      "armatures": [
+        {
+          "name": "Armature",
+          "boneCount": 65,
+          "animation": "patient-pool-male-white-sitting-talking"
+        }
+      ],
+      "meshCount": 9,
+      "bounds": {
+        "meshCount": 9,
+        "min": [
+          -0.42279940843582153,
+          1.7774101495742798,
+          -38.90501022338867
+        ],
+        "max": [
+          0.1089252233505249,
+          2.7718729972839355,
+          -37.59054946899414
+        ],
+        "size": [
+          0.5317246317863464,
+          0.9944628477096558,
+          1.3144607543945312
+        ]
+      },
+      "optimization": "gltf-transform resize --width 1024 --height 1024"
+    }
+  ]
+}

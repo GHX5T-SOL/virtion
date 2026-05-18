@@ -1,0 +1,148 @@
+{
+  "workspace": "/Users/mx/3D Clinic/virtion-web-production-mvp",
+  "created_at": "2026-05-11",
+  "policy": {
+    "github_push": false,
+    "local_commits": false,
+    "license_note": "Prototype-local asset use only. Re-check each third-party license before public or commercial release.",
+    "secrets": "No API keys or tokens recorded in this manifest."
+  },
+  "assets": [
+    {
+      "id": "zoro-v43-room",
+      "role": "environment",
+      "path": "/assets/medical-suite/environment/v43/modern_office_clinic_art_target_v43.glb",
+      "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
+      "license": "Zoro handoff / local prototype, provenance pending public release clearance",
+      "notes": "Phase40 donor room. About 191 MB in the handoff, 250 nodes, 152 meshes, 72 materials, 50 images, no skins, one room animation. Runtime local only; too heavy for production web without optimization."
+    },
+    {
+      "id": "zoro-v43-visual-upgrade-v11",
+      "role": "environment-support",
+      "path": "/assets/medical-suite/environment/v43/visual-upgrade-v11/",
+      "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
+      "license": "Mixed Zoro handoff assets; source package includes Poly Haven/public-domain notes where applicable",
+      "notes": "HDRI, textures, xray/backdrop support files used by the v43 adapter."
+    },
+    {
+      "id": "zoro-patient-primary-animated",
+      "role": "patient-candidate",
+      "path": "/assets/medical-suite/patients/zoro/patient-primary.glb",
+      "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
+      "license": "Zoro handoff / local prototype, provenance pending public release clearance",
+      "notes": "About 4.7 MB, one skin, one Take 001 animation. Registered but not selected for final Phase40 main POV because it did not visually beat the Phase34 patient."
+    },
+    {
+      "id": "zoro-aisha-v2-lite",
+      "role": "patient-candidate",
+      "path": "/assets/medical-suite/patients/zoro/aisha-v2-lite.glb",
+      "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
+      "license": "Zoro handoff / local prototype, provenance pending public release clearance",
+      "notes": "Small visual fallback, no skin or animation."
+    },
+    {
+      "id": "zoro-aisha-lite",
+      "role": "patient-candidate",
+      "path": "/assets/medical-suite/patients/zoro/aisha-lite.glb",
+      "source": "/Users/mx/3D Clinic/MX_3D_CLINIC_HANDOFF.zip",
+      "license": "Zoro handoff / local prototype, provenance pending public release clearance",
+      "notes": "Small visual fallback, no skin or animation."
+    },
+    {
+      "id": "phase34-aisha-style-patient",
+      "role": "hero-patient",
+      "path": "/assets/medical-suite/patients/phase34-patient/patient-unity-clean.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/PBRHeroProps/patient",
+      "license": "Local prototype asset",
+      "notes": "Blender/Meshy-cleaned GLB from prior Phase34/Unity evidence. glTF binary, static, roughly 18 MB. R3F adds subtle procedural idle motion."
+    },
+    {
+      "id": "threejs-michelle",
+      "role": "patient-fallback",
+      "path": "/assets/medical-suite/patients/michelle-threejs.glb",
+      "source": "https://threejs.org/examples/models/gltf/Michelle.glb",
+      "license": "three.js examples / Mixamo sample asset",
+      "notes": "Rigged fallback with SambaDance and TPose clips. Not primary because the animation is not a seated consult idle."
+    },
+    {
+      "id": "threejs-soldier",
+      "role": "patient-fallback",
+      "path": "/assets/medical-suite/patients/soldier-threejs.glb",
+      "source": "https://threejs.org/examples/models/gltf/Soldier.glb",
+      "license": "three.js examples / Mixamo sample asset",
+      "notes": "Rigged fallback for future male patient registry slots."
+    },
+    {
+      "id": "threejs-readyplayerme",
+      "role": "patient-fallback",
+      "path": "/assets/medical-suite/patients/readyplayerme-threejs.glb",
+      "source": "https://threejs.org/examples/models/gltf/readyplayer.me.glb",
+      "license": "Ready Player Me sample avatar terms",
+      "notes": "Local mirrored sample GLB for future Ready Player Me registry testing."
+    },
+    {
+      "id": "threejs-robot-expressive",
+      "role": "patient-fallback",
+      "path": "/assets/medical-suite/patients/robot-expressive-threejs.glb",
+      "source": "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
+      "license": "three.js examples / CC0 sample asset",
+      "notes": "Small animated fallback with explicit sitting/idle clips for motion-system tests."
+    },
+    {
+      "id": "phase34-stethoscope",
+      "role": "desk-prop",
+      "path": "/assets/medical-suite/props/stethoscope/stethoscope-unity-clean.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/PBRHeroProps/stethoscope",
+      "license": "Local prototype asset",
+      "notes": "PBR medical hero prop localized from prior Unity prototype."
+    },
+    {
+      "id": "phase34-blood-pressure-cuff",
+      "role": "parked-source",
+      "path": "source-assets/medical-suite/parked/bp-cuff-phase37-unused/bp-cuff-unity-clean.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/PBRHeroProps/bp-cuff",
+      "license": "Local prototype asset",
+      "notes": "PBR medical hero prop localized from prior Unity prototype. Parked outside public runtime in Phase37 because the imported model was heavy/noisy in the main POV; the live scene now uses a procedural R3F BP cuff assembly in Polyclinic.tsx."
+    },
+    {
+      "id": "phase34-pulse-oximeter",
+      "role": "desk-prop",
+      "path": "/assets/medical-suite/props/pulse-oximeter/pulse-oximeter-unity-clean.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/PBRHeroProps/pulse-oximeter",
+      "license": "Local prototype asset",
+      "notes": "PBR medical hero prop localized from prior Unity prototype."
+    },
+    {
+      "id": "phase34-desk-clutter",
+      "role": "desk-prop",
+      "path": "/assets/medical-suite/props/desk-clutter/desk-clutter-unity-clean.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/PBRHeroProps/desk-clutter",
+      "license": "Local prototype asset",
+      "notes": "Chart/paper/office detail kit localized from prior Unity prototype."
+    },
+    {
+      "id": "phase26-desk-device-production-kit",
+      "role": "desk-prop",
+      "path": "/assets/medical-suite/props/source-kits/desk_medical_device_production_kit.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/Phase26ProductionAssets",
+      "license": "Local prototype asset",
+      "notes": "Small production source kit for medical device accents."
+    },
+    {
+      "id": "phase25-right-diagnostic-wall-production-kit",
+      "role": "diagnostic-wall",
+      "path": "/assets/medical-suite/props/source-kits/right_diagnostic_wall_production_kit.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/Phase25ProductionAssets",
+      "license": "Local prototype asset",
+      "notes": "Physical right-wall source-asset detail, used to break up flat wall reads."
+    },
+    {
+      "id": "phase23-rear-clinic-equipment-source-pack",
+      "role": "environment-kit",
+      "path": "/assets/medical-suite/props/source-kits/rear_clinic_equipment_source_pack.glb",
+      "source": "/Users/mx/3D Clinic/3D Clinic/Assets/MedicalSuite/VisualPrototype/Imported/Phase23SourceAssets",
+      "license": "Local prototype asset",
+      "notes": "Back-clinic depth accents behind the glass wall."
+    }
+  ]
+}
